@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.*
+!.env.example
+!.env.docker
+
+# Prisma local artifacts
+/generated/prisma
+
+# Logs
+*.log

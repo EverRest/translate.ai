@@ -1,0 +1,437 @@
+# OpenAPI Specification
+
+REST API contract for translate.ai. Implemented with NestJS Swagger (`@nestjs/swagger`).
+
+- **Base URL:** `/api/v1`
+- **Swagger UI (dev):** `http://localhost:3000/api/docs`
+- **OpenAPI JSON (dev):** `http://localhost:3000/api/docs-json`
+
+Source of truth at runtime: Swagger decorators on controllers and DTOs in `backend/src/`.
+
+---
+
+## Info
+
+```yaml
+openapi: 3.0.3
+info:
+  title: translate.ai API
+  version: 1.0.0
+  description: Multi-tenant AI translation platform API
+```
+
+---
+
+## Security schemes
+
+```yaml
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Dashboard user session (JWT access token)
+    apiKeyAuth:
+      type: http
+      scheme: bearer
+      description: Project API key (Bearer token)
+```
+
+Most endpoints accept either scheme. `TenantGuard` resolves tenant from JWT claims or API key → project → tenant.
+
+---
+
+## Common schemas
+
+### Success envelope
+
+```yaml
+SuccessResponse:
+  type: object
+  required: [success, data]
+  properties:
+    success:
+      type: boolean
+      example: true
+    data:
+      type: object
+```
+
+### Error envelope
+
+```yaml
+ErrorResponse:
+  type: object
+  required: [success, error]
+  properties:
+    success:
+      type: boolean
+      example: false
+    error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+```
+
+### Pagination
+
+```yaml
+PaginatedMeta:
+  type: object
+  properties:
+    page:
+      type: integer
+      minimum: 1
+    limit:
+      type: integer
+      minimum: 1
+      maximum: 100
+    total:
+      type: integer
+```
+
+---
+
+## Paths
+
+### Auth
+
+#### POST `/api/v1/auth/login`
+
+Login with email and password. Returns JWT access + refresh tokens.
+
+**Request:**
+
+```json
+{
+  "email": "user@example.com",
+  "password": "secret"
+}
+```
+
+**Response `200`:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "accessToken": "eyJ...",
+    "refreshToken": "eyJ...",
+    "expiresIn": 3600
+  }
+}
+```
+
+#### POST `/api/v1/auth/refresh`
+
+Refresh access token.
+
+#### POST `/api/v1/auth/register`
+
+Register new tenant + admin user (MVP).
+
+---
+
+### Projects
+
+#### GET `/api/v1/projects`
+
+List projects for current tenant.
+
+**Query:** `page`, `limit`, `status` (active | archived)
+
+**Response `200`:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440000",
+        "name": "Shop",
+        "description": "E-commerce strings",
+        "status": "active",
+        "createdAt": "2026-06-25T12:00:00Z"
+      }
+    ],
+    "meta": { "page": 1, "limit": 20, "total": 1 }
+  }
+}
+```
+
+#### POST `/api/v1/projects`
+
+**Request:**
+
+```json
+{
+  "name": "Shop",
+  "description": "E-commerce strings"
+}
+```
+
+#### GET `/api/v1/projects/{projectId}`
+
+#### PATCH `/api/v1/projects/{projectId}`
+
+#### DELETE `/api/v1/projects/{projectId}`
+
+Archive project (soft delete).
+
+---
+
+### Translation keys
+
+#### GET `/api/v1/projects/{projectId}/keys`
+
+**Query:** `page`, `limit`, `search`
+
+#### POST `/api/v1/projects/{projectId}/keys`
+
+**Request:**
+
+```json
+{
+  "key": "cart.checkout",
+  "description": "Checkout button label",
+  "context": "Primary CTA on cart page"
+}
+```
+
+#### PATCH `/api/v1/projects/{projectId}/keys/{keyId}`
+
+#### DELETE `/api/v1/projects/{projectId}/keys/{keyId}`
+
+---
+
+### Translations
+
+#### GET `/api/v1/projects/{projectId}/translations`
+
+**Query:** `language`, `status`, `key`
+
+#### GET `/api/v1/projects/{projectId}/translations/{translationId}`
+
+---
+
+### Translation jobs
+
+#### POST `/api/v1/jobs`
+
+Create async translation job. Returns immediately; processing via BullMQ.
+
+**Request:**
+
+```json
+{
+  "projectId": "550e8400-e29b-41d4-a716-446655440000",
+  "languages": ["de", "fr", "es"],
+  "keys": ["cart.checkout", "cart.total"],
+  "provider": "openai",
+  "clientRequestId": "optional-idempotency-key"
+}
+```
+
+**Response `201`:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "jobId": "660e8400-e29b-41d4-a716-446655440001",
+    "status": "pending"
+  }
+}
+```
+
+#### GET `/api/v1/jobs`
+
+List jobs. **Query:** `projectId`, `status`, `page`, `limit`
+
+#### GET `/api/v1/jobs/{jobId}`
+
+**Response `200`:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "660e8400-e29b-41d4-a716-446655440001",
+    "projectId": "550e8400-e29b-41d4-a716-446655440000",
+    "status": "completed",
+    "provider": "openai",
+    "progress": {
+      "total": 6,
+      "completed": 6,
+      "failed": 0
+    },
+    "createdAt": "2026-06-25T12:00:00Z",
+    "completedAt": "2026-06-25T12:00:05Z"
+  }
+}
+```
+
+#### POST `/api/v1/jobs/{jobId}/retry`
+
+Retry failed items.
+
+#### POST `/api/v1/jobs/{jobId}/cancel`
+
+Cancel pending/processing job.
+
+---
+
+### Approval
+
+#### GET `/api/v1/projects/{projectId}/reviews`
+
+Pending translations for review.
+
+#### POST `/api/v1/translations/{translationId}/approve`
+
+#### POST `/api/v1/translations/{translationId}/reject`
+
+**Request:**
+
+```json
+{
+  "comment": "Tone is too informal"
+}
+```
+
+#### POST `/api/v1/translations/{translationId}/publish`
+
+---
+
+### Export
+
+#### GET `/api/v1/projects/{projectId}/export`
+
+**Query:**
+
+| Param | Values |
+|-------|--------|
+| `format` | json, yaml, csv, xlsx, android-xml, ios-strings, po |
+| `language` | Optional filter (e.g. `de`) |
+| `status` | draft, approved, published (default: published) |
+
+**Response:** File download (`Content-Disposition: attachment`).
+
+---
+
+### API keys
+
+#### GET `/api/v1/projects/{projectId}/api-keys`
+
+#### POST `/api/v1/projects/{projectId}/api-keys`
+
+**Response includes plain secret once:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "...",
+    "name": "CI pipeline",
+    "secret": "ta_live_...",
+    "active": true
+  }
+}
+```
+
+#### DELETE `/api/v1/projects/{projectId}/api-keys/{keyId}`
+
+---
+
+### Webhooks
+
+#### GET `/api/v1/projects/{projectId}/webhooks`
+
+#### POST `/api/v1/projects/{projectId}/webhooks`
+
+**Request:**
+
+```json
+{
+  "url": "https://example.com/webhooks/translate",
+  "secret": "whsec_...",
+  "enabled": true
+}
+```
+
+#### PATCH `/api/v1/projects/{projectId}/webhooks/{webhookId}`
+
+#### DELETE `/api/v1/projects/{projectId}/webhooks/{webhookId}`
+
+---
+
+### Health
+
+#### GET `/health`
+
+No auth. Returns DB + Redis status.
+
+```json
+{
+  "status": "ok",
+  "info": {
+    "database": { "status": "up" },
+    "redis": { "status": "up" }
+  }
+}
+```
+
+---
+
+## Webhook events (outbound)
+
+Not OpenAPI paths — documented for integrators. See [../workflows/webhooks.md](../workflows/webhooks.md).
+
+| Event | Description |
+|-------|-------------|
+| `job.created` | Translation job created |
+| `job.completed` | Job finished successfully |
+| `job.failed` | Job failed or partially failed |
+| `translation.approved` | Translation published |
+| `project.created` | New project created |
+
+---
+
+## HTTP status codes
+
+| Code | Usage |
+|------|-------|
+| 200 | OK |
+| 201 | Created |
+| 204 | No content |
+| 400 | Validation error |
+| 401 | Unauthorized |
+| 403 | Forbidden |
+| 404 | Not found |
+| 409 | Conflict |
+| 429 | Rate limited |
+| 500 | Internal error |
+
+See also [conventions.md](./conventions.md).
+
+---
+
+## Implementation notes
+
+- Controllers live in `backend/src/*/presentation/`.
+- DTOs use `class-validator` + `@ApiProperty()` decorators.
+- Global prefix: `api/v1` (except `/health`).
+- Correlation header: `X-Request-Id` (optional on request, returned on response).
+
+When adding endpoints, update this doc and Swagger decorators in the same PR.

@@ -1,0 +1,216 @@
+# Changelog
+
+All notable changes to translate.ai documentation and project.
+
+## [Unreleased]
+
+### Added — Developer tooling
+
+- **Makefile:** `make help`, `install`, `lint`, `format`, `typecheck`, `test`, `build`, `ci`, dev/db/docker targets
+- **Scripts:** `scripts/ci-local.sh` — full local CI mirror (backend e2e + frontend tests)
+- **Shared config:** root `.editorconfig`, `.prettierrc`, `.prettierignore`, `.nvmrc` (Node 22)
+- **Backend:** `lint:check`, `format:check` scripts
+- **Frontend:** ESLint + Prettier + Vitest; `typecheck`, `lint:check`, `format:check`, `test:cov`
+- **CI:** format check, frontend typecheck + unit tests
+
+### Added — Ollama multi-model router
+
+Per [features/ollama.md](./features/ollama.md) and [adr/0007-ollama-model-router.md](./adr/0007-ollama-model-router.md):
+
+- **Model router:** Qwen (default), Llama (fast/short), NLLB (literal) selected by content type
+- **Classifier:** rule-based + optional AI classifier (`OLLAMA_ROUTING_MODE`)
+- **Polish pipeline:** optional second pass (`OLLAMA_POLISH_ENABLED`)
+- **Services:** `OllamaClient`, `ContentClassifierService`, `OllamaModelRouterService`, `OllamaPolishService`
+- **Docker:** optional `ollama` Compose profile + [infra/ollama/README.md](../infra/ollama/README.md)
+- **Jobs:** infer `contentType` from translation key context
+
+### Added — UI-11 (backend + frontend)
+
+Per [ui-roadmap.md](./ui-roadmap.md) UI-11 and [adr/0006-project-branching.md](./adr/0006-project-branching.md):
+
+- **Branching module:** `ProjectBranch`, `BranchTranslation` models + migration
+- **API:** list/create branches, diff vs main, update branch translation, merge to main
+- **Main branch:** canonical translations stay in `translations` table; feature branches use snapshots
+- **UI:** `/projects/:id/branches` — branch list, diff view, inline edit, merge action
+- **RBAC:** create/merge/edit require admin or developer
+
+### Added — UI-10 (backend + frontend)
+
+Per [ui-roadmap.md](./ui-roadmap.md) UI-10 and [adr/0005-project-glossary.md](./adr/0005-project-glossary.md):
+
+- **Glossary module:** `Glossary`, `GlossaryTerm` models + migration
+- **API:** CRUD at `/projects/:id/glossary/terms`
+- **AI prompts:** glossary rules injected via `buildTranslationPrompts`
+- **Translation jobs:** load project glossary terms before each AI call
+- **UI:** `/projects/:id/glossary` tab — term list, do-not-translate flag, search
+
+### Added — UI-9 (frontend + backend)
+
+Per [ui-roadmap.md](./ui-roadmap.md) UI-9:
+
+- **Settings page:** `/settings` — read-only profile and organization sections
+- **Profile:** email, role, user ID
+- **Organization:** tenant name, slug, tenant ID
+- **Backend:** `GET /auth/me` now includes `tenant` object
+
+### Added — UI-8 (frontend)
+
+Per [ui-roadmap.md](./ui-roadmap.md) UI-8:
+
+- **Audit logs:** `/audit-logs` — paginated table with entity filter
+- **Analytics:** `/analytics` — summary stats, provider/cost/fallback charts, usage log table
+- **Filters:** project and date range on analytics; entity filter on audit logs
+- **RBAC:** analytics page restricted to admin/developer (matches API)
+
+### Added — UI-7 (frontend + backend webhooks)
+
+Per [ui-roadmap.md](./ui-roadmap.md) UI-7:
+
+- **Settings tab:** Languages, API Keys, Webhooks sub-tabs
+- **Languages:** add/remove target language codes
+- **API keys:** create (secret shown once), revoke
+- **Webhooks:** create (secret shown once), enable/disable, delete
+- **Backend:** webhook CRUD on `ProjectResourcesController`
+
+### Added — UI-6 (frontend)
+
+Per [ui-roadmap.md](./ui-roadmap.md) UI-6:
+
+- **Approvals tab:** pending review + ready to publish tabs
+- **Actions:** approve, reject (with comment), edit value, bulk approve, publish
+- **RBAC:** admin/reviewer only; role message for others
+- **API:** `GET /projects/:id/reviews?status=pending|approved`
+
+### Added — UI-5 (frontend)
+
+Per [ui-roadmap.md](./ui-roadmap.md) UI-5:
+
+- **Jobs list:** global `/jobs` and project tab `/projects/:id/jobs`
+- **Create job modal:** project, languages, keys, provider selection
+- **Job detail:** progress bar, auto-refresh, retry and cancel actions
+
+### Added — UI-4 (frontend)
+
+Per [ui-roadmap.md](./ui-roadmap.md) UI-4:
+
+- **Translation keys tab:** list, search, create, edit (description/context), delete
+- **API integration:** `/projects/:id/keys` CRUD
+
+### Added — UI-3 (frontend)
+
+Per [ui-roadmap.md](./ui-roadmap.md) UI-3:
+
+- **Projects list:** paginated table, create/edit modals, archive action
+- **Project detail:** tabbed layout (Overview, Keys, Jobs, Approvals, Settings)
+- **Overview tab:** project metadata + inline edit
+- **API client:** `apiPatch`, `apiDelete`
+- Placeholder tabs for UI-4–UI-7
+
+### Added — UI-2 (frontend)
+
+Per [ui-roadmap.md](./ui-roadmap.md) UI-2:
+
+- **Dashboard stats:** project count, active jobs, pending reviews (reviewer/admin)
+- **Recent jobs** list (last 5)
+- **AI usage summary** widget (admin/developer)
+- **Quick actions:** links to Projects and Jobs
+
+### Added — UI-1 (frontend)
+
+Per [ui-roadmap.md](./ui-roadmap.md) UI-1:
+
+- **Auth:** login, register, JWT store (Zustand + localStorage), protected routes
+- **App shell:** sidebar layout, sign out, nav stubs for upcoming pages
+- **API client:** Bearer token, POST helper, error parsing
+- **Docs:** [ui-roadmap.md](./ui-roadmap.md) — full UI-1–UI-12 plan
+
+### Added — Phase 5.3 (tests)
+
+Per [roadmap.md](./roadmap.md) Phase 5:
+
+- **Unit tests:** prompt builder, provider fallback registry, Prometheus metrics service
+- **E2E tests:** health check (`/api/v1/health`) and metrics scrape (`/metrics`)
+- **Backend script:** `npm run typecheck`
+
+### Added — Phase 5.2 (CI/CD)
+
+Per [roadmap.md](./roadmap.md) Phase 5:
+
+- **GitHub Actions CI:** lint, build, unit tests, e2e tests (backend); lint, build (frontend); Docker image build
+- Workflow: `.github/workflows/ci.yml` — runs on push/PR to `main`/`master`
+
+### Added — Phase 5.1 (monitoring)
+
+Per [roadmap.md](./roadmap.md) Phase 5:
+
+- **Prometheus metrics:** `GET /metrics` — HTTP latency, queue depth, job outcomes, AI cost, webhook deliveries
+- **Health checks:** Redis added alongside PostgreSQL at `GET /api/v1/health`
+- **Docker monitoring stack:** `docker compose --profile monitoring up` — Prometheus (:9090), Grafana (:3001)
+
+### Added — Phase 4 (backend)
+
+Per [roadmap.md](./roadmap.md) Phase 4, [domain/ai-provider.md](./domain/ai-provider.md):
+
+- **Multi-provider AI:** `GeminiProvider`, `OllamaProvider` alongside existing OpenAI
+- **Fallback chain:** configurable via `AI_PROVIDER_FALLBACK` (default `gemini,ollama`); audit log on fallback
+- **Usage tracking:** `AiUsageLog` model — tokens + estimated cost per translation call
+- **Cost analytics:** `GET /api/v1/analytics/usage`, `GET /api/v1/analytics/usage/summary` (admin/developer)
+- **Config:** `GEMINI_MODEL`, `OLLAMA_MODEL`, `AI_PROVIDER_FALLBACK`
+
+### Added — Phase 3 (backend)
+
+Per [roadmap.md](./roadmap.md) Phase 3, [domain/approval.md](./domain/approval.md), [workflows/webhooks.md](./workflows/webhooks.md), [api/conventions.md](./api/conventions.md):
+
+- **Approval workflow:** list reviews, approve, reject, publish, edit value, bulk approve
+- **RBAC:** global `RolesGuard` + `@Roles(admin, reviewer)` on approval routes
+- **Audit logs:** `AuditService` + `GET /api/v1/audit-logs` (all approval/export actions logged)
+- **Export:** `GET /api/v1/projects/:id/export` — json, yaml, csv, android-xml, ios-strings, po
+- **Webhooks:** `translation.approved` on publish via `TranslationPublishedEvent`
+
+### Added — Phase 2 (backend)
+
+Per [roadmap.md](./roadmap.md) Phase 2, [workflows/translation-job.md](./workflows/translation-job.md), [workflows/webhooks.md](./workflows/webhooks.md), [domain/ai-provider.md](./domain/ai-provider.md), [patterns.md](./patterns.md):
+
+- **Translation jobs:** real `CreateTranslationJobCommand` — creates job items, enqueues `translation.create`, returns `{ jobId }`
+- **Job queries:** `GET /jobs`, `GET /jobs/:id` with progress counts; `POST retry`, `POST cancel`
+- **Workers:** `translation.create` → fan-out `translation.process`; memory lookup + OpenAI; job completion events
+- **OpenAI provider:** `OpenAiProvider` via [adr/0003-ai-provider-abstraction.md](./adr/0003-ai-provider-abstraction.md)
+- **Translation memory:** hash cache before AI calls; unique `(tenant_id, hash)`
+- **Webhooks:** event handlers for `job.created`, `job.completed`, `job.failed`; HMAC delivery via `webhook.send` queue
+- **Schema:** `TranslationKey.sourceText` required for translation jobs
+
+### Added — Phase 1 MVP (backend)
+
+Per [roadmap.md](./roadmap.md) Phase 1 and [domain/tenant.md](./domain/tenant.md), [domain/project.md](./domain/project.md), [domain/translation.md](./domain/translation.md):
+
+- **Auth:** `POST /api/v1/auth/register`, `login`, `GET me` — JWT, argon2 passwords ([api/openapi.md](./api/openapi.md))
+- **Multi-tenant:** global `JwtAuthGuard`, `tenantId` from JWT on all protected routes ([adr/0004-multi-tenant-isolation.md](./adr/0004-multi-tenant-isolation.md))
+- **Projects:** CQRS CRUD + archive ([patterns.md](./patterns.md))
+- **API keys:** create (secret shown once), list, revoke
+- **Languages:** `project_languages` table + CRUD per project
+- **Translation keys:** CQRS CRUD under `/projects/:id/keys`
+- **API error envelope** per [api/conventions.md](./api/conventions.md)
+- Prisma model: `ProjectLanguage`
+
+### Added — Monorepo scaffold
+  - `backend/` — NestJS API with DDD module skeletons, Prisma schema, BullMQ worker
+  - `frontend/` — React + Vite + Tailwind + TanStack Query feature structure
+  - `docker-compose.yml` — postgres, redis, api, worker, frontend
+  - `backend/.env.example`, `frontend/.env.example`
+- **OpenAPI docs:** `docs/api/openapi.md`
+- **Docs translated to English:** `docs/important.md`
+- AI-optimized docs pack:
+  - `docs/README.md`, `system-overview.md`, `patterns.md`, `coding-standards.md`
+  - `docs/domain/`, `docs/api/`, `docs/database/`, `docs/workflows/`, `docs/adr/`
+- `AGENTS.md` — Cursor / LLM agent instructions
+
+### Backend modules (skeleton)
+
+`auth`, `tenant`, `user`, `project`, `translation`, `ai-provider`, `webhook`, `approval`, `export`, `audit`, `billing`, `shared`, `worker`
+
+Stub controllers: projects, jobs, auth status. Swagger at `/api/docs`.
+
+### Existing docs (pre-pack)
+
+- `docs/architecture.md`, `roadmap.md`, `llm.md`
+- `docs/nest_best_practices.md`, `react_best_practices.md`

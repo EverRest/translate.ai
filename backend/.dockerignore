@@ -1,0 +1,40 @@
+# Dependencies (reinstalled in container)
+node_modules/
+
+# Build output (rebuilt in container)
+dist/
+coverage/
+*.tsbuildinfo
+
+# Git & CI
+.git/
+.github/
+.husky/
+
+# Tests (not needed in production image)
+test/
+**/*.spec.ts
+**/*.e2e-spec.ts
+jest.config.js
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Docs & local tooling
+README.md
+docs/
+*.md
+!prisma/**/*.md
+
+# Editor & OS
+.idea/
+.vscode/
+.DS_Store
+*.log
+
+# Docker meta (avoid recursive/context noise)
+Dockerfile*
+.dockerignore
+docker-compose*.yml

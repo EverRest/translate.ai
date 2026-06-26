@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: translate.ai
+    orgId: 1
+    folder: translate.ai
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

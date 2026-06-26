@@ -1,0 +1,416 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  admin
+  developer
+  reviewer
+  viewer
+}
+
+enum ProjectStatus {
+  active
+  archived
+}
+
+enum TranslationStatus {
+  draft
+  review
+  approved
+  published
+}
+
+enum JobStatus {
+  pending
+  processing
+  completed
+  failed
+  cancelled
+}
+
+enum JobItemStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+enum ReviewStatus {
+  pending
+  in_review
+  approved
+  rejected
+}
+
+enum BranchStatus {
+  active
+  merged
+  archived
+}
+
+enum QualityMetricSource {
+  review
+  manual
+  job_completion
+  editor
+}
+
+enum QualityVerdict {
+  accurate
+  needs_edit
+  inaccurate
+}
+
+model Tenant {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  users              User[]
+  projects           Project[]
+  translationMemory  TranslationMemory[]
+  auditLogs          AuditLog[]
+  providerConfigs    ProviderConfig[]
+  aiUsageLogs        AiUsageLog[]
+  apiRequestLogs     ApiRequestLog[]
+  qualityMetrics     TranslationQualityMetric[]
+
+  @@map("tenants")
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  email     String
+  password  String
+  role      UserRole @default(developer)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  auditLogs AuditLog[]
+  reviews   Review[]
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@map("users")
+}
+
+model Project {
+  id          String        @id @default(uuid()) @db.Uuid
+  tenantId    String        @map("tenant_id") @db.Uuid
+  name        String
+  description String?
+  status      ProjectStatus @default(active)
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  apiKeys          ApiKey[]
+  webhooks         Webhook[]
+  languages        ProjectLanguage[]
+  translationKeys  TranslationKey[]
+  translationJobs  TranslationJob[]
+  providerConfigs  ProviderConfig[]
+  glossary         Glossary?
+  branches         ProjectBranch[]
+
+  @@index([tenantId])
+  @@map("projects")
+}
+
+model ProjectBranch {
+  id        String       @id @default(uuid()) @db.Uuid
+  projectId String       @map("project_id") @db.Uuid
+  name      String
+  isDefault Boolean      @default(false) @map("is_default")
+  status    BranchStatus @default(active)
+  createdAt DateTime     @default(now()) @map("created_at")
+  mergedAt  DateTime?    @map("merged_at")
+
+  project      Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  translations BranchTranslation[]
+
+  @@unique([projectId, name])
+  @@index([projectId])
+  @@map("project_branches")
+}
+
+model BranchTranslation {
+  id               String            @id @default(uuid()) @db.Uuid
+  branchId         String            @map("branch_id") @db.Uuid
+  translationKeyId String            @map("translation_key_id") @db.Uuid
+  language         String            @db.VarChar(5)
+  value            String
+  status           TranslationStatus @default(draft)
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  branch         ProjectBranch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  translationKey TranslationKey @relation(fields: [translationKeyId], references: [id], onDelete: Cascade)
+
+  @@unique([branchId, translationKeyId, language])
+  @@index([branchId])
+  @@map("branch_translations")
+}
+
+model Glossary {
+  id        String   @id @default(uuid()) @db.Uuid
+  projectId String   @unique @map("project_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  project Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  terms   GlossaryTerm[]
+
+  @@map("glossaries")
+}
+
+model GlossaryTerm {
+  id             String  @id @default(uuid()) @db.Uuid
+  glossaryId     String  @map("glossary_id") @db.Uuid
+  sourceTerm     String  @map("source_term")
+  targetTerm     String? @map("target_term")
+  doNotTranslate Boolean @default(false) @map("do_not_translate")
+  note           String?
+
+  glossary Glossary @relation(fields: [glossaryId], references: [id], onDelete: Cascade)
+
+  @@unique([glossaryId, sourceTerm])
+  @@index([glossaryId])
+  @@map("glossary_terms")
+}
+
+model ApiKey {
+  id         String  @id @default(uuid()) @db.Uuid
+  projectId  String  @map("project_id") @db.Uuid
+  name       String
+  secretHash String  @map("secret_hash")
+  active     Boolean @default(true)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("api_keys")
+}
+
+model Webhook {
+  id        String  @id @default(uuid()) @db.Uuid
+  projectId String  @map("project_id") @db.Uuid
+  url       String
+  secret    String
+  enabled   Boolean @default(true)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("webhooks")
+}
+
+model ProjectLanguage {
+  id        String  @id @default(uuid()) @db.Uuid
+  projectId String  @map("project_id") @db.Uuid
+  code      String  @db.VarChar(5)
+  isDefault Boolean @default(false) @map("is_default")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, code])
+  @@index([projectId])
+  @@map("project_languages")
+}
+
+model TranslationKey {
+  id          String  @id @default(uuid()) @db.Uuid
+  projectId   String  @map("project_id") @db.Uuid
+  key         String
+  sourceText  String  @map("source_text")
+  description String?
+  context     String?
+
+  project           Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  translations      Translation[]
+  translationJobItems TranslationJobItem[]
+  branchTranslations BranchTranslation[]
+
+  @@unique([projectId, key])
+  @@index([projectId])
+  @@map("translation_keys")
+}
+
+model Translation {
+  id               String            @id @default(uuid()) @db.Uuid
+  translationKeyId String            @map("translation_key_id") @db.Uuid
+  language         String            @db.VarChar(5)
+  value            String
+  status           TranslationStatus @default(draft)
+  provider         String?
+  version          Int               @default(1)
+
+  translationKey TranslationKey @relation(fields: [translationKeyId], references: [id], onDelete: Cascade)
+  reviews        Review[]
+  qualityMetrics TranslationQualityMetric[]
+
+  @@index([translationKeyId, language])
+  @@map("translations")
+}
+
+model TranslationJob {
+  id        String    @id @default(uuid()) @db.Uuid
+  projectId String    @map("project_id") @db.Uuid
+  status    JobStatus @default(pending)
+  provider  String?
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  project Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  items   TranslationJobItem[]
+
+  @@index([projectId])
+  @@map("translation_jobs")
+}
+
+model TranslationJobItem {
+  id               String        @id @default(uuid()) @db.Uuid
+  jobId            String        @map("job_id") @db.Uuid
+  translationKeyId String        @map("translation_key_id") @db.Uuid
+  language         String        @db.VarChar(5)
+  status           JobItemStatus @default(pending)
+
+  job            TranslationJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  translationKey TranslationKey @relation(fields: [translationKeyId], references: [id], onDelete: Cascade)
+
+  @@index([jobId, status])
+  @@map("translation_job_items")
+}
+
+model TranslationMemory {
+  id             String @id @default(uuid()) @db.Uuid
+  tenantId       String @map("tenant_id") @db.Uuid
+  sourceLanguage String @map("source_language") @db.VarChar(5)
+  targetLanguage String @map("target_language") @db.VarChar(5)
+  sourceText     String @map("source_text")
+  translatedText String @map("translated_text")
+  hash           String
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, hash])
+  @@index([tenantId, hash])
+  @@map("translation_memory")
+}
+
+model Review {
+  id            String       @id @default(uuid()) @db.Uuid
+  translationId String       @map("translation_id") @db.Uuid
+  reviewerId    String       @map("reviewer_id") @db.Uuid
+  status        ReviewStatus @default(pending)
+  comment       String?
+  createdAt     DateTime     @default(now()) @map("created_at")
+
+  translation Translation @relation(fields: [translationId], references: [id], onDelete: Cascade)
+  reviewer    User        @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@index([translationId])
+  @@map("reviews")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  entity    String
+  entityId  String   @map("entity_id") @db.Uuid
+  action    String
+  payload   Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+  @@map("audit_logs")
+}
+
+model ProviderConfig {
+  id        String  @id @default(uuid()) @db.Uuid
+  tenantId  String  @map("tenant_id") @db.Uuid
+  projectId String? @map("project_id") @db.Uuid
+  provider  String
+  config    Json
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("provider_configs")
+}
+
+model AiUsageLog {
+  id               String   @id @default(uuid()) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  projectId        String?  @map("project_id") @db.Uuid
+  jobId            String?  @map("job_id") @db.Uuid
+  jobItemId        String?  @map("job_item_id") @db.Uuid
+  provider         String
+  model            String
+  inputTokens      Int      @default(0) @map("input_tokens")
+  outputTokens     Int      @default(0) @map("output_tokens")
+  estimatedCostUsd Decimal  @default(0) @map("estimated_cost_usd") @db.Decimal(12, 6)
+  usedFallback     Boolean  @default(false) @map("used_fallback")
+  primaryProvider  String?  @map("primary_provider")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+  @@index([projectId, createdAt])
+  @@map("ai_usage_logs")
+}
+
+model ApiRequestLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String?  @map("tenant_id") @db.Uuid
+  method     String
+  route      String
+  status     Int
+  durationMs Int      @map("duration_ms")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+  @@index([createdAt])
+  @@map("api_request_logs")
+}
+
+model TranslationQualityMetric {
+  id             String              @id @default(uuid()) @db.Uuid
+  tenantId       String              @map("tenant_id") @db.Uuid
+  projectId      String              @map("project_id") @db.Uuid
+  translationId  String              @map("translation_id") @db.Uuid
+  jobId          String?             @map("job_id") @db.Uuid
+  jobItemId      String?             @map("job_item_id") @db.Uuid
+  provider       String?
+  language       String              @db.VarChar(5)
+  translationKey String              @map("translation_key")
+  sourceText     String              @map("source_text")
+  aiValue        String              @map("ai_value")
+  referenceValue String?             @map("reference_value")
+  score          Decimal             @db.Decimal(5, 4)
+  source         QualityMetricSource
+  verdict        QualityVerdict?
+  notes          String?
+  createdById    String?             @map("created_by_id") @db.Uuid
+  createdAt      DateTime            @default(now()) @map("created_at")
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  translation Translation @relation(fields: [translationId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+  @@index([projectId, createdAt])
+  @@index([translationId, createdAt])
+  @@map("translation_quality_metrics")
+}

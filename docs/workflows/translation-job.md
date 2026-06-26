@@ -1,0 +1,115 @@
+# Translation Job Workflow
+
+End-to-end flow from API request to stored translations and webhook.
+
+## Trigger
+
+Sources:
+
+- `POST /api/v1/jobs` (API key or JWT)
+- React dashboard "Translate" action
+
+## Steps
+
+### 1. API — Create job
+
+```text
+Controller receives CreateJobDto
+  → Validate project access (tenant + permissions)
+  → CommandBus.execute(CreateTranslationJobCommand)
+  → Handler:
+      - Create TranslationJob (status: pending)
+      - Create TranslationJobItems (key × language matrix)
+      - Publish TranslationJobCreatedEvent
+      - Enqueue BullMQ: translation.create
+  → Return { jobId }
+```
+
+HTTP responds immediately. No AI calls in request thread.
+
+### 2. Worker — translation.create
+
+```text
+Load job + items
+  → Update job status: processing
+  → For each item: enqueue translation.process
+```
+
+### 3. Worker — translation.process (per item)
+
+```text
+Load TranslationJobItem + TranslationKey
+  → Check TranslationMemory (hash lookup)
+      ├── HIT  → use cached translation, provider = memory
+      └── MISS → AiProvider.translate()
+                 → store in TranslationMemory
+  → Upsert Translation record (status: draft)
+  → Mark item completed (or failed with retry)
+  → If all items done → mark job completed
+  → Publish TranslationJobCompletedEvent (or FailedEvent)
+  → Enqueue webhook.send
+```
+
+### 4. Retry — translation.retry
+
+Failed items (provider timeout, rate limit):
+
+- Exponential backoff
+- Max attempts: 3 (configurable)
+- After max → item status failed, job may be partial completed
+
+### 5. Post-completion
+
+Optional paths:
+
+- Auto-submit for review → approval domain
+- Manual review in dashboard
+- Export via `translation.export` queue
+
+## Status transitions
+
+### Job
+
+```text
+pending → processing → completed
+                    └→ failed
+                    └→ cancelled
+```
+
+### Item
+
+```text
+pending → processing → completed
+                    └→ failed (retryable)
+```
+
+## Idempotency
+
+- Re-processing same `jobItemId` must not duplicate translations.
+- Use upsert on `(translation_key_id, language)` with version bump.
+
+## Saga compensations
+
+| Step failed | Compensation |
+|-------------|--------------|
+| After job created, before enqueue | Mark job cancelled |
+| After partial process | Mark failed items; job = partial/failed |
+| Webhook fails | Retry via webhook.send; do not rollback translations |
+
+## Example timeline
+
+```text
+T+0ms    POST /jobs → 201 { jobId }
+T+50ms   translation.create worker starts
+T+100ms  4 items enqueued (2 keys × 2 languages)
+T+2s     Item 1: memory hit → instant
+T+5s     Item 2: OpenAI call → stored
+T+8s     All items done → job.completed
+T+8.1s   webhook.send → customer endpoint
+```
+
+## Related
+
+- [workflows/queues.md](./queues.md)
+- [domain/translation.md](../domain/translation.md)
+- [patterns.md](../patterns.md)
