@@ -56,9 +56,9 @@ The model router may load **more than one** model during a job batch (different 
 
 ### Related docs
 
-- [infra/ollama/README.md](../infra/ollama/README.md)
-- [docs/features/ollama.md](../docs/features/ollama.md)
-- `MOCK_TRANSLATIONS` — already supported for non-AI dev ([translate-text.service.ts](../backend/src/translation/application/services/translate-text.service.ts))
+- [infra/ollama/README.md](../../infra/ollama/README.md)
+- [docs/features/ollama.md](../features/ollama.md)
+- `MOCK_TRANSLATIONS` — already supported for non-AI dev ([translate-text.service.ts](../../backend/src/translation/application/services/translate-text.service.ts))
 
 ---
 
@@ -178,7 +178,7 @@ Use a **tiered local dev** approach:
 ## Follow-ups (if we adopt)
 
 - [ ] Add `backend/.env.dev.example` with single-model overrides
-- [ ] Document hybrid dev in [docs/README.md](../docs/README.md) and [infra/ollama/README.md](../infra/ollama/README.md)
+- [ ] Document hybrid dev in [docs/README.md](../README.md) and [infra/ollama/README.md](../../infra/ollama/README.md)
 - [ ] Makefile target `dev-ollama-hybrid` with hints
 - [ ] Compose: optional `host.docker.internal` Ollama URL for `docker-app` without `ollama` profile
 - [ ] Warn in `make docker-ollama-app` about RAM on ≤16 GB hosts

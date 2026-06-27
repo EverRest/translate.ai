@@ -62,6 +62,6 @@ For UI/API testing without AI, set `MOCK_TRANSLATIONS=true`.
 ## Related
 
 - [backend/.env.dev.example](../../backend/.env.dev.example)
-- [issues/001-docker-compose-full-stack-with-ollama-7b-models-freezes-host-out-of-ram.md](../../issues/001-docker-compose-full-stack-with-ollama-7b-models-freezes-host-out-of-ram.md)
+- [issues/001-docker-compose-full-stack-with-ollama-7b-models-freezes-host-out-of-ram.md](../../docs/issues/001-docker-compose-full-stack-with-ollama-7b-models-freezes-host-out-of-ram.md)
 - [docs/features/ollama.md](../../docs/features/ollama.md)
 - [docs/adr/0007-ollama-model-router.md](../../docs/adr/0007-ollama-model-router.md)

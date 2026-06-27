@@ -25,4 +25,4 @@ Suggested body sections: **Problem**, **Context**, **Options**, **Recommendation
 
 | ID | File | Status |
 |----|------|--------|
-| 001 | [docker-compose-full-stack-with-ollama-7b-models-freezes-host-out-of-ram](./001-docker-compose-full-stack-with-ollama-7b-models-freezes-host-out-of-ram.md) | Open — discussion |
+| 001 | [docker-compose-full-stack-with-ollama-7b-models-freezes-host-out-of-ram](001-docker-compose-full-stack-with-ollama-7b-models-freezes-host-out-of-ram.md) | Open — discussion |
