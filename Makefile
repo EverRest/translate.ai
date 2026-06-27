@@ -134,6 +134,8 @@ dev: dev-infra ## Print dev startup hints
 	@echo "  make dev-backend"
 	@echo "  make dev-worker"
 	@echo "  make dev-frontend"
+	@echo ""
+	@echo "Ollama: native Ollama.app on http://127.0.0.1:11434 (see backend/.env.dev.example)"
 
 db-generate: ## Prisma generate
 	cd $(BACKEND) && npm run prisma:generate

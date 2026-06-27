@@ -43,7 +43,16 @@ export class AuthController {
   async me(@CurrentUser() user: AuthUser) {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: user.tenantId },
-      select: { id: true, name: true, slug: true },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        plan: true,
+        planStatus: true,
+        subscriptionSince: true,
+        monthlyTokenQuota: true,
+        createdAt: true,
+      },
     });
 
     return successResponse({
@@ -51,7 +60,12 @@ export class AuthController {
       email: user.email,
       role: user.role,
       tenantId: user.tenantId,
-      tenant,
+      tenant: tenant
+        ? {
+            ...tenant,
+            subscriptionSince: tenant.subscriptionSince ?? tenant.createdAt,
+          }
+        : null,
     });
   }
 }

@@ -3,6 +3,7 @@ export type SupportedProvider = (typeof SUPPORTED_PROVIDERS)[number];
 
 export interface TranslateContext {
   tenantId: string;
+  userId?: string;
   projectId?: string;
   jobId?: string;
   jobItemId?: string;

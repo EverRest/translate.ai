@@ -18,6 +18,7 @@ import {
   TranslationRetryJobPayload,
 } from '../../../shared/constants/job-payloads';
 import { TranslationJobCreatedEvent } from '../../domain/events/translation-job.events';
+import { buildJobFailureSummary } from '../utils/job-failure-summary';
 import { JobCompletionService } from './job-completion.service';
 import { TranslateTextService } from './translate-text.service';
 import { TranslationQueueService } from '../../infrastructure/translation-queue.service';
@@ -91,7 +92,7 @@ export class TranslationJobRunnerService {
 
     const sourceText = item.translationKey.sourceText;
     if (!sourceText?.trim()) {
-      await this.markItemFailed(item.id);
+      await this.markItemFailed(item.id, 'Translation key has empty source text');
       this.metrics.recordTranslationJobItem('failed');
       await this.jobCompletion.checkAndFinalize(item.jobId, payload.tenantId);
       return;
@@ -109,6 +110,7 @@ export class TranslationJobRunnerService {
 
       const result = await this.translateText.translate({
         tenantId: payload.tenantId,
+        userId: item.job.createdById ?? undefined,
         projectId: item.job.projectId,
         jobId: item.jobId,
         jobItemId: item.id,
@@ -177,10 +179,11 @@ export class TranslationJobRunnerService {
       });
       this.metrics.recordTranslationJobItem('completed');
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       this.logger.warn(
-        `Failed to process item ${item.id}: ${error instanceof Error ? error.message : error}`,
+        `Failed to process item ${item.id}: ${message}`,
       );
-      await this.markItemFailed(item.id);
+      await this.markItemFailed(item.id, message);
       this.metrics.recordTranslationJobItem('failed');
     }
 
@@ -200,7 +203,7 @@ export class TranslationJobRunnerService {
     for (const item of failedItems) {
       await this.prisma.translationJobItem.update({
         where: { id: item.id },
-        data: { status: JobItemStatus.pending },
+        data: { status: JobItemStatus.pending, errorMessage: null },
       });
       await this.queue.enqueueProcess({
         jobItemId: item.id,
@@ -216,10 +219,16 @@ export class TranslationJobRunnerService {
     );
   }
 
-  private async markItemFailed(itemId: string): Promise<void> {
+  private async markItemFailed(
+    itemId: string,
+    errorMessage?: string,
+  ): Promise<void> {
     await this.prisma.translationJobItem.update({
       where: { id: itemId },
-      data: { status: JobItemStatus.failed },
+      data: {
+        status: JobItemStatus.failed,
+        errorMessage: errorMessage?.slice(0, 2000),
+      },
     });
   }
 }

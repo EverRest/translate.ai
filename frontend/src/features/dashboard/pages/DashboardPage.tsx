@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { TokenUsageCharts } from '../../analytics/components/TokenUsageCharts';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { RecentJobsList } from '../components/RecentJobsList';
 import { StatCard } from '../components/StatCard';
@@ -99,6 +100,35 @@ export function DashboardPage() {
           visible={stats.canSeeAnalytics || stats.usageForbidden}
         />
       </div>
+
+        {stats.canSeeAnalytics &&
+          stats.usageSummary &&
+          stats.usageTimeline && (
+            <div>
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-medium text-white">
+                    AI token usage
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Tokens by model and user for your tenant (last 30 days).
+                  </p>
+                </div>
+                <Link
+                  to="/analytics"
+                  className="text-xs text-sky-400 hover:text-sky-300"
+                >
+                  Full analytics
+                </Link>
+              </div>
+              <TokenUsageCharts
+                byModel={stats.usageSummary.byModel}
+                byUser={stats.usageSummary.byUser}
+                timeline={stats.usageTimeline}
+                compact
+              />
+            </div>
+          )}
 
       {stats.canSeeAnalytics &&
         stats.trafficSummary &&

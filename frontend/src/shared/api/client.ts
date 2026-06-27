@@ -11,6 +11,10 @@ function authHeaders(): HeadersInit {
 }
 
 async function parseResponse<T>(response: Response): Promise<T> {
+  if (response.status === 204) {
+    return {} as T;
+  }
+
   const body = (await response.json().catch(() => ({}))) as {
     message?: string;
     error?: string;

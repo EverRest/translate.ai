@@ -3,9 +3,11 @@ import {
   ICommandHandler,
   IQueryHandler,
   QueryHandler,
+  CommandBus,
 } from '@nestjs/cqrs';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
+import { ConfigService } from '@nestjs/config';
 import {
   QualityMetricSource,
   QualityVerdict,
@@ -16,6 +18,8 @@ import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { AuditService } from '../../../audit/application/audit.service';
 import { TranslationQualityService } from '../../../billing/application/translation-quality.service';
 import { ProjectAccessService } from '../../../project/infrastructure/project-access.service';
+import { CreateTranslationJobCommand } from '../../../translation/application/job.commands';
+import { TranslationMemoryService } from '../../../translation/application/services/translation-memory.service';
 import { TranslationAccessService } from '../../infrastructure/translation-access.service';
 import {
   TranslationApprovedEvent,
@@ -28,6 +32,7 @@ import {
   ListProjectReviewsQuery,
   PublishTranslationCommand,
   RejectTranslationCommand,
+  RetranslateTranslationCommand,
   UpdateTranslationValueCommand,
 } from '../approval.commands';
 
@@ -416,5 +421,68 @@ export class BulkApproveTranslationsHandler implements ICommandHandler<BulkAppro
     });
 
     return { approved: results.length, items: results };
+  }
+}
+
+@Injectable()
+@CommandHandler(RetranslateTranslationCommand)
+export class RetranslateTranslationHandler implements ICommandHandler<RetranslateTranslationCommand> {
+  constructor(
+    private readonly access: TranslationAccessService,
+    private readonly memory: TranslationMemoryService,
+    private readonly commandBus: CommandBus,
+    private readonly config: ConfigService,
+  ) {}
+
+  async execute(command: RetranslateTranslationCommand) {
+    const translation = await this.access.getTranslationForTenant(
+      command.tenantId,
+      command.translationId,
+    );
+
+    if (translation.status === TranslationStatus.published) {
+      throw new BadRequestException(
+        'Published translations cannot be re-translated',
+      );
+    }
+
+    const sourceText = translation.translationKey.sourceText;
+    if (!sourceText?.trim()) {
+      throw new BadRequestException('Translation key has empty source text');
+    }
+
+    const sourceLang = this.config.get<string>(
+      'DEFAULT_SOURCE_LANGUAGE',
+      'en',
+    );
+
+    await this.memory.forget(
+      command.tenantId,
+      sourceText,
+      sourceLang,
+      translation.language,
+    );
+
+    const provider =
+      command.provider ?? translation.provider ?? 'openai';
+
+    const job = await this.commandBus.execute(
+      new CreateTranslationJobCommand(
+        command.tenantId,
+        translation.translationKey.projectId,
+        [translation.language],
+        [translation.translationKey.key],
+        undefined,
+        provider,
+        undefined,
+        command.userId,
+      ),
+    );
+
+    return {
+      jobId: job.jobId,
+      translationId: translation.id,
+      status: job.status,
+    };
   }
 }

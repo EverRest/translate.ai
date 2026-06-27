@@ -29,3 +29,10 @@ export class BulkApproveDto {
   @IsUUID(undefined, { each: true })
   translationIds!: string[];
 }
+
+export class RetranslateTranslationDto {
+  @ApiProperty({ required: false, example: 'ollama' })
+  @IsOptional()
+  @IsString()
+  provider?: string;
+}

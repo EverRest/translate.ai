@@ -1,10 +1,12 @@
 import { apiGet, type ApiSuccess } from '../../../shared/api/client';
 import type {
+  AccountUsage,
   AnalyticsFilters,
   QualityLogEntry,
   QualitySummary,
   UsageLogEntry,
   UsageSummary,
+  UsageTimeline,
 } from '../types';
 
 function buildQuery(filters: AnalyticsFilters) {
@@ -24,9 +26,28 @@ function buildQuery(filters: AnalyticsFilters) {
   return query ? `?${query}` : '';
 }
 
-export async function fetchUsageSummary(filters: AnalyticsFilters) {
+export async function fetchAccountUsage() {
+  const response = await apiGet<ApiSuccess<AccountUsage>>('/analytics/account');
+  return response.data;
+}
+
+export async function fetchUsageSummary(filters: AnalyticsFilters = {}) {
   const response = await apiGet<ApiSuccess<UsageSummary>>(
     `/analytics/usage/summary${buildQuery(filters)}`,
+  );
+  return response.data;
+}
+
+export async function fetchUsageTimeline(
+  days = 30,
+  filters: Pick<AnalyticsFilters, 'projectId'> = {},
+) {
+  const params = new URLSearchParams({ days: String(days) });
+  if (filters.projectId) {
+    params.set('projectId', filters.projectId);
+  }
+  const response = await apiGet<ApiSuccess<UsageTimeline>>(
+    `/analytics/usage/timeline?${params.toString()}`,
   );
   return response.data;
 }

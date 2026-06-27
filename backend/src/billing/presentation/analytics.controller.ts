@@ -8,8 +8,10 @@ import { Roles } from '../../shared/auth/decorators/roles.decorator';
 import { RolesGuard } from '../../shared/auth/guards/roles.guard';
 import { successResponse } from '../../shared/presentation/api-response';
 import {
+  GetAccountUsageQuery,
   GetUsageAnalyticsQuery,
   GetUsageSummaryQuery,
+  GetUsageTimelineQuery,
 } from '../application/usage-analytics.service';
 import {
   GetTrafficSummaryQuery,
@@ -23,12 +25,23 @@ import {
 @ApiTags('analytics')
 @ApiBearerAuth()
 @UseGuards(RolesGuard)
-@Roles(UserRole.admin, UserRole.developer)
 @Controller('analytics')
 export class AnalyticsController {
   constructor(private readonly queryBus: QueryBus) {}
 
+  @Get('account')
+  @ApiOperation({
+    summary: 'Tenant subscription and lifetime AI usage (all roles)',
+  })
+  async account(@CurrentUser() user: AuthUser) {
+    const data = await this.queryBus.execute(
+      new GetAccountUsageQuery(user.tenantId),
+    );
+    return successResponse(data);
+  }
+
   @Get('usage')
+  @Roles(UserRole.admin, UserRole.developer)
   @ApiOperation({ summary: 'List AI usage log entries' })
   async usage(
     @CurrentUser() user: AuthUser,
@@ -46,7 +59,8 @@ export class AnalyticsController {
   }
 
   @Get('usage/summary')
-  @ApiOperation({ summary: 'AI usage cost summary by provider' })
+  @Roles(UserRole.admin, UserRole.developer)
+  @ApiOperation({ summary: 'AI usage summary by provider, model, and user' })
   async summary(
     @CurrentUser() user: AuthUser,
     @Query() query: { projectId?: string; from?: string; to?: string },
@@ -62,7 +76,22 @@ export class AnalyticsController {
     return successResponse(data);
   }
 
+  @Get('usage/timeline')
+  @Roles(UserRole.admin, UserRole.developer)
+  @ApiOperation({ summary: 'Daily AI token usage timeline' })
+  async usageTimeline(
+    @CurrentUser() user: AuthUser,
+    @Query() query: { days?: string; projectId?: string },
+  ) {
+    const days = query.days ? Number(query.days) : 30;
+    const data = await this.queryBus.execute(
+      new GetUsageTimelineQuery(user.tenantId, days, query.projectId),
+    );
+    return successResponse(data);
+  }
+
   @Get('traffic/summary')
+  @Roles(UserRole.admin, UserRole.developer)
   @ApiOperation({ summary: 'API request traffic summary for tenant' })
   async trafficSummary(
     @CurrentUser() user: AuthUser,
@@ -76,6 +105,7 @@ export class AnalyticsController {
   }
 
   @Get('traffic/timeline')
+  @Roles(UserRole.admin, UserRole.developer)
   @ApiOperation({ summary: 'Hourly API request counts for tenant' })
   async trafficTimeline(
     @CurrentUser() user: AuthUser,
@@ -89,6 +119,7 @@ export class AnalyticsController {
   }
 
   @Get('quality/summary')
+  @Roles(UserRole.admin, UserRole.developer)
   @ApiOperation({ summary: 'AI translation accuracy summary' })
   async qualitySummary(
     @CurrentUser() user: AuthUser,
@@ -106,6 +137,7 @@ export class AnalyticsController {
   }
 
   @Get('quality/logs')
+  @Roles(UserRole.admin, UserRole.developer)
   @ApiOperation({ summary: 'Recent AI accuracy samples' })
   async qualityLogs(
     @CurrentUser() user: AuthUser,

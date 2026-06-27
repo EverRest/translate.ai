@@ -36,6 +36,12 @@ export function UsageSummaryCard({
             <span className="text-white">{summary.totalRequests}</span>
           </div>
           <div className="flex justify-between text-sm">
+            <span className="text-slate-400">Total tokens</span>
+            <span className="text-white">
+              {summary.totalTokens.toLocaleString()}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
             <span className="text-slate-400">Estimated cost</span>
             <span className="text-white">
               ${summary.totalCostUsd.toFixed(4)}

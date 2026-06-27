@@ -68,10 +68,14 @@ enum QualityVerdict {
 }
 
 model Tenant {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  slug      String   @unique
-  createdAt DateTime @default(now()) @map("created_at")
+  id                String    @id @default(uuid()) @db.Uuid
+  name              String
+  slug              String    @unique
+  plan              String    @default("free")
+  planStatus        String    @default("active") @map("plan_status")
+  subscriptionSince DateTime? @map("subscription_since")
+  monthlyTokenQuota Int?      @map("monthly_token_quota")
+  createdAt         DateTime  @default(now()) @map("created_at")
 
   users              User[]
   projects           Project[]
@@ -93,9 +97,11 @@ model User {
   role      UserRole @default(developer)
   createdAt DateTime @default(now()) @map("created_at")
 
-  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  auditLogs AuditLog[]
-  reviews   Review[]
+  tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  auditLogs    AuditLog[]
+  reviews      Review[]
+  aiUsageLogs  AiUsageLog[]
+  createdJobs  TranslationJob[] @relation("JobCreatedBy")
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -259,16 +265,19 @@ model Translation {
 }
 
 model TranslationJob {
-  id        String    @id @default(uuid()) @db.Uuid
-  projectId String    @map("project_id") @db.Uuid
-  status    JobStatus @default(pending)
-  provider  String?
-  createdAt DateTime  @default(now()) @map("created_at")
+  id          String    @id @default(uuid()) @db.Uuid
+  projectId   String    @map("project_id") @db.Uuid
+  createdById String?   @map("created_by_id") @db.Uuid
+  status      JobStatus @default(pending)
+  provider    String?
+  createdAt   DateTime  @default(now()) @map("created_at")
 
-  project Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  items   TranslationJobItem[]
+  project   Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User?                @relation("JobCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  items     TranslationJobItem[]
 
   @@index([projectId])
+  @@index([createdById])
   @@map("translation_jobs")
 }
 
@@ -278,6 +287,7 @@ model TranslationJobItem {
   translationKeyId String        @map("translation_key_id") @db.Uuid
   language         String        @db.VarChar(5)
   status           JobItemStatus @default(pending)
+  errorMessage     String?       @map("error_message")
 
   job            TranslationJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
   translationKey TranslationKey @relation(fields: [translationKeyId], references: [id], onDelete: Cascade)
@@ -351,6 +361,7 @@ model ProviderConfig {
 model AiUsageLog {
   id               String   @id @default(uuid()) @db.Uuid
   tenantId         String   @map("tenant_id") @db.Uuid
+  userId           String?  @map("user_id") @db.Uuid
   projectId        String?  @map("project_id") @db.Uuid
   jobId            String?  @map("job_id") @db.Uuid
   jobItemId        String?  @map("job_item_id") @db.Uuid
@@ -364,8 +375,11 @@ model AiUsageLog {
   createdAt        DateTime @default(now()) @map("created_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([tenantId, createdAt])
+  @@index([tenantId, userId, createdAt])
+  @@index([tenantId, model, createdAt])
   @@index([projectId, createdAt])
   @@map("ai_usage_logs")
 }

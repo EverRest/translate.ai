@@ -32,8 +32,6 @@ export function JobDetailPage() {
     job.progress.total - job.progress.completed - job.progress.failed,
   );
 
-  const isOllama = job.provider === 'ollama';
-
   const canRetry =
     job.status === 'failed' ||
     job.status === 'completed' ||
@@ -88,10 +86,36 @@ export function JobDetailPage() {
               />
             </div>
             {job.progress.failed > 0 && (
-              <p className="mt-2 text-sm text-red-400">
-                {job.progress.failed} item(s) failed
-                {isOllama && ' — Ollama may have timed out; increase OLLAMA_TIMEOUT_MS or use Retry'}
-              </p>
+              <div className="mt-3 space-y-2 rounded-lg border border-red-900/40 bg-red-950/20 p-3">
+                <p className="text-sm text-red-300">
+                  {job.progress.failed} item(s) failed
+                  {job.failures ? `: ${job.failures.summary}` : '.'}
+                </p>
+                {job.failures?.hint && (
+                  <p className="text-sm text-red-200/80">{job.failures.hint}</p>
+                )}
+                {!job.failures && job.provider === 'ollama' && (
+                  <p className="text-sm text-red-200/80">
+                    Check that Ollama is running and the worker is connected, then
+                    Retry. Older jobs may not include a detailed error — retry after
+                    restarting the worker.
+                  </p>
+                )}
+                {(job.failures?.sampleErrors.length ?? 0) > 0 && (
+                  <details className="text-xs text-red-200/70">
+                    <summary className="cursor-pointer hover:text-red-200">
+                      Technical details
+                    </summary>
+                    <ul className="mt-2 list-disc space-y-1 pl-4">
+                      {job.failures?.sampleErrors.map((sample) => (
+                        <li key={sample} className="break-words font-mono">
+                          {sample}
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+              </div>
             )}
           </div>
         </div>

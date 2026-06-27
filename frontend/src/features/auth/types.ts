@@ -2,6 +2,10 @@ export type TenantSummary = {
   id: string;
   name: string;
   slug: string;
+  plan?: string;
+  planStatus?: string;
+  subscriptionSince?: string;
+  monthlyTokenQuota?: number | null;
 };
 
 export type AuthUser = {

@@ -7,25 +7,33 @@ type UsageSummaryStatsProps = {
 export function UsageSummaryStats({ summary }: UsageSummaryStatsProps) {
   const cards = [
     {
-      label: 'Total requests',
-      value: summary.totalRequests.toLocaleString(),
+      label: 'Total tokens',
+      value: summary.totalTokens.toLocaleString(),
+    },
+    {
+      label: 'Input / output',
+      value: `${summary.totalInputTokens.toLocaleString()} / ${summary.totalOutputTokens.toLocaleString()}`,
     },
     {
       label: 'Estimated cost',
       value: `$${summary.totalCostUsd.toFixed(4)}`,
     },
     {
-      label: 'Provider fallbacks',
-      value: summary.fallbackCount.toLocaleString(),
+      label: 'AI requests',
+      value: summary.totalRequests.toLocaleString(),
     },
     {
-      label: 'Providers used',
-      value: summary.byProvider.length.toLocaleString(),
+      label: 'Models used',
+      value: summary.byModel.length.toLocaleString(),
+    },
+    {
+      label: 'Active users',
+      value: summary.byUser.length.toLocaleString(),
     },
   ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {cards.map((card) => (
         <div
           key={card.label}

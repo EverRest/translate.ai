@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { AiUsageService } from './application/ai-usage.service';
 import {
+  GetAccountUsageHandler,
   GetUsageAnalyticsHandler,
   GetUsageSummaryHandler,
+  GetUsageTimelineHandler,
 } from './application/handlers/usage-analytics.handlers';
 import {
   GetQualityLogsHandler,
@@ -26,6 +28,8 @@ import { AnalyticsController } from './presentation/analytics.controller';
     TranslationQualityService,
     GetUsageAnalyticsHandler,
     GetUsageSummaryHandler,
+    GetUsageTimelineHandler,
+    GetAccountUsageHandler,
     GetTrafficSummaryHandler,
     GetTrafficTimelineHandler,
     GetQualitySummaryHandler,

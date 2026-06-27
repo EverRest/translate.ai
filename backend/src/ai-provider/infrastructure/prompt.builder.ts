@@ -50,7 +50,7 @@ export function buildTranslationPrompts(
 
   const systemPrompt = `You are a professional translator. Translate from ${sourceLang} to ${targetLang}.
 Preserve formatting, placeholders like {{name}}, and HTML tags.
-Return only the translated text without explanations.${toneHint}${contentHint}${glossaryHint}`;
+Return only the translated text without explanations or surrounding quotation marks.${toneHint}${contentHint}${glossaryHint}`;
 
   const userPrompt = `${contextHint}\n\nText:\n${text}`.trim();
 

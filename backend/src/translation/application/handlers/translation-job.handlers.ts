@@ -55,6 +55,7 @@ export class CreateTranslationJobHandler implements ICommandHandler<CreateTransl
         projectId: command.projectId,
         provider,
         status: JobStatus.pending,
+        createdById: command.createdById,
         items: {
           create: translationKeys.flatMap((tk) =>
             languages.map((language) => ({

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useProjectsList } from '../../projects/hooks/useProjects';
 import { ProviderCharts } from '../components/ProviderCharts';
+import { TokenUsageCharts } from '../components/TokenUsageCharts';
 import { QualityCharts } from '../components/QualityCharts';
 import { QualityLogsTable } from '../components/QualityLogsTable';
 import { QualitySummaryStats } from '../components/QualitySummaryStats';
@@ -13,6 +14,7 @@ import {
   useQualitySummary,
   useUsageLogs,
   useUsageSummary,
+  useUsageTimeline,
 } from '../hooks/useAnalytics';
 import type { AnalyticsFilters } from '../types';
 
@@ -33,6 +35,7 @@ export function AnalyticsPage() {
 
   const projects = useProjectsList(1, 100);
   const summary = useUsageSummary(filters, canView);
+  const timeline = useUsageTimeline(filters, canView, 30);
   const logs = useUsageLogs(filters, canView);
   const qualitySummary = useQualitySummary(filters, canView);
   const qualityLogs = useQualityLogs(filters, canView);
@@ -44,6 +47,7 @@ export function AnalyticsPage() {
     isAnalyticsForbidden(qualityLogs.error);
   const loading =
     summary.isLoading ||
+    timeline.isLoading ||
     logs.isLoading ||
     qualitySummary.isLoading ||
     qualityLogs.isLoading;
@@ -132,6 +136,11 @@ export function AnalyticsPage() {
                 <h2 className="text-lg font-medium text-white">AI usage</h2>
               </div>
               <UsageSummaryStats summary={summary.data} />
+              <TokenUsageCharts
+                byModel={summary.data.byModel}
+                byUser={summary.data.byUser}
+                timeline={timeline.data}
+              />
               <ProviderCharts summary={summary.data} />
             </>
           )}

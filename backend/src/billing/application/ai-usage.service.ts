@@ -30,6 +30,7 @@ export class AiUsageService {
       .create({
         data: {
           tenantId: input.tenantId,
+          userId: input.userId,
           projectId: input.projectId,
           jobId: input.jobId,
           jobItemId: input.jobItemId,

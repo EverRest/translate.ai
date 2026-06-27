@@ -10,6 +10,7 @@ import {
   fetchTrafficSummary,
   fetchTrafficTimeline,
   fetchUsageSummary,
+  fetchUsageTimeline,
 } from '../api/dashboard.api';
 
 const REVIEW_ROLES = new Set(['admin', 'reviewer']);
@@ -54,6 +55,13 @@ export function useDashboardStats() {
     retry: false,
   });
 
+  const usageTimeline = useQuery({
+    queryKey: ['dashboard', 'usage-timeline'],
+    queryFn: () => fetchUsageTimeline(30),
+    enabled: canSeeAnalytics,
+    retry: false,
+  });
+
   const trafficSummary = useQuery({
     queryKey: ['dashboard', 'traffic-summary'],
     queryFn: () => fetchTrafficSummary(24),
@@ -75,6 +83,7 @@ export function useDashboardStats() {
     (canSeeReviews && (projectIds.isLoading || pendingReviews.isLoading)) ||
     (canSeeAnalytics &&
       (usageSummary.isLoading ||
+        usageTimeline.isLoading ||
         trafficSummary.isLoading ||
         trafficTimeline.isLoading));
 
@@ -84,6 +93,7 @@ export function useDashboardStats() {
     pendingReviews: canSeeReviews ? (pendingReviews.data ?? 0) : null,
     recentJobs: recentJobs.data ?? [],
     usageSummary: usageSummary.data,
+    usageTimeline: usageTimeline.data,
     trafficSummary: trafficSummary.data,
     trafficTimeline: trafficTimeline.data,
     usageForbidden:

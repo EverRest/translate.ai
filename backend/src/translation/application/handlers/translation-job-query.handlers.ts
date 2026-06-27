@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { JobItemStatus } from '@prisma/client';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { GetJobStatusQuery, ListTranslationJobsQuery } from '../job.commands';
+import { buildJobFailureSummary } from '../utils/job-failure-summary';
 
 @Injectable()
 @QueryHandler(ListTranslationJobsQuery)
@@ -77,9 +78,16 @@ export class GetJobStatusHandler implements IQueryHandler<GetJobStatusQuery> {
     const completed = job.items.filter(
       (i) => i.status === JobItemStatus.completed,
     ).length;
-    const failed = job.items.filter(
+    const failedItems = job.items.filter(
       (i) => i.status === JobItemStatus.failed,
-    ).length;
+    );
+    const failed = failedItems.length;
+    const failures = buildJobFailureSummary(
+      failedItems
+        .map((item) => item.errorMessage)
+        .filter((message): message is string => Boolean(message)),
+      job.provider,
+    );
 
     return {
       id: job.id,
@@ -87,6 +95,7 @@ export class GetJobStatusHandler implements IQueryHandler<GetJobStatusQuery> {
       status: job.status,
       provider: job.provider,
       progress: { total, completed, failed },
+      failures,
       createdAt: job.createdAt,
     };
   }

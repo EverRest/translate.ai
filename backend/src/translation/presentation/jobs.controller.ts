@@ -73,6 +73,7 @@ export class JobsController {
         dto.keyItems,
         dto.provider,
         dto.clientRequestId,
+        user.authMethod === 'jwt' ? user.userId : undefined,
       ),
     );
     return successResponse(data);

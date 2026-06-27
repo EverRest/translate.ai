@@ -15,6 +15,7 @@ type ReviewsTableProps = {
   onToggleAll: (ids: string[]) => void;
   onApprove?: (id: string) => void;
   onReject?: (item: ReviewItem) => void;
+  onRetranslate?: (id: string) => void;
   onEdit?: (item: ReviewItem) => void;
   onPublish?: (id: string) => void;
   busyId?: string;
@@ -28,6 +29,7 @@ export function ReviewsTable({
   onToggleAll,
   onApprove,
   onReject,
+  onRetranslate,
   onEdit,
   onPublish,
   busyId,
@@ -112,6 +114,16 @@ export function ReviewsTable({
                       className="text-sm text-slate-300 hover:text-white disabled:opacity-50"
                     >
                       Edit
+                    </button>
+                  )}
+                  {mode === 'pending' && onRetranslate && (
+                    <button
+                      type="button"
+                      disabled={busyId === item.id}
+                      onClick={() => onRetranslate(item.id)}
+                      className="text-sm text-sky-400 hover:text-sky-300 disabled:opacity-50"
+                    >
+                      Retranslate
                     </button>
                   )}
                   {mode === 'pending' && onApprove && (

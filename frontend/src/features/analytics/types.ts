@@ -1,29 +1,72 @@
+export type UsageBreakdownRow = {
+  requests: number;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  estimatedCostUsd: number;
+};
+
 export type UsageSummary = {
   totalRequests: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalTokens: number;
   totalCostUsd: number;
   fallbackCount: number;
-  byProvider: Array<{
-    provider: string;
+  byProvider: Array<UsageBreakdownRow & { provider: string }>;
+  byModel: Array<UsageBreakdownRow & { model: string }>;
+  byUser: Array<
+    UsageBreakdownRow & {
+      userId: string | null;
+      userEmail: string;
+    }
+  >;
+};
+
+export type UsageTimeline = {
+  days: number;
+  points: Array<{
+    date: string;
     requests: number;
     inputTokens: number;
     outputTokens: number;
+    totalTokens: number;
     estimatedCostUsd: number;
   }>;
 };
 
 export type UsageLogEntry = {
   id: string;
-  projectId: string;
+  userId: string | null;
+  userEmail: string | null;
+  projectId: string | null;
   jobId: string | null;
   jobItemId: string | null;
   provider: string;
   model: string;
   inputTokens: number;
   outputTokens: number;
+  totalTokens: number;
   estimatedCostUsd: number;
   usedFallback: boolean;
   primaryProvider: string | null;
   createdAt: string;
+};
+
+export type AccountUsage = {
+  tenant: {
+    id: string;
+    name: string;
+    slug: string;
+    plan: string;
+    planStatus: string;
+    subscriptionSince: string;
+    monthlyTokenQuota: number | null;
+  };
+  lifetime: UsageSummary;
+  thisMonth: UsageSummary;
+  quotaUsedPercent: number | null;
+  timeline: UsageTimeline;
 };
 
 export type AnalyticsFilters = {

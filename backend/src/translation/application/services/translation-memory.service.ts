@@ -40,4 +40,16 @@ export class TranslationMemoryService {
       update: { translatedText, sourceText },
     });
   }
+
+  async forget(
+    tenantId: string,
+    sourceText: string,
+    sourceLang: string,
+    targetLang: string,
+  ): Promise<void> {
+    const hash = translationMemoryHash(sourceText, sourceLang, targetLang);
+    await this.prisma.translationMemory.deleteMany({
+      where: { tenantId, hash },
+    });
+  }
 }

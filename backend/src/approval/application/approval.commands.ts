@@ -50,3 +50,12 @@ export class BulkApproveTranslationsCommand {
     public readonly translationIds: string[],
   ) {}
 }
+
+export class RetranslateTranslationCommand {
+  constructor(
+    public readonly tenantId: string,
+    public readonly userId: string,
+    public readonly translationId: string,
+    public readonly provider?: string,
+  ) {}
+}

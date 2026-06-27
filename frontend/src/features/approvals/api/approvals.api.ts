@@ -71,3 +71,17 @@ export async function bulkApproveTranslations(
   >(`/projects/${projectId}/reviews/bulk-approve`, { translationIds });
   return response.data;
 }
+
+export async function retranslateTranslation(
+  translationId: string,
+  provider?: string,
+) {
+  const response = await apiPost<
+    ApiSuccess<{ jobId: string; translationId: string; status: string }>,
+    { provider?: string }
+  >(
+    `/translations/${translationId}/retranslate`,
+    provider ? { provider } : {},
+  );
+  return response.data;
+}

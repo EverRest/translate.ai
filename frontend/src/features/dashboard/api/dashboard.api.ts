@@ -20,6 +20,9 @@ export type JobSummary = {
 
 export type UsageSummary = {
   totalRequests: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalTokens: number;
   totalCostUsd: number;
   fallbackCount: number;
   byProvider: Array<{
@@ -27,6 +30,36 @@ export type UsageSummary = {
     requests: number;
     inputTokens: number;
     outputTokens: number;
+    totalTokens: number;
+    estimatedCostUsd: number;
+  }>;
+  byModel: Array<{
+    model: string;
+    requests: number;
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    estimatedCostUsd: number;
+  }>;
+  byUser: Array<{
+    userId: string | null;
+    userEmail: string;
+    requests: number;
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    estimatedCostUsd: number;
+  }>;
+};
+
+export type UsageTimeline = {
+  days: number;
+  points: Array<{
+    date: string;
+    requests: number;
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
     estimatedCostUsd: number;
   }>;
 };
@@ -71,6 +104,13 @@ export async function fetchActiveJobsCount() {
 export async function fetchUsageSummary() {
   const response = await apiGet<ApiSuccess<UsageSummary>>(
     '/analytics/usage/summary',
+  );
+  return response.data;
+}
+
+export async function fetchUsageTimeline(days = 30) {
+  const response = await apiGet<ApiSuccess<UsageTimeline>>(
+    `/analytics/usage/timeline?days=${days}`,
   );
   return response.data;
 }

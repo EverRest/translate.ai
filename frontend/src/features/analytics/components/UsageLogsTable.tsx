@@ -18,6 +18,9 @@ export function UsageLogsTable({ items }: UsageLogsTableProps) {
               Time
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400">
+              User
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400">
               Provider
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400">
@@ -39,6 +42,9 @@ export function UsageLogsTable({ items }: UsageLogsTableProps) {
             <tr key={row.id} className="hover:bg-slate-800/40">
               <td className="whitespace-nowrap px-4 py-4 text-sm text-slate-300">
                 {formatDate(row.createdAt)}
+              </td>
+              <td className="px-4 py-4 text-sm text-slate-400">
+                {row.userEmail ?? '—'}
               </td>
               <td className="px-4 py-4 text-sm capitalize text-slate-300">
                 {row.provider}

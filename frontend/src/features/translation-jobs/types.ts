@@ -8,6 +8,12 @@ export type TranslationJob = {
   createdAt: string;
 };
 
+export type JobFailureSummary = {
+  summary: string;
+  hint: string;
+  sampleErrors: string[];
+};
+
 export type JobDetail = {
   id: string;
   projectId: string;
@@ -18,6 +24,7 @@ export type JobDetail = {
     completed: number;
     failed: number;
   };
+  failures: JobFailureSummary | null;
   createdAt: string;
 };
 

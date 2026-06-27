@@ -75,6 +75,6 @@ const services = [
     TranslationsController,
   ],
   providers: [...commandHandlers, ...queryHandlers, ...services],
-  exports: [...services, TranslationQueueService],
+  exports: [...services, TranslationQueueService, TranslationMemoryService],
 })
 export class TranslationModule {}

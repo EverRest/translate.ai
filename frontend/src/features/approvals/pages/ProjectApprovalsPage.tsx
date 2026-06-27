@@ -13,6 +13,7 @@ import {
   useProjectReviews,
   usePublishTranslation,
   useRejectTranslation,
+  useRetranslateTranslation,
   useUpdateTranslationValue,
 } from '../hooks/useApprovals';
 import type { ReviewItem, ReviewStatusFilter } from '../types';
@@ -36,6 +37,7 @@ export function ProjectApprovalsPage() {
   const publish = usePublishTranslation(projectId ?? '');
   const updateValue = useUpdateTranslationValue(projectId ?? '');
   const bulkApprove = useBulkApprove(projectId ?? '');
+  const retranslate = useRetranslateTranslation(projectId ?? '');
 
   const items = data?.items ?? [];
   const forbidden = error instanceof ApiError && error.status === 403;
@@ -152,6 +154,12 @@ export function ProjectApprovalsPage() {
               : undefined
           }
           onReject={tab === 'pending' ? setRejectingItem : undefined}
+          onRetranslate={
+            tab === 'pending'
+              ? (id) =>
+                  void runAction(id, () => retranslate.mutateAsync(id))
+              : undefined
+          }
           onPublish={
             tab === 'approved'
               ? (id) => void runAction(id, () => publish.mutateAsync(id))

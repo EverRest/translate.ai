@@ -36,7 +36,8 @@ services:
       DATABASE_URL: postgresql://translate:translate@postgres:5432/translate_ai?schema=public
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      OLLAMA_BASE_URL: http://ollama:11434
+    extra_hosts:
+      - host.docker.internal:host-gateway
     ports:
       - '3000:3000'
     healthcheck:
@@ -66,7 +67,8 @@ services:
       DATABASE_URL: postgresql://translate:translate@postgres:5432/translate_ai?schema=public
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      OLLAMA_BASE_URL: http://ollama:11434
+    extra_hosts:
+      - host.docker.internal:host-gateway
     depends_on:
       postgres:
         condition: service_healthy

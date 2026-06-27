@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import {
   approveTranslation,
   bulkApproveTranslations,
   listReviews,
   publishTranslation,
   rejectTranslation,
+  retranslateTranslation,
   updateTranslationValue,
 } from '../api/approvals.api';
 import type { ReviewStatusFilter } from '../types';
@@ -85,5 +87,21 @@ export function useBulkApprove(projectId: string) {
     mutationFn: (translationIds: string[]) =>
       bulkApproveTranslations(projectId, translationIds),
     onSuccess: invalidate,
+  });
+}
+
+export function useRetranslateTranslation(projectId: string) {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: (translationId: string) =>
+      retranslateTranslation(translationId),
+    onSuccess: (data) => {
+      void queryClient.invalidateQueries({ queryKey: ['reviews', projectId] });
+      void queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      navigate(`/jobs/${data.jobId}`);
+    },
   });
 }

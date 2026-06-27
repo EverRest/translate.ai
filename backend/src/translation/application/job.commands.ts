@@ -14,6 +14,7 @@ export class CreateTranslationJobCommand {
     public readonly keyItems: JobKeyItemInput[] | undefined,
     public readonly provider?: string,
     public readonly clientRequestId?: string,
+    public readonly createdById?: string,
   ) {}
 }
 

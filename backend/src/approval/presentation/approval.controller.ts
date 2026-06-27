@@ -27,10 +27,12 @@ import {
   PublishTranslationCommand,
   RejectTranslationCommand,
   UpdateTranslationValueCommand,
+  RetranslateTranslationCommand,
 } from '../application/approval.commands';
 import {
   BulkApproveDto,
   RejectTranslationDto,
+  RetranslateTranslationDto,
   UpdateTranslationValueDto,
 } from './dto/approval.dto';
 
@@ -144,6 +146,25 @@ export class ApprovalController {
         user.userId,
         translationId,
         dto.value,
+      ),
+    );
+    return successResponse(data);
+  }
+
+  @Post('translations/:translationId/retranslate')
+  @Roles(UserRole.admin, UserRole.reviewer)
+  @ApiOperation({ summary: 'Re-run AI translation for a single row' })
+  async retranslate(
+    @CurrentUser() user: AuthUser,
+    @Param('translationId') translationId: string,
+    @Body() dto: RetranslateTranslationDto,
+  ) {
+    const data = await this.commandBus.execute(
+      new RetranslateTranslationCommand(
+        user.tenantId,
+        user.userId,
+        translationId,
+        dto.provider,
       ),
     );
     return successResponse(data);

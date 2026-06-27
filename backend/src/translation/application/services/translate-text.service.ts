@@ -4,6 +4,7 @@ import { TranslateOptions } from '../../../ai-provider/domain/ai-provider.interf
 import { TranslateContext } from '../../../ai-provider/domain/ai-provider.types';
 import { ProviderRegistryService } from '../../../ai-provider/application/provider-registry.service';
 import { AiUsageService } from '../../../billing/application/ai-usage.service';
+import { stripWrappingQuotes } from '../../../shared/utils/string.utils';
 import { TranslationMemoryService } from './translation-memory.service';
 
 export interface TranslateResult {
@@ -66,16 +67,19 @@ export class TranslateTextService {
       },
     );
 
+    const translatedText = stripWrappingQuotes(result.text);
+
     await this.memory.store(
       request.tenantId,
       request.text,
       source,
       request.targetLang,
-      result.text,
+      translatedText,
     );
 
     await this.usage.log({
       tenantId: request.tenantId,
+      userId: request.userId,
       projectId: request.projectId,
       jobId: request.jobId,
       jobItemId: request.jobItemId,
@@ -86,7 +90,7 @@ export class TranslateTextService {
     });
 
     return {
-      text: result.text,
+      text: translatedText,
       provider: result.provider,
       usedFallback: result.usedFallback,
     };

@@ -30,7 +30,11 @@ export class RegisterTenantHandler implements ICommandHandler<RegisterTenantComm
 
     const result = await this.prisma.$transaction(async (tx) => {
       const tenant = await tx.tenant.create({
-        data: { name: command.tenantName, slug },
+        data: {
+          name: command.tenantName,
+          slug,
+          subscriptionSince: new Date(),
+        },
       });
       const user = await tx.user.create({
         data: {
