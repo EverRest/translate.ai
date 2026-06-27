@@ -5,9 +5,9 @@ import {
   JobItemStatus,
   JobStatus,
   QualityMetricSource,
+  QualityVerdict,
   TranslationStatus,
 } from '@prisma/client';
-import { inferContentTypeFromContext } from '../../../ai-provider/application/content-classifier.utils';
 import { TranslationQualityService } from '../../../billing/application/translation-quality.service';
 import { GlossaryService } from '../../../glossary/application/glossary.service';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
@@ -18,10 +18,13 @@ import {
   TranslationRetryJobPayload,
 } from '../../../shared/constants/job-payloads';
 import { TranslationJobCreatedEvent } from '../../domain/events/translation-job.events';
-import { buildJobFailureSummary } from '../utils/job-failure-summary';
+import { buildTranslateOptionsFromKey } from '../utils/translation-context.utils';
 import { JobCompletionService } from './job-completion.service';
 import { TranslateTextService } from './translate-text.service';
+import { TranslationOutputValidator } from './translation-output.validator';
 import { TranslationQueueService } from '../../infrastructure/translation-queue.service';
+
+const MAX_TRANSLATION_ATTEMPTS = 3;
 
 @Injectable()
 export class TranslationJobRunnerService {
@@ -37,6 +40,7 @@ export class TranslationJobRunnerService {
     private readonly metrics: MetricsService,
     private readonly glossary: GlossaryService,
     private readonly quality: TranslationQualityService,
+    private readonly outputValidator: TranslationOutputValidator,
   ) {}
 
   async handleCreate(payload: TranslationCreateJobPayload): Promise<void> {
@@ -69,7 +73,11 @@ export class TranslationJobRunnerService {
     const item = await this.prisma.translationJobItem.findUnique({
       where: { id: payload.jobItemId },
       include: {
-        translationKey: true,
+        translationKey: {
+          include: {
+            project: { select: { name: true, description: true } },
+          },
+        },
         job: true,
       },
     });
@@ -103,27 +111,77 @@ export class TranslationJobRunnerService {
         item.job.projectId,
       );
 
-      const keyContext =
-        item.translationKey.context ??
-        item.translationKey.description ??
-        undefined;
-
-      const result = await this.translateText.translate({
-        tenantId: payload.tenantId,
-        userId: item.job.createdById ?? undefined,
-        projectId: item.job.projectId,
-        jobId: item.jobId,
-        jobItemId: item.id,
-        text: sourceText,
-        targetLang: item.language,
-        providerName: item.job.provider ?? 'openai',
-        options: {
-          context: keyContext,
-          contentType: inferContentTypeFromContext(keyContext),
+      const baseOptions = buildTranslateOptionsFromKey(
+        item.translationKey,
+        item.translationKey.project,
+        {
           glossary: glossaryTerms.length > 0 ? glossaryTerms : undefined,
         },
-        sourceLang: this.config.get<string>('DEFAULT_SOURCE_LANGUAGE', 'en'),
-      });
+      );
+
+      const sourceLang = this.config.get<string>(
+        'DEFAULT_SOURCE_LANGUAGE',
+        'en',
+      );
+
+      let lastFailureReason = 'Translation validation failed';
+      let succeeded = false;
+      let resultText = '';
+      let resultProvider = item.job.provider ?? 'openai';
+
+      for (let attempt = 1; attempt <= MAX_TRANSLATION_ATTEMPTS; attempt += 1) {
+        const translateOptions = {
+          ...baseOptions,
+          ...(attempt > 1
+            ? {
+                retryHint: `Previous attempt was rejected: ${lastFailureReason}. Return only the translated text.`,
+              }
+            : {}),
+        };
+
+        const result = await this.translateText.translate({
+          tenantId: payload.tenantId,
+          userId: item.job.createdById ?? undefined,
+          projectId: item.job.projectId,
+          jobId: item.jobId,
+          jobItemId: item.id,
+          text: sourceText,
+          targetLang: item.language,
+          providerName: item.job.provider ?? 'openai',
+          options: translateOptions,
+          sourceLang,
+          skipMemory: attempt > 1,
+        });
+
+        const validation = this.outputValidator.validate(
+          result.text,
+          sourceText,
+          sourceLang,
+          item.language,
+        );
+
+        if (validation.valid) {
+          resultText = result.text;
+          resultProvider = result.provider;
+          succeeded = true;
+          break;
+        }
+
+        lastFailureReason = validation.reason ?? 'Translation validation failed';
+        this.logger.warn(
+          `Validation failed for item ${item.id} attempt ${attempt}/${MAX_TRANSLATION_ATTEMPTS}: ${lastFailureReason}`,
+        );
+      }
+
+      if (!succeeded) {
+        await this.markItemFailed(
+          item.id,
+          `Validation failed after ${MAX_TRANSLATION_ATTEMPTS} attempts: ${lastFailureReason}`,
+        );
+        this.metrics.recordTranslationJobItem('failed');
+        await this.jobCompletion.checkAndFinalize(item.jobId, payload.tenantId);
+        return;
+      }
 
       const existing = await this.prisma.translation.findFirst({
         where: {
@@ -138,9 +196,9 @@ export class TranslationJobRunnerService {
         const updated = await this.prisma.translation.update({
           where: { id: existing.id },
           data: {
-            value: result.text,
+            value: resultText,
             status: TranslationStatus.draft,
-            provider: result.provider,
+            provider: resultProvider,
             version: existing.version + 1,
           },
         });
@@ -150,9 +208,9 @@ export class TranslationJobRunnerService {
           data: {
             translationKeyId: item.translationKeyId,
             language: item.language,
-            value: result.text,
+            value: resultText,
             status: TranslationStatus.draft,
-            provider: result.provider,
+            provider: resultProvider,
           },
         });
         translationId = created.id;
@@ -165,12 +223,14 @@ export class TranslationJobRunnerService {
         language: item.language,
         translationKey: item.translationKey.key,
         sourceText,
-        aiValue: result.text,
+        aiValue: resultText,
+        score: 0.85,
+        verdict: QualityVerdict.needs_edit,
         source: QualityMetricSource.job_completion,
-        provider: result.provider,
+        provider: resultProvider,
         jobId: item.jobId,
         jobItemId: item.id,
-        notes: 'Unverified AI output at job completion',
+        notes: 'Heuristic validation passed at job completion',
       });
 
       await this.prisma.translationJobItem.update({

@@ -120,7 +120,13 @@ export function ProjectKeysPage() {
         error={create.error instanceof Error ? create.error.message : undefined}
         onClose={() => setCreateOpen(false)}
         onSubmit={(values) => {
-          create.mutate(values, { onSuccess: () => setCreateOpen(false) });
+          create.mutate(
+            {
+              ...values,
+              contentType: values.contentType || undefined,
+            },
+            { onSuccess: () => setCreateOpen(false) },
+          );
         }}
       />
 
@@ -135,7 +141,13 @@ export function ProjectKeysPage() {
             return;
           }
           update.mutate(
-            { keyId: editingKey.id, input: values },
+            {
+              keyId: editingKey.id,
+              input: {
+                ...values,
+                contentType: values.contentType || null,
+              },
+            },
             { onSuccess: () => setEditingKey(null) },
           );
         }}

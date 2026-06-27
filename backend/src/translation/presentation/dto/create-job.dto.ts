@@ -30,6 +30,11 @@ export class JobKeyItemDto {
   @IsOptional()
   @IsString()
   context?: string;
+
+  @ApiPropertyOptional({ example: 'ui' })
+  @IsOptional()
+  @IsString()
+  contentType?: string;
 }
 
 export class CreateJobDto {

@@ -115,6 +115,34 @@ export function JobDetailPage() {
                     </ul>
                   </details>
                 )}
+                {(job.failedItems?.length ?? 0) > 0 && (
+                  <div className="mt-3 overflow-x-auto">
+                    <table className="min-w-full text-left text-xs">
+                      <thead>
+                        <tr className="text-red-200/60">
+                          <th className="pb-2 pr-4 font-medium">Key</th>
+                          <th className="pb-2 pr-4 font-medium">Lang</th>
+                          <th className="pb-2 font-medium">Reason</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {job.failedItems?.map((item) => (
+                          <tr key={`${item.key}-${item.language}`}>
+                            <td className="py-1 pr-4 font-mono text-red-100">
+                              {item.key}
+                            </td>
+                            <td className="py-1 pr-4 uppercase text-red-100">
+                              {item.language}
+                            </td>
+                            <td className="py-1 text-red-200/80">
+                              {item.errorMessage ?? 'Unknown error'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
           </div>

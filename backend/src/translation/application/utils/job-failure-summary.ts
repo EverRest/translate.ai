@@ -92,6 +92,18 @@ export function buildJobFailureSummary(
     };
   }
 
+  if (
+    combined.includes('validation failed') ||
+    combined.includes('refusal') ||
+    combined.includes('identical to source')
+  ) {
+    return {
+      summary: 'AI translation output failed quality checks.',
+      hint: 'Review key context/content type, try Retranslate from Approvals, or Retry the job after fixing prompts.',
+      sampleErrors,
+    };
+  }
+
   return {
     summary: truncate(unique[0], 160),
     hint: 'Check worker logs for details, fix the underlying issue, then Retry failed items.',

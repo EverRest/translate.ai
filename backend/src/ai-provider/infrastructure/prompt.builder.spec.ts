@@ -8,6 +8,29 @@ import {
 
 describe('prompt.builder', () => {
   describe('buildTranslationPrompts', () => {
+    it('includes project name, description, and context in user prompt', () => {
+      const { systemPrompt, userPrompt } = buildTranslationPrompts(
+        'Hello',
+        'en',
+        'de',
+        {
+          projectName: 'Shop',
+          projectDescription: 'E-commerce storefront',
+          keyDescription: 'Checkout button label',
+          context: 'Cart page footer',
+          contentType: 'ui',
+        },
+      );
+
+      expect(systemPrompt).toContain('Content type: ui');
+      expect(systemPrompt).toContain('short form field label');
+      expect(userPrompt).toContain('Project: Shop');
+      expect(userPrompt).toContain('Project description: E-commerce storefront');
+      expect(userPrompt).toContain('Description: Checkout button label');
+      expect(userPrompt).toContain('Context: Cart page footer');
+      expect(userPrompt).toContain('Hello');
+    });
+
     it('includes tone and context in prompts', () => {
       const { systemPrompt, userPrompt } = buildTranslationPrompts(
         'Hello',
@@ -45,6 +68,13 @@ describe('prompt.builder', () => {
 
       expect(systemPrompt).toContain('Keep "Checkout" unchanged');
       expect(systemPrompt).toContain('Translate "Cart" as "Warenkorb"');
+    });
+
+    it('includes quote instruction in system prompt', () => {
+      const { systemPrompt } = buildTranslationPrompts('Hello', 'en', 'de');
+      expect(systemPrompt).toContain(
+        'without explanations or surrounding quotation marks',
+      );
     });
   });
 

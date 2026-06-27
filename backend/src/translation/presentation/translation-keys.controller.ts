@@ -74,6 +74,7 @@ export class TranslationKeysController {
         dto.sourceText,
         dto.description,
         dto.context,
+        dto.contentType,
       ),
     );
     return successResponse(data);
@@ -94,6 +95,7 @@ export class TranslationKeysController {
         keyId,
         dto.description,
         dto.context,
+        dto.contentType,
       ),
     );
     return successResponse(data);

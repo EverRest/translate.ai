@@ -3,6 +3,7 @@ export type JobKeyItemInput = {
   sourceText: string;
   description?: string;
   context?: string;
+  contentType?: string;
 };
 
 export class CreateTranslationJobCommand {

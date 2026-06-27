@@ -236,6 +236,7 @@ model TranslationKey {
   sourceText  String  @map("source_text")
   description String?
   context     String?
+  contentType String? @map("content_type") @db.VarChar(20)
 
   project           Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
   translations      Translation[]

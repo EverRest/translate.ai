@@ -38,25 +38,29 @@ Load job + items
 ### 3. Worker — translation.process (per item)
 
 ```text
-Load TranslationJobItem + TranslationKey
-  → Check TranslationMemory (hash lookup)
-      ├── HIT  → use cached translation, provider = memory
-      └── MISS → AiProvider.translate()
-                 → store in TranslationMemory
-  → Upsert Translation record (status: draft)
-  → Mark item completed (or failed with retry)
-  → If all items done → mark job completed
+Load TranslationJobItem + TranslationKey + Project context
+  → Build prompt options (project name, description, context, content type)
+  → For up to 3 attempts:
+      → Check TranslationMemory (skipped on retry attempts)
+          ├── HIT  → use cached translation
+          └── MISS → AiProvider.translate()
+      → sanitizeTranslationOutput()
+      → TranslationOutputValidator (heuristic)
+          ├── PASS → save draft, record quality metric, complete item
+          └── FAIL → retry with skipMemory + retry hint, or mark failed
+  → If all items done → mark job completed/failed
   → Publish TranslationJobCompletedEvent (or FailedEvent)
-  → Enqueue webhook.send
+  → Enqueue webhook.send (job.failed includes failedItems)
 ```
 
 ### 4. Retry — translation.retry
 
-Failed items (provider timeout, rate limit):
+Manual retry of failed items via `POST /jobs/:id/retry`:
 
-- Exponential backoff
-- Max attempts: 3 (configurable)
-- After max → item status failed, job may be partial completed
+- Re-enqueues failed items as `translation.process`
+- In-process validation retries (up to 3) run again per item
+
+Automatic BullMQ retries apply only to uncaught worker exceptions.
 
 ### 5. Post-completion
 

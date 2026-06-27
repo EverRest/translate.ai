@@ -31,6 +31,7 @@ export const validationSchema = Joi.object({
   AI_PROVIDER_FALLBACK: Joi.string().default('gemini,ollama'),
   DEFAULT_SOURCE_LANGUAGE: Joi.string().default('en'),
   MOCK_TRANSLATIONS: Joi.boolean().default(false),
+  TRANSLATION_VALIDATION_ENABLED: Joi.boolean().default(true),
   ADMIN_EMAIL: Joi.string().email().default('admin@translate.ai'),
   ADMIN_PASSWORD: Joi.string().min(8).default('admin123'),
   ADMIN_TENANT_NAME: Joi.string().default('Default'),

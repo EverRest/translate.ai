@@ -4,7 +4,7 @@ import { TranslateOptions } from '../../../ai-provider/domain/ai-provider.interf
 import { TranslateContext } from '../../../ai-provider/domain/ai-provider.types';
 import { ProviderRegistryService } from '../../../ai-provider/application/provider-registry.service';
 import { AiUsageService } from '../../../billing/application/ai-usage.service';
-import { stripWrappingQuotes } from '../../../shared/utils/string.utils';
+import { sanitizeTranslationOutput } from '../../../shared/utils/translation-sanitize.utils';
 import { TranslationMemoryService } from './translation-memory.service';
 
 export interface TranslateResult {
@@ -19,6 +19,7 @@ export interface TranslateRequest extends TranslateContext {
   providerName: string;
   options?: TranslateOptions;
   sourceLang?: string;
+  skipMemory?: boolean;
 }
 
 @Injectable()
@@ -43,12 +44,14 @@ export class TranslateTextService {
       request.sourceLang ??
       this.config.get<string>('DEFAULT_SOURCE_LANGUAGE', 'en');
 
-    const cached = await this.memory.lookup(
-      request.tenantId,
-      request.text,
-      source,
-      request.targetLang,
-    );
+    const cached = request.skipMemory
+      ? null
+      : await this.memory.lookup(
+          request.tenantId,
+          request.text,
+          source,
+          request.targetLang,
+        );
     if (cached) {
       return { text: cached, provider: 'memory', usedFallback: false };
     }
@@ -67,7 +70,10 @@ export class TranslateTextService {
       },
     );
 
-    const translatedText = stripWrappingQuotes(result.text);
+    const translatedText = sanitizeTranslationOutput(
+      result.text,
+      request.text,
+    );
 
     await this.memory.store(
       request.tenantId,

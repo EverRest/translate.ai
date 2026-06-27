@@ -27,6 +27,8 @@ const WRAPPING_QUOTE_PAIRS: ReadonlyArray<[string, string]> = [
   ['“', '”'],
   ['‘', '’'],
   ['«', '»'],
+  ['„', '"'],
+  ['`', '`'],
 ];
 
 /** Remove one matching pair of wrapping quotes from AI output (both sides). */

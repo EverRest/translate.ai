@@ -28,6 +28,7 @@ import { RecordTranslationQualityHandler } from './application/handlers/record-t
 import { JobCompletionService } from './application/services/job-completion.service';
 import { TranslateTextService } from './application/services/translate-text.service';
 import { TranslationJobRunnerService } from './application/services/translation-job-runner.service';
+import { TranslationOutputValidator } from './application/services/translation-output.validator';
 import { TranslationMemoryService } from './application/services/translation-memory.service';
 import { TranslationQueueService } from './infrastructure/translation-queue.service';
 import { JobsController } from './presentation/jobs.controller';
@@ -59,6 +60,7 @@ const services = [
   TranslateTextService,
   JobCompletionService,
   TranslationJobRunnerService,
+  TranslationOutputValidator,
 ];
 
 @Module({

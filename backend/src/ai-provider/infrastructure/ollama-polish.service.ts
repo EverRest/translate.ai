@@ -25,7 +25,7 @@ export class OllamaPolishService {
     polishModel: string,
   ): Promise<{ text: string; inputTokens: number; outputTokens: number }> {
     const prompt = `You are a professional editor. Improve the fluency and natural flow of this ${targetLang} translation.
-Keep the exact meaning. Do not add explanations. Return only the polished text.
+Keep the exact meaning. Do not add explanations. Return only the polished text without surrounding quotation marks.
 Content type: ${contentType}
 
 Translation:

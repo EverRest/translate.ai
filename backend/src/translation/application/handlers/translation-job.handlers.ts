@@ -150,6 +150,7 @@ export class CreateTranslationJobHandler implements ICommandHandler<CreateTransl
           sourceText: item.sourceText,
           description: item.description,
           context: item.context,
+          contentType: item.contentType,
         },
       });
       found.set(keyName, created);

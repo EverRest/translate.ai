@@ -38,6 +38,7 @@ Single unit of work: one key × one target language.
 | source_text | Source text to translate (required for AI jobs) |
 | description | Human-readable context |
 | context | Optional UI/screenshot context for AI |
+| content_type | Structured type: ui, placeholder, email, article, … |
 
 ### Translation
 

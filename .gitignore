@@ -9,6 +9,12 @@ build/
 **/build/
 *.tsbuildinfo
 
+# Docs folders
+docs/backlog
+docs/issues
+docs/database
+docs/api
+
 # Test & coverage artifacts
 coverage/
 **/coverage/

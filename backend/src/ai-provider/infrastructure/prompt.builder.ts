@@ -1,4 +1,5 @@
 import {
+  ContentType,
   GlossaryTermOption,
   TranslateOptions,
 } from '../domain/ai-provider.interface';
@@ -14,6 +15,17 @@ export interface ProviderTranslateResult {
   text: string;
   usage: ProviderUsageMetrics;
 }
+
+const CONTENT_TYPE_HINTS: Partial<Record<ContentType, string>> = {
+  ui: 'Short form field label or button. Use short, modern, commonly used terms as seen in web forms and apps. Avoid archaic or overly formal expressions.',
+  placeholder: 'Input placeholder or hint text. Very short, no full sentence.',
+  email: 'Email copy. Match subject/body tone.',
+  article: 'Long-form content. Preserve paragraph structure.',
+  legal: 'Legal text. Preserve precise meaning and formal tone.',
+  marketing: 'Marketing copy. Keep persuasive tone.',
+  chat: 'Conversational message. Natural phrasing.',
+  technical: 'Technical documentation. Use precise terminology.',
+};
 
 export function formatGlossaryPrompt(glossary: GlossaryTermOption[]): string {
   if (glossary.length === 0) {
@@ -33,11 +45,42 @@ export function formatGlossaryPrompt(glossary: GlossaryTermOption[]): string {
   return `\nGlossary rules:\n${lines.join('\n')}`;
 }
 
-function buildContentHint(contentType: string): string {
+function buildContentHint(contentType: ContentType): string {
   if (contentType === 'ui') {
     return '\nContent type: ui — short form field label or button. Use short, modern, commonly used terms as seen in web forms and apps. Avoid archaic or overly formal expressions.';
   }
   return `\nContent type: ${contentType}`;
+}
+
+function buildUserPromptParts(
+  text: string,
+  options?: TranslateOptions,
+): string {
+  const parts: string[] = [];
+
+  if (options?.projectName) {
+    parts.push(`Project: ${options.projectName}`);
+  }
+
+  if (options?.projectDescription?.trim()) {
+    parts.push(`Project description: ${options.projectDescription.trim()}`);
+  }
+
+  if (options?.keyDescription?.trim()) {
+    parts.push(`Description: ${options.keyDescription.trim()}`);
+  }
+
+  if (options?.context?.trim()) {
+    parts.push(`Context: ${options.context.trim()}`);
+  }
+
+  if (options?.retryHint?.trim()) {
+    parts.push(`Note: ${options.retryHint.trim()}`);
+  }
+
+  parts.push(`Text:\n${text}`);
+
+  return parts.join('\n\n');
 }
 
 export function buildTranslationPrompts(
@@ -47,19 +90,24 @@ export function buildTranslationPrompts(
   options?: TranslateOptions,
 ): { systemPrompt: string; userPrompt: string } {
   const toneHint = options?.tone ? `\nTone: ${options.tone}` : '';
-  const contextHint = options?.context ? `\nContext: ${options.context}` : '';
   const contentHint = options?.contentType
     ? buildContentHint(options.contentType)
     : '';
+  const contentTypeGuidance =
+    options?.contentType &&
+    options.contentType !== 'ui' &&
+    CONTENT_TYPE_HINTS[options.contentType]
+      ? `\n${CONTENT_TYPE_HINTS[options.contentType]}`
+      : '';
   const glossaryHint = options?.glossary
     ? formatGlossaryPrompt(options.glossary)
     : '';
 
   const systemPrompt = `You are a professional translator. Translate from ${sourceLang} to ${targetLang}.
 Preserve formatting, template placeholders (e.g. {{...}}, %%...%%), and HTML tags exactly as-is — do not translate or alter them.
-Return only the translated text without explanations or surrounding quotation marks.${toneHint}${contentHint}${glossaryHint}`;
+Return only the translated text without explanations or surrounding quotation marks.${toneHint}${contentHint}${contentTypeGuidance}${glossaryHint}`;
 
-  const userPrompt = `${contextHint}\n\nText:\n${text}`.trim();
+  const userPrompt = buildUserPromptParts(text, options);
 
   return { systemPrompt, userPrompt };
 }
