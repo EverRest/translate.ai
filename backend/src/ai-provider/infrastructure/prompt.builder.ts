@@ -33,6 +33,13 @@ export function formatGlossaryPrompt(glossary: GlossaryTermOption[]): string {
   return `\nGlossary rules:\n${lines.join('\n')}`;
 }
 
+function buildContentHint(contentType: string): string {
+  if (contentType === 'ui') {
+    return '\nContent type: ui — short form field label or button. Use short, modern, commonly used terms as seen in web forms and apps. Avoid archaic or overly formal expressions.';
+  }
+  return `\nContent type: ${contentType}`;
+}
+
 export function buildTranslationPrompts(
   text: string,
   sourceLang: string,
@@ -42,14 +49,14 @@ export function buildTranslationPrompts(
   const toneHint = options?.tone ? `\nTone: ${options.tone}` : '';
   const contextHint = options?.context ? `\nContext: ${options.context}` : '';
   const contentHint = options?.contentType
-    ? `\nContent type: ${options.contentType}`
+    ? buildContentHint(options.contentType)
     : '';
   const glossaryHint = options?.glossary
     ? formatGlossaryPrompt(options.glossary)
     : '';
 
   const systemPrompt = `You are a professional translator. Translate from ${sourceLang} to ${targetLang}.
-Preserve formatting, placeholders like {{name}}, and HTML tags.
+Preserve formatting, template placeholders (e.g. {{...}}, %%...%%), and HTML tags exactly as-is — do not translate or alter them.
 Return only the translated text without explanations or surrounding quotation marks.${toneHint}${contentHint}${glossaryHint}`;
 
   const userPrompt = `${contextHint}\n\nText:\n${text}`.trim();
