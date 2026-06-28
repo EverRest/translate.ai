@@ -31,7 +31,7 @@ After job completes, open a PR with updated locale files — developers review i
 ## Dependencies
 
 - P1-02 (VCS auth + repo access)
-- P1-05 helpful for large file generation
+- Shipped export UI + async queue ([shipped-baseline.md](./shipped-baseline.md)) for large file generation
 
 ## Acceptance criteria
 

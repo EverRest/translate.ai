@@ -30,7 +30,6 @@ Goal: paying teams — VCS sync, stronger QA, semantic memory, export UX.
 | [P1-01](./P1-01-semantic-translation-memory.md) | Semantic TM (pgvector) + cache metrics | High |
 | [P1-02](./P1-02-github-gitlab-integration.md) | GitHub / GitLab key sync + webhooks | High |
 | [P1-03](./P1-03-auto-glossary-builder.md) | Auto glossary suggestions from corpus | Medium |
-| [P1-05](./P1-05-export-ui-async-queue.md) | Export UI + async `translation.export` worker | Medium |
 | [P1-06](./P1-06-translation-pull-request.md) | PR workflow with translations | High |
 
 ---

@@ -4,13 +4,16 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
-### Added — Export UI (sync download)
+### Added — Export UI + async export queue
 
-Per [backlog/P1-05-export-ui-async-queue.md](./backlog/P1-05-export-ui-async-queue.md):
+Per [backlog/shipped-baseline.md](./backlog/shipped-baseline.md):
 
-- **Frontend:** project **Export** tab — format, language, status filters; downloads via existing `GET /projects/:id/export`
-- **API client:** `apiDownload` helper with `Content-Disposition` filename parsing
-- **Deferred:** async `translation.export` queue, `export_jobs` schema, poll UI
+- **Frontend:** project **Export** tab — format, language, status; polls async jobs until download ready
+- **Sync API:** `GET /projects/:id/export` (unchanged fast path)
+- **Async API:** `POST /projects/:id/exports`, `GET /exports/:id`, `GET /exports/:id/download`
+- **Worker:** `translation.export` processor; `ExportJob` Prisma model; files in `EXPORT_STORAGE_DIR`
+- **Config:** `EXPORT_ASYNC_THRESHOLD` (default 1000), `EXPORT_JOB_TTL_HOURS`, `EXPORT_STORAGE_DIR`
+- **Tests:** `ExportFormatService` unit tests; `RequestExportHandler` async/sync handler tests
 
 ### Added — Extended QA validators
 
