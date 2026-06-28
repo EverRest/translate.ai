@@ -28,6 +28,10 @@ import {
 } from '../../../shared/constants/job-payloads';
 import { TranslationJobCreatedEvent } from '../../domain/events/translation-job.events';
 import { buildTranslateOptionsFromKey } from '../utils/translation-context.utils';
+import {
+  loadReferenceTranslations,
+  shouldIncludeReferenceTranslations,
+} from '../utils/reference-translation.utils';
 import { JobCompletionService } from './job-completion.service';
 import { TranslateTextService } from './translate-text.service';
 import { TranslationOutputValidator } from './translation-output.validator';
@@ -131,6 +135,12 @@ export class TranslationJobRunnerService {
         },
       );
 
+      const referenceTranslations = await loadReferenceTranslations(
+        this.prisma,
+        item.translationKeyId,
+        item.language,
+      );
+
       const sourceLang = this.config.get<string>(
         'DEFAULT_SOURCE_LANGUAGE',
         'en',
@@ -149,6 +159,13 @@ export class TranslationJobRunnerService {
 
         const translateOptions = {
           ...baseOptions,
+          ...(shouldIncludeReferenceTranslations(
+            attempt,
+            payload.includeReferenceTranslations,
+            referenceTranslations.length,
+          )
+            ? { referenceTranslations }
+            : {}),
           ...(retryHint ? { retryHint } : {}),
         };
 
@@ -295,6 +312,7 @@ export class TranslationJobRunnerService {
         jobItemId: item.id,
         jobId: payload.jobId,
         tenantId: payload.tenantId,
+        includeReferenceTranslations: true,
       });
     }
   }
