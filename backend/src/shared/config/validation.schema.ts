@@ -28,6 +28,7 @@ export const validationSchema = Joi.object({
   OLLAMA_TIMEOUT_MS: Joi.number().integer().min(30_000).default(600_000),
   OPENAI_MODEL: Joi.string().default('gpt-4o-mini'),
   GEMINI_MODEL: Joi.string().default('gemini-2.0-flash'),
+  GEMINI_MODEL_FALLBACK: Joi.string().allow('').default(''),
   GEMINI_TRANSIENT_RETRIES: Joi.number().integer().min(0).max(5).default(2),
   GEMINI_TRANSIENT_RETRY_DELAY_MS: Joi.number()
     .integer()
