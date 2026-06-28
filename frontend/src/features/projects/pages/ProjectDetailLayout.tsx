@@ -4,6 +4,7 @@ import { useArchiveProject, useProject } from '../hooks/useProjects';
 const tabs = [
   { to: '.', label: 'Overview', end: true },
   { to: 'keys', label: 'Keys' },
+  { to: 'translations', label: 'Translations' },
   { to: 'glossary', label: 'Glossary' },
   { to: 'branches', label: 'Branches' },
   { to: 'jobs', label: 'Jobs' },

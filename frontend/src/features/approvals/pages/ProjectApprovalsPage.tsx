@@ -156,8 +156,7 @@ export function ProjectApprovalsPage() {
           onReject={tab === 'pending' ? setRejectingItem : undefined}
           onRetranslate={
             tab === 'pending'
-              ? (id) =>
-                  void runAction(id, () => retranslate.mutateAsync(id))
+              ? (id) => void runAction(id, () => retranslate.mutateAsync(id))
               : undefined
           }
           onPublish={

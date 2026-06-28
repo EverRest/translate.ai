@@ -157,9 +157,9 @@ describe('Translation flow (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
-    expect(languagesResponse.body.data.map((item: { code: string }) => item.code)).toContain(
-      'fr',
-    );
+    expect(
+      languagesResponse.body.data.map((item: { code: string }) => item.code),
+    ).toContain('fr');
 
     const keysResponse = await request(app.getHttpServer())
       .get(`/api/v1/projects/${inlineProjectId}/keys`)

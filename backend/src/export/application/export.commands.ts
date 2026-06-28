@@ -1,10 +1,5 @@
 export type ExportFormat =
-  | 'json'
-  | 'yaml'
-  | 'csv'
-  | 'android-xml'
-  | 'ios-strings'
-  | 'po';
+  'json' | 'yaml' | 'csv' | 'android-xml' | 'ios-strings' | 'po';
 
 export interface ExportRow {
   key: string;
