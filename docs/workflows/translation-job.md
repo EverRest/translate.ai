@@ -45,6 +45,8 @@ Load TranslationJobItem + TranslationKey + Project context
           ├── HIT  → use cached translation
           └── MISS → AiProvider.translate()
               → Gemini: retry transient HTTP 502/503/429 in-provider before fallback
+                  → then optional GEMINI_MODEL_FALLBACK tier with same retry policy
+                  → then Ollama via AI_PROVIDER_FALLBACK
       → On attempt ≥ 2 or manual job retry: attach reference translations
           from sibling locales for the same key (published > approved > draft)
       → sanitizeTranslationOutput()

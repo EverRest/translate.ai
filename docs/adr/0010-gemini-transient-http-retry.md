@@ -44,4 +44,4 @@ Shared pure helpers live in `provider-http-retry.utils.ts` for testability. Open
 ## Related
 
 - [docs/workflows/translation-job.md](../workflows/translation-job.md)
-- ADR 0003 (provider abstraction), ADR 0008 (validation retry)
+- ADR 0003 (provider abstraction), ADR 0008 (validation retry), ADR 0011 (Gemini model tier fallback)

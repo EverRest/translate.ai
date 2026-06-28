@@ -4,6 +4,13 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Gemini model tier fallback
+
+Per [adr/0011-gemini-model-fallback.md](./adr/0011-gemini-model-fallback.md):
+
+- **GeminiProvider:** after primary model exhausts transient retries, try `GEMINI_MODEL_FALLBACK` before provider fallback to Ollama
+- **Config:** `GEMINI_MODEL_FALLBACK` (optional)
+
 ### Added — Gemini transient HTTP retry
 
 Per [adr/0010-gemini-transient-http-retry.md](./adr/0010-gemini-transient-http-retry.md):

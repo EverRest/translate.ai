@@ -105,6 +105,7 @@ Pre-process (chunk, sanitize HTML)
 - All provider errors mapped to domain exceptions (`ProviderUnavailableException`).
 - Timeouts required on every external call.
 - Gemini retries transient HTTP 502/503/429 in-process before fallback (ADR 0010).
+- Optional `GEMINI_MODEL_FALLBACK` tries a second Gemini model tier after primary transient exhaustion (ADR 0011).
 
 ## Related
 
