@@ -14,6 +14,20 @@ Per extended [adr/0008-translation-output-validation.md](./adr/0008-translation-
 - **Config:** `TRANSLATION_QA_VALIDATORS_ENABLED` (default `true`; heuristics still controlled by `TRANSLATION_VALIDATION_ENABLED`)
 - **Deferred:** markdown fence validator, link warn-only mode, per-project `qaProfile` (future backlog)
 
+### Added — Gemini model tier fallback
+
+Per [adr/0011-gemini-model-fallback.md](./adr/0011-gemini-model-fallback.md):
+
+- **GeminiProvider:** after primary model exhausts transient retries, try `GEMINI_MODEL_FALLBACK` before provider fallback to Ollama
+- **Config:** `GEMINI_MODEL_FALLBACK` (optional)
+
+### Added — Gemini transient HTTP retry
+
+Per [adr/0010-gemini-transient-http-retry.md](./adr/0010-gemini-transient-http-retry.md):
+
+- **GeminiProvider:** exponential backoff retry on HTTP 502/503/429 before provider fallback
+- **Config:** `GEMINI_TRANSIENT_RETRIES`, `GEMINI_TRANSIENT_RETRY_DELAY_MS`
+
 ### Added — Cross-locale reference on retry
 
 Per [features/cross-locale-reference.md](./features/cross-locale-reference.md) and [adr/0009-cross-locale-reference-on-retry.md](./adr/0009-cross-locale-reference-on-retry.md):
