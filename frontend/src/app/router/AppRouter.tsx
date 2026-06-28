@@ -3,6 +3,7 @@ import { AppLayout } from '../layout/AppLayout';
 import { LoginPage } from '../../features/auth/pages/LoginPage';
 import { RegisterPage } from '../../features/auth/pages/RegisterPage';
 import { DashboardPage } from '../../features/dashboard/pages/DashboardPage';
+import { ProjectExportPage } from '../../features/export/pages/ProjectExportPage';
 import { ProjectSettingsPage } from '../../features/project-settings/pages/ProjectSettingsPage';
 import { ProjectApprovalsPage } from '../../features/approvals/pages/ProjectApprovalsPage';
 import { ProjectDetailLayout } from '../../features/projects/pages/ProjectDetailLayout';
@@ -40,6 +41,7 @@ export function AppRouter() {
             <Route path="branches" element={<ProjectBranchesPage />} />
             <Route path="jobs" element={<ProjectJobsPage />} />
             <Route path="approvals" element={<ProjectApprovalsPage />} />
+            <Route path="export" element={<ProjectExportPage />} />
             <Route path="settings" element={<ProjectSettingsPage />} />
           </Route>
           <Route path="/jobs" element={<JobsPage />} />

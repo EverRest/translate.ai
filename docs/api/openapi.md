@@ -322,9 +322,11 @@ Pending translations for review.
 
 | Param | Values |
 |-------|--------|
-| `format` | json, yaml, csv, xlsx, android-xml, ios-strings, po |
+| `format` | json, yaml, csv, android-xml, ios-strings, po |
 | `language` | Optional filter (e.g. `de`) |
-| `status` | draft, approved, published (default: published) |
+| `status` | draft, review, approved, published (default: published) |
+
+**Dashboard:** Project → **Export** tab triggers this endpoint (sync download).
 
 **Response:** File download (`Content-Disposition: attachment`).
 

@@ -16,5 +16,6 @@ Reference only — do **not** re-implement. Details live in `docs/domain/`, `doc
 | Webhooks (job + publish) | `webhook` module |
 | Usage + quality analytics | `billing` module, Analytics UI |
 | Export API (sync) | `export` module — json/yaml/csv/android-xml/ios-strings/po |
+| Export UI (sync download) | Project Export tab, `apiDownload`, `features/export/` |
 
 When extending the platform, **build on these modules** — do not fork parallel implementations.
