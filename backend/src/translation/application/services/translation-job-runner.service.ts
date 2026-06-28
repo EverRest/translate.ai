@@ -13,6 +13,15 @@ import { GlossaryService } from '../../../glossary/application/glossary.service'
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { MetricsService } from '../../../shared/monitoring/metrics.service';
 import {
+  cyrillicScriptHint,
+  isCyrillicTargetLang,
+} from '../../../shared/utils/language-script.utils';
+import {
+  resolveJobAiProvider,
+  resolveStoredTranslationProvider,
+  isPseudoProvider,
+} from '../../../ai-provider/domain/ai-provider.utils';
+import {
   TranslationProcessJobPayload,
   TranslationCreateJobPayload,
   TranslationRetryJobPayload,
@@ -130,16 +139,17 @@ export class TranslationJobRunnerService {
       let lastFailureReason = 'Translation validation failed';
       let succeeded = false;
       let resultText = '';
-      let resultProvider = item.job.provider ?? 'gemini';
+      let resultProvider = resolveJobAiProvider(item.job.provider);
 
       for (let attempt = 1; attempt <= MAX_TRANSLATION_ATTEMPTS; attempt += 1) {
+        const retryHint =
+          attempt > 1
+            ? buildValidationRetryHint(lastFailureReason, item.language)
+            : undefined;
+
         const translateOptions = {
           ...baseOptions,
-          ...(attempt > 1
-            ? {
-                retryHint: `Previous attempt was rejected: ${lastFailureReason}. Return only the translated text.`,
-              }
-            : {}),
+          ...(retryHint ? { retryHint } : {}),
         };
 
         const result = await this.translateText.translate({
@@ -150,7 +160,7 @@ export class TranslationJobRunnerService {
           jobItemId: item.id,
           text: sourceText,
           targetLang: item.language,
-          providerName: item.job.provider ?? 'gemini',
+          providerName: resolveJobAiProvider(item.job.provider),
           options: translateOptions,
           sourceLang,
           skipMemory: attempt > 1,
@@ -165,7 +175,10 @@ export class TranslationJobRunnerService {
 
         if (validation.valid) {
           resultText = result.text;
-          resultProvider = result.provider;
+          resultProvider = resolveStoredTranslationProvider(
+            result.provider,
+            item.job.provider,
+          );
           succeeded = true;
           break;
         }
@@ -253,6 +266,17 @@ export class TranslationJobRunnerService {
   }
 
   async handleRetry(payload: TranslationRetryJobPayload): Promise<void> {
+    const job = await this.prisma.translationJob.findUnique({
+      where: { id: payload.jobId },
+    });
+
+    if (job && isPseudoProvider(job.provider)) {
+      await this.prisma.translationJob.update({
+        where: { id: payload.jobId },
+        data: { provider: resolveJobAiProvider(job.provider) },
+      });
+    }
+
     const failedItems = await this.prisma.translationJobItem.findMany({
       where: { jobId: payload.jobId, status: JobItemStatus.failed },
     });
@@ -293,4 +317,15 @@ export class TranslationJobRunnerService {
       },
     });
   }
+}
+
+function buildValidationRetryHint(reason: string, targetLang: string): string {
+  let hint = `Previous attempt was rejected: ${reason}. Return only the translated text.`;
+  if (
+    isCyrillicTargetLang(targetLang) &&
+    reason.toLowerCase().includes('script')
+  ) {
+    hint += ` ${cyrillicScriptHint(targetLang)}`;
+  }
+  return hint;
 }

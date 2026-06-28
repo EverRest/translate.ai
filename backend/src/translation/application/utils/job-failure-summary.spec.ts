@@ -33,6 +33,16 @@ describe('buildJobFailureSummary', () => {
     expect(result?.hint).toContain('127.0.0.1:11434');
   });
 
+  it('detects gemini temporary HTTP errors', () => {
+    const result = buildJobFailureSummary(
+      ['AI provider unavailable: gemini (HTTP 503)'],
+      'gemini',
+    );
+
+    expect(result?.summary).toContain('temporary error');
+    expect(result?.hint).toContain('AI_PROVIDER_FALLBACK');
+  });
+
   it('returns null when there are no errors', () => {
     expect(buildJobFailureSummary([], 'ollama')).toBeNull();
   });
