@@ -4,13 +4,15 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
-### Added — Extended QA validators (P1-04 MVP)
+### Added — Extended QA validators
 
-Per [backlog/P1-04-extended-qa-validators.md](./backlog/P1-04-extended-qa-validators.md) and extended [adr/0008-translation-output-validation.md](./adr/0008-translation-output-validation.md):
+Per extended [adr/0008-translation-output-validation.md](./adr/0008-translation-output-validation.md) and [backlog/shipped-baseline.md](./backlog/shipped-baseline.md):
 
-- **PlaceholderValidator:** reject output when `{{...}}` or `%%...%%` tokens differ from source
+- **PlaceholderValidator** (`translation/application/validators/`): reject output when `{{...}}` or `%%...%%` tokens differ from source
 - **HtmlTagBalanceValidator:** reject unbalanced HTML when source contains tags
+- **Integration:** composable QA chain runs after heuristic checks in `TranslationOutputValidator`; failures retry up to 3 attempts with validator name in job item error
 - **Config:** `TRANSLATION_QA_VALIDATORS_ENABLED` (default `true`; heuristics still controlled by `TRANSLATION_VALIDATION_ENABLED`)
+- **Deferred:** markdown fence validator, link warn-only mode, per-project `qaProfile` (future backlog)
 
 ### Added — Cross-locale reference on retry
 
@@ -26,7 +28,7 @@ Per [features/cross-locale-reference.md](./features/cross-locale-reference.md) a
 
 ### Added — Product backlog (LocalizationOps)
 
-- **docs/backlog/:** Restructured from [raw.md](./backlog/raw.md) vision into 24 phased tasks (P1–P3)
+- **docs/backlog/:** Restructured from [raw.md](./backlog/raw.md) vision into phased tasks (P1–P3)
 - [shipped-baseline.md](./backlog/shipped-baseline.md) — reference for already-built capabilities
 - Removed completed micro-tasks (context, validation, trimming) — covered in shipped baseline + ADRs
 

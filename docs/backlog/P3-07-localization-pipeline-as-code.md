@@ -19,7 +19,7 @@
 | **File** | `.translate.ai/pipeline.yaml` in customer repo |
 | **Parser** | `PipelineDefinitionService` — validate schema |
 | **GitHub Action** | `translate-ai/action` — calls API with pipeline steps |
-| **Steps map to** | existing queues: sync (P1-02), job create, export (P1-05), PR (P1-06), QA (P1-04) |
+| **Steps map to** | existing queues: sync (P1-02), job create, export (P1-05), PR (P1-06), QA (shipped ADR 0008) |
 | **Backend** | Optional `POST /pipelines/run` executes step list |
 
 ### Example pipeline.yaml
@@ -36,7 +36,7 @@ pipeline:
 
 ## Dependencies
 
-- P1-02, P1-04, P1-05, P1-06 (composable steps)
+- P1-02, P1-05, P1-06, shipped QA validators (ADR 0008)
 
 ## Acceptance criteria
 

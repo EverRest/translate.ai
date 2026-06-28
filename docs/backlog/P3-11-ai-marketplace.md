@@ -33,7 +33,7 @@ Extensibility: third-party validators, providers, connectors, prompt packs — V
 
 ## Dependencies
 
-- P1-04 validator chain architecture
+- Shipped QA validator chain (ADR 0008)
 - P2-02 provider router
 
 ## Acceptance criteria

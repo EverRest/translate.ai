@@ -30,7 +30,6 @@ Goal: paying teams — VCS sync, stronger QA, semantic memory, export UX.
 | [P1-01](./P1-01-semantic-translation-memory.md) | Semantic TM (pgvector) + cache metrics | High |
 | [P1-02](./P1-02-github-gitlab-integration.md) | GitHub / GitLab key sync + webhooks | High |
 | [P1-03](./P1-03-auto-glossary-builder.md) | Auto glossary suggestions from corpus | Medium |
-| [P1-04](./P1-04-extended-qa-validators.md) | QA: HTML, placeholders, markdown | High |
 | [P1-05](./P1-05-export-ui-async-queue.md) | Export UI + async `translation.export` worker | Medium |
 | [P1-06](./P1-06-translation-pull-request.md) | PR workflow with translations | High |
 
@@ -75,7 +74,7 @@ Goal: hard-to-replace infrastructure — replay, duplicates, CI pipeline, market
 ## Dependency graph (simplified)
 
 ```text
-P1-04 (QA validators) ──► P2-07 (PR review)
+Shipped QA validators (ADR 0008) ──► P2-07 (PR review)
 P1-01 (pgvector) ──► P3-02 (semantic diff) ──► P3-03 (duplicates)
 P2-01 (prompt versioning) ──► P3-01 (replay)
 P2-02 (cost router) ──► P3-08 (simulator)

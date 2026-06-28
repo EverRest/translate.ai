@@ -24,7 +24,7 @@ Detect UI overflow/truncation after translation (e.g. "OK" → "Bestätigen" bre
 
 ## Dependencies
 
-- P1-04 length validators as cheap first pass without screenshots
+- Shipped QA validators (ADR 0008) length/heuristic checks as cheap first pass without screenshots
 
 ## Acceptance criteria
 
