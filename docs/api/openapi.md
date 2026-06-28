@@ -314,6 +314,34 @@ Pending translations for review.
 
 ---
 
+### Glossary suggestions
+
+#### GET `/api/v1/projects/{projectId}/glossary/suggestions`
+
+**Query:** `status` — `pending` (default), `approved`, `rejected`
+
+**Response:** `{ success, data: { items: GlossarySuggestion[] } }`
+
+#### POST `/api/v1/projects/{projectId}/glossary/suggestions/analyze`
+
+Requires at least `GLOSSARY_ANALYZE_MIN_TRANSLATIONS` (default 100) translations. Enqueues `glossary.analyze` worker job.
+
+**Response:** `{ success, data: { queued: true, translationCount: number } }`
+
+#### POST `/api/v1/projects/{projectId}/glossary/suggestions/{suggestionId}/approve`
+
+Creates or updates `GlossaryTerm`; marks suggestion `approved`.
+
+**Response:** `{ success, data: { suggestion, term } }`
+
+#### POST `/api/v1/projects/{projectId}/glossary/suggestions/{suggestionId}/reject`
+
+**Response:** `{ success, data: { rejected: true } }`
+
+**Dashboard:** Project → **Glossary** tab — **Suggest terms**, review pending table.
+
+---
+
 ### Export
 
 #### GET `/api/v1/projects/{projectId}/export`

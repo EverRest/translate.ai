@@ -43,6 +43,12 @@ export const validationSchema = Joi.object({
   EXPORT_ASYNC_THRESHOLD: Joi.number().integer().min(1).default(1000),
   EXPORT_STORAGE_DIR: Joi.string().default('.exports'),
   EXPORT_JOB_TTL_HOURS: Joi.number().integer().min(1).max(168).default(24),
+  GLOSSARY_ANALYZE_MIN_TRANSLATIONS: Joi.number().integer().min(1).default(100),
+  GLOSSARY_ANALYZE_MAX_SUGGESTIONS: Joi.number()
+    .integer()
+    .min(1)
+    .max(500)
+    .default(50),
   ADMIN_EMAIL: Joi.string().email().default('admin@translate.ai'),
   ADMIN_PASSWORD: Joi.string().min(8).default('admin123'),
   ADMIN_TENANT_NAME: Joi.string().default('Default'),

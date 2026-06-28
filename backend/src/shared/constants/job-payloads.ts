@@ -33,3 +33,8 @@ export interface TranslationExportJobPayload {
   exportJobId: string;
   tenantId: string;
 }
+
+export interface GlossaryAnalyzeJobPayload {
+  projectId: string;
+  tenantId: string;
+}
