@@ -7,6 +7,7 @@ import {
   cyrillicScriptHint,
   isCyrillicTargetLang,
 } from '../../shared/utils/language-script.utils';
+import { formatReferenceTranslationsPrompt } from '../../shared/utils/reference-translation-prompt.utils';
 
 export interface ProviderUsageMetrics {
   model: string;
@@ -76,6 +77,13 @@ function buildUserPromptParts(
 
   if (options?.context?.trim()) {
     parts.push(`Context: ${options.context.trim()}`);
+  }
+
+  const referenceHint = options?.referenceTranslations
+    ? formatReferenceTranslationsPrompt(options.referenceTranslations)
+    : '';
+  if (referenceHint) {
+    parts.push(referenceHint.trim());
   }
 
   if (options?.retryHint?.trim()) {

@@ -26,6 +26,11 @@ export interface GlossaryTermOption {
   doNotTranslate: boolean;
 }
 
+export interface ReferenceTranslationOption {
+  language: string;
+  value: string;
+}
+
 export interface TranslateOptions {
   context?: string;
   keyDescription?: string;
@@ -34,6 +39,7 @@ export interface TranslateOptions {
   tone?: 'formal' | 'friendly' | 'technical';
   glossary?: GlossaryTermOption[];
   contentType?: ContentType;
+  referenceTranslations?: ReferenceTranslationOption[];
   retryHint?: string;
 }
 

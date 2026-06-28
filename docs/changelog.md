@@ -4,6 +4,14 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Cross-locale reference on retry
+
+Per [features/cross-locale-reference.md](./features/cross-locale-reference.md) and [adr/0009-cross-locale-reference-on-retry.md](./adr/0009-cross-locale-reference-on-retry.md):
+
+- **Reference translations:** on validation retry (attempt ≥ 2) or manual job retry, inject up to 8 sibling locale translations into the AI prompt
+- **Utils:** `reference-translation.utils.ts`, `reference-translation-prompt.utils.ts`
+- **Payload:** `includeReferenceTranslations` on `translation.process` queue jobs from `translation.retry`
+
 ### Added — Developer tooling
 
 - **Makefile:** `make help`, `install`, `lint`, `format`, `typecheck`, `test`, `build`, `ci`, dev/db/docker targets
