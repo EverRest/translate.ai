@@ -3,6 +3,11 @@ import {
   GlossaryTermOption,
   TranslateOptions,
 } from '../domain/ai-provider.interface';
+import {
+  cyrillicScriptHint,
+  isCyrillicTargetLang,
+} from '../../shared/utils/language-script.utils';
+import { formatReferenceTranslationsPrompt } from '../../shared/utils/reference-translation-prompt.utils';
 
 export interface ProviderUsageMetrics {
   model: string;
@@ -74,6 +79,13 @@ function buildUserPromptParts(
     parts.push(`Context: ${options.context.trim()}`);
   }
 
+  const referenceHint = options?.referenceTranslations
+    ? formatReferenceTranslationsPrompt(options.referenceTranslations)
+    : '';
+  if (referenceHint) {
+    parts.push(referenceHint.trim());
+  }
+
   if (options?.retryHint?.trim()) {
     parts.push(`Note: ${options.retryHint.trim()}`);
   }
@@ -102,10 +114,13 @@ export function buildTranslationPrompts(
   const glossaryHint = options?.glossary
     ? formatGlossaryPrompt(options.glossary)
     : '';
+  const scriptHint = isCyrillicTargetLang(targetLang)
+    ? `\n${cyrillicScriptHint(targetLang)}`
+    : '';
 
   const systemPrompt = `You are a professional translator. Translate from ${sourceLang} to ${targetLang}.
 Preserve formatting, template placeholders (e.g. {{...}}, %%...%%), and HTML tags exactly as-is — do not translate or alter them.
-Return only the translated text without explanations or surrounding quotation marks.${toneHint}${contentHint}${contentTypeGuidance}${glossaryHint}`;
+Return only the translated text without explanations or surrounding quotation marks.${toneHint}${contentHint}${contentTypeGuidance}${glossaryHint}${scriptHint}`;
 
   const userPrompt = buildUserPromptParts(text, options);
 

@@ -78,6 +78,19 @@ describe('prompt.builder', () => {
         'without explanations or surrounding quotation marks',
       );
     });
+
+    it('includes reference translations in user prompt', () => {
+      const { userPrompt } = buildTranslationPrompts('Turbo', 'en', 'es', {
+        referenceTranslations: [
+          { language: 'de', value: 'Turbo' },
+          { language: 'fr', value: 'Turbo' },
+        ],
+      });
+
+      expect(userPrompt).toContain('Reference translations for the same key');
+      expect(userPrompt).toContain('- de: Turbo');
+      expect(userPrompt).toContain('Text:\nTurbo');
+    });
   });
 
   describe('formatGlossaryPrompt', () => {

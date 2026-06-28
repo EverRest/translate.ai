@@ -44,6 +44,8 @@ Load TranslationJobItem + TranslationKey + Project context
       → Check TranslationMemory (skipped on retry attempts)
           ├── HIT  → use cached translation
           └── MISS → AiProvider.translate()
+      → On attempt ≥ 2 or manual job retry: attach reference translations
+          from sibling locales for the same key (published > approved > draft)
       → sanitizeTranslationOutput()
       → TranslationOutputValidator (heuristic)
           ├── PASS → save draft, record quality metric, complete item

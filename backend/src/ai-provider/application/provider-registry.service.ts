@@ -8,6 +8,7 @@ import {
   TranslateWithFallbackResult,
 } from '../domain/ai-provider.types';
 import { ProviderUnavailableException } from '../domain/provider-unavailable.exception';
+import { resolveJobAiProvider } from '../domain/ai-provider.utils';
 import { ProviderTranslateResult } from '../infrastructure/prompt.builder';
 import { GeminiProvider } from '../infrastructure/gemini.provider';
 import { OllamaProvider } from '../infrastructure/ollama.provider';
@@ -39,13 +40,13 @@ export class ProviderRegistryService {
   }
 
   buildFallbackChain(primary: string): SupportedProvider[] {
-    const normalized = this.normalizeProvider(primary);
+    const normalized = resolveJobAiProvider(primary);
     const configured = this.config
       .get<string>('AI_PROVIDER_FALLBACK', 'gemini,ollama')
       .split(',')
       .map((p) => p.trim())
       .filter(Boolean)
-      .map((p) => this.normalizeProvider(p));
+      .map((p) => resolveJobAiProvider(p));
 
     const chain: SupportedProvider[] = [normalized];
     for (const provider of configured) {
@@ -127,10 +128,6 @@ export class ProviderRegistryService {
   }
 
   private normalizeProvider(name: string): SupportedProvider {
-    const value = name.toLowerCase();
-    if (value === 'openai' || value === 'gemini' || value === 'ollama') {
-      return value;
-    }
-    throw new ProviderUnavailableException(name, 'unknown provider');
+    return resolveJobAiProvider(name);
   }
 }
