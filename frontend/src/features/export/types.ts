@@ -1,3 +1,22 @@
+export type ExportJobStatus = 'pending' | 'processing' | 'completed' | 'failed';
+
+export type ExportJob = {
+  id: string;
+  projectId: string;
+  format: ExportFormat;
+  language?: string;
+  statusFilter: TranslationExportStatus;
+  exportStatus: ExportJobStatus;
+  rowCount: number;
+  filename?: string;
+  contentType?: string;
+  errorMessage?: string;
+  async: boolean;
+  downloadUrl?: string;
+  createdAt: string;
+  completedAt?: string;
+};
+
 export type ExportFormat =
   | 'json'
   | 'yaml'
@@ -39,3 +58,6 @@ export const EXPORT_STATUS_OPTIONS: Array<{
   { value: 'review', label: 'In review' },
   { value: 'draft', label: 'Draft' },
 ];
+
+export const EXPORT_POLL_INTERVAL_MS = 2000;
+export const EXPORT_POLL_MAX_ATTEMPTS = 60;

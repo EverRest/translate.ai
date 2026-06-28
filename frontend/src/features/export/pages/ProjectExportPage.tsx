@@ -41,8 +41,8 @@ export function ProjectExportPage() {
       <div>
         <h2 className="text-lg font-medium text-white">Export translations</h2>
         <p className="mt-1 text-sm text-slate-400">
-          Download project translations as a file. Uses the synchronous export
-          API — large projects may take a moment.
+          Download project translations as a file. Large exports (&gt;1000 rows)
+          run in the background — the page polls until the file is ready.
         </p>
       </div>
 
@@ -107,7 +107,7 @@ export function ProjectExportPage() {
             disabled={exportProject.isPending || !projectId}
             className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
           >
-            {exportProject.isPending ? 'Preparing download…' : 'Download'}
+            {exportProject.isPending ? 'Exporting…' : 'Download'}
           </button>
           <p className="text-sm text-slate-500">
             Exports are recorded in audit logs.

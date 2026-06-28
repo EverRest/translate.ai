@@ -28,3 +28,8 @@ export interface WebhookSendJobPayload {
   data: Record<string, unknown>;
   correlationId?: string;
 }
+
+export interface TranslationExportJobPayload {
+  exportJobId: string;
+  tenantId: string;
+}
