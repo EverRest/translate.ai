@@ -57,6 +57,17 @@ describe('TranslationOutputValidator', () => {
     expect(result.reason).toContain('script');
   });
 
+  it('allows short single-token Latin labels for Cyrillic targets', () => {
+    const result = validator.validate('Cast', 'Cast', 'en', 'ru');
+    expect(result.valid).toBe(false);
+    expect(result.reason).toContain('identical');
+  });
+
+  it('skips script check for short single-token non-identical output', () => {
+    const result = validator.validate('Roles', 'Cast', 'en', 'ru');
+    expect(result.valid).toBe(true);
+  });
+
   it('can be disabled via config', () => {
     const disabled = new TranslationOutputValidator({
       get: () => false,

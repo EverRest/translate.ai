@@ -11,6 +11,7 @@ export interface TranslationProcessJobPayload {
   jobId: string;
   tenantId: string;
   correlationId?: string;
+  includeReferenceTranslations?: boolean;
 }
 
 export interface TranslationRetryJobPayload {

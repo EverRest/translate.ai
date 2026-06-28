@@ -83,8 +83,13 @@ describe('ProviderRegistryService', () => {
     ).rejects.toThrow('ollama down');
   });
 
-  it('rejects unknown providers', () => {
-    expect(() => service.buildFallbackChain('unknown')).toThrow(
+  it('maps pseudo providers to gemini in fallback chain', () => {
+    expect(service.buildFallbackChain('memory')).toEqual(['gemini', 'ollama']);
+    expect(service.buildFallbackChain('unknown')).toEqual(['gemini', 'ollama']);
+  });
+
+  it('rejects unsupported providers at resolve time', () => {
+    expect(() => service.resolve('unknown')).toThrow(
       ProviderUnavailableException,
     );
   });
