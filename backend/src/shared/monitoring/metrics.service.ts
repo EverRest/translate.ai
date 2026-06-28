@@ -16,6 +16,7 @@ export class MetricsService implements OnModuleInit {
   readonly translationJobItemsTotal: Counter<'status'>;
   readonly webhookDeliveriesTotal: Counter<'status'>;
   readonly aiUsageCostUsdTotal: Counter<'provider' | 'used_fallback'>;
+  readonly memoryHitsTotal: Counter<'hit_type'>;
   readonly queueJobsWaiting: Gauge<'queue'>;
   readonly queueJobsActive: Gauge<'queue'>;
   readonly queueJobsFailed: Gauge<'queue'>;
@@ -54,6 +55,13 @@ export class MetricsService implements OnModuleInit {
       name: 'ai_usage_cost_usd_total',
       help: 'Estimated AI usage cost in USD',
       labelNames: ['provider', 'used_fallback'],
+      registers: [this.registry],
+    });
+
+    this.memoryHitsTotal = new Counter({
+      name: 'memory_hits_total',
+      help: 'Translation memory cache hits',
+      labelNames: ['hit_type'],
       registers: [this.registry],
     });
 
@@ -117,6 +125,10 @@ export class MetricsService implements OnModuleInit {
       { provider, used_fallback: String(usedFallback) },
       costUsd,
     );
+  }
+
+  recordMemoryHit(hitType: 'exact' | 'semantic'): void {
+    this.memoryHitsTotal.inc({ hit_type: hitType });
   }
 
   setQueueDepth(

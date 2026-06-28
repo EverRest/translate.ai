@@ -27,7 +27,6 @@ Goal: paying teams — VCS sync, stronger QA, semantic memory, export UX.
 
 | ID | Task | Priority |
 |----|------|----------|
-| [P1-01](./P1-01-semantic-translation-memory.md) | Semantic TM (pgvector) + cache metrics | High |
 | [P1-02](./P1-02-github-gitlab-integration.md) | GitHub / GitLab key sync + webhooks | High |
 | [P1-06](./P1-06-translation-pull-request.md) | PR workflow with translations | High |
 
@@ -73,7 +72,7 @@ Goal: hard-to-replace infrastructure — replay, duplicates, CI pipeline, market
 
 ```text
 Shipped QA validators (ADR 0008) ──► P2-07 (PR review)
-P1-01 (pgvector) ──► P3-02 (semantic diff) ──► P3-03 (duplicates)
+Shipped semantic TM (ADR 0013) ──► P3-02 (semantic diff) ──► P3-03 (duplicates)
 P2-01 (prompt versioning) ──► P3-01 (replay)
 P2-02 (cost router) ──► P3-08 (simulator)
 P1-02 (VCS) ──► P1-06 (PR) ──► P3-07 (pipeline as code)

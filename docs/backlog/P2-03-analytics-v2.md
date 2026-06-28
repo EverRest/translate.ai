@@ -28,7 +28,7 @@ Enterprise dashboard: cache hits, prompt cost, confidence, human edits, glossary
 
 ## Dependencies
 
-- P1-01 for semantic/exact cache split metrics
+- Shipped semantic TM (ADR 0013) for semantic/exact cache split metrics
 - P2-01 for per-prompt-version cost
 
 ## Acceptance criteria

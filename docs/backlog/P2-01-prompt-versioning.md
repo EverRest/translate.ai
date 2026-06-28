@@ -19,7 +19,7 @@ Version, rollback, and A/B test system prompts — reproducible translations.
 | **Schema** | `prompt_templates` (tenantId?, name, version, systemTemplate, userTemplate, contentTypeDefaults, isActive) |
 | **Module** | `ai-provider` — `PromptTemplateService` |
 | **Pipeline** | `buildTranslationPrompts` reads active version for tenant/project or falls back to code default |
-| **TM hash** | Include `promptVersion` in exact hash (P1-01) |
+| **TM hash** | Include `promptVersion` in exact hash (see ADR 0012 follow-up) |
 | **API** | CRUD + `POST /prompts/:id/activate`, compare diff endpoint |
 | **Frontend** | Settings → Prompts (admin); project override optional |
 
@@ -30,7 +30,7 @@ Version, rollback, and A/B test system prompts — reproducible translations.
 
 ## Dependencies
 
-- Enables accurate cache invalidation for P1-01, P3-01 replay
+- Enables accurate cache invalidation for semantic TM (ADR 0013), P3-01 replay
 
 ## Acceptance criteria
 

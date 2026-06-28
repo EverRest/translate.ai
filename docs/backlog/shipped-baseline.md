@@ -4,7 +4,7 @@ Reference only — do **not** re-implement. Details live in `docs/domain/`, `doc
 
 | Capability | Where |
 |------------|--------|
-| Translation memory (Postgres hash) | `TranslationMemoryService`, ADR implicit in patterns |
+| Translation memory (Postgres hash + pgvector semantic) | `TranslationMemoryService`, `SemanticMemoryService`, ADR 0013 |
 | Multi-provider fallback | `ProviderRegistryService`, ADR 0003 |
 | Ollama model router + classifier | ADR 0007, `OllamaModelRouterService` |
 | Key context + contentType in prompts | `translation-context.utils`, `prompt.builder` |
@@ -12,6 +12,7 @@ Reference only — do **not** re-implement. Details live in `docs/domain/`, `doc
 | QA validators (placeholders, HTML tag balance) | ADR 0008, `translation/application/validators/`, `TRANSLATION_QA_VALIDATORS_ENABLED` |
 | Manual glossary | ADR 0005, `glossary` module |
 | Auto glossary suggestions | ADR 0012, `GlossarySuggestion`, `glossary.analyze` queue |
+| Project knowledge RAG | ADR 0014, `project_knowledge_*`, `knowledge.ingest` queue |
 | Branching | ADR 0006, `branching` module |
 | Approval + retranslate | `approval` module |
 | Webhooks (job + publish) | `webhook` module |

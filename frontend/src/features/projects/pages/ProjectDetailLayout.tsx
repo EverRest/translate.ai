@@ -7,6 +7,7 @@ const tabs = [
   { to: 'keys', label: 'Keys' },
   { to: 'translations', label: 'Translations' },
   { to: 'glossary', label: 'Glossary' },
+  { to: 'knowledge', label: 'Knowledge' },
   { to: 'branches', label: 'Branches' },
   { to: 'jobs', label: 'Jobs' },
   { to: 'approvals', label: 'Approvals' },

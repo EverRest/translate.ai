@@ -2,6 +2,7 @@ import { apiGet, type ApiSuccess } from '../../../shared/api/client';
 import type {
   AccountUsage,
   AnalyticsFilters,
+  MemoryCacheSummary,
   QualityLogEntry,
   QualitySummary,
   UsageLogEntry,
@@ -71,4 +72,11 @@ export async function fetchQualityLogs(filters: AnalyticsFilters) {
     `/analytics/quality/logs${buildQuery(filters)}`,
   );
   return response.data.items;
+}
+
+export async function fetchMemoryCacheSummary(filters: AnalyticsFilters = {}) {
+  const response = await apiGet<ApiSuccess<MemoryCacheSummary>>(
+    `/analytics/cache/summary${buildQuery(filters)}`,
+  );
+  return response.data;
 }

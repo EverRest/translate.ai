@@ -4,6 +4,30 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Project knowledge RAG
+
+Per [adr/0014-project-knowledge-rag.md](./adr/0014-project-knowledge-rag.md):
+
+- **Schema:** `project_knowledge_sources`, `project_knowledge_chunks` with pgvector HNSW index
+- **Chunker:** overlapping 200–300 char chunks with heading/overlap metadata
+- **Ingest API:** paste JSON or upload `.txt`/`.md`; async `knowledge.ingest` worker
+- **RAG pipeline:** top-K chunk retrieval injected into translation prompts
+- **UI:** Project **Knowledge** tab — add source, upload file, list/delete sources
+- **Config:** `KNOWLEDGE_CHUNK_*`, `PROJECT_RAG_*`
+
+### Added — Semantic translation memory (pgvector)
+
+Per [adr/0013-semantic-translation-memory.md](./adr/0013-semantic-translation-memory.md):
+
+- **Pipeline:** exact hash → pgvector semantic similarity → LLM in `TranslateTextService`
+- **Embeddings:** OpenAI `text-embedding-3-small` (768d) with Ollama `nomic-embed-text` fallback
+- **Schema:** `translation_memory.embedding`, `translation_memory_hits` hit log
+- **Worker:** `translation.embed` queue for backfill of missing embeddings
+- **Analytics API:** `GET /analytics/cache/summary` (`memoryHitExact`, `memoryHitSemantic`, rates, timeline)
+- **Frontend:** Analytics **Translation memory** section with stat cards and charts
+- **Config:** `SEMANTIC_MEMORY_ENABLED`, `SEMANTIC_MEMORY_THRESHOLD`, `EMBEDDING_PROVIDER`, `EMBEDDING_DIMENSIONS`, `OPENAI_EMBEDDING_MODEL`, `OLLAMA_EMBEDDING_MODEL`
+- **Infra:** Docker/CI Postgres uses `pgvector/pgvector:pg16`
+
 ### Added — Auto glossary suggestions (P1-03)
 
 Per [adr/0012-auto-glossary-suggestions.md](./adr/0012-auto-glossary-suggestions.md):

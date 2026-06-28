@@ -11,6 +11,7 @@ import { validationSchema } from '../shared/config/validation.schema';
 import { TranslationModule } from '../translation/translation.module';
 import { ExportModule } from '../export/export.module';
 import { GlossaryModule } from '../glossary/glossary.module';
+import { KnowledgeModule } from '../knowledge/knowledge.module';
 import { WebhookModule } from '../webhook/webhook.module';
 import {
   TranslationCreateProcessor,
@@ -20,6 +21,8 @@ import {
 } from './processors/translation.processor';
 import { ExportProcessor } from './processors/export.processor';
 import { GlossaryAnalyzeProcessor } from './processors/glossary.processor';
+import { EmbedProcessor } from './processors/embed.processor';
+import { KnowledgeIngestProcessor } from './processors/knowledge.processor';
 
 @Module({
   imports: [
@@ -36,6 +39,7 @@ import { GlossaryAnalyzeProcessor } from './processors/glossary.processor';
     WebhookModule,
     ExportModule,
     GlossaryModule,
+    KnowledgeModule,
     BullModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -54,6 +58,8 @@ import { GlossaryAnalyzeProcessor } from './processors/glossary.processor';
     WebhookSendProcessor,
     ExportProcessor,
     GlossaryAnalyzeProcessor,
+    EmbedProcessor,
+    KnowledgeIngestProcessor,
   ],
 })
 export class WorkerModule {}

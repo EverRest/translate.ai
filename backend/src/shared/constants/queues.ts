@@ -5,6 +5,8 @@ export const QUEUES = {
   TRANSLATION_REVIEW: 'translation.review',
   TRANSLATION_EXPORT: 'translation.export',
   GLOSSARY_ANALYZE: 'glossary.analyze',
+  TRANSLATION_EMBED: 'translation.embed',
+  KNOWLEDGE_INGEST: 'knowledge.ingest',
   WEBHOOK_SEND: 'webhook.send',
 } as const;
 

@@ -142,6 +142,23 @@ UNIQUE(project_id, key)
 | source_text | TEXT | |
 | translated_text | TEXT | |
 | hash | VARCHAR(64) | INDEX |
+| embedding | vector(768) | pgvector; nullable until backfill |
+| embedded_at | TIMESTAMP | nullable |
+
+### translation_memory_hits
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID PK | |
+| tenant_id | UUID FK | |
+| project_id | UUID | nullable |
+| job_id | UUID | nullable |
+| job_item_id | UUID | nullable |
+| hit_type | ENUM | exact, semantic |
+| source_lang | VARCHAR(5) | |
+| target_lang | VARCHAR(5) | |
+| similarity | FLOAT | semantic hits only |
+| created_at | TIMESTAMP | |
 
 ### audit_logs
 
@@ -211,6 +228,19 @@ UNIQUE(project_id, key)
 | glossary_suggestions.confidence | float | Rank score 0–1 |
 | glossary_suggestions.reason | text? | Heuristic id (e.g. `identical_across_languages`) |
 | glossary_suggestions.status | enum | pending, approved, rejected |
+
+### project_knowledge_sources / project_knowledge_chunks
+
+| Column | Type | Notes |
+|--------|------|-------|
+| project_knowledge_sources.project_id | UUID | Scoped to project |
+| project_knowledge_sources.source_type | enum | text, markdown, file |
+| project_knowledge_sources.status | enum | pending, ready, failed |
+| project_knowledge_sources.raw_content | text | Original uploaded/pasted content |
+| project_knowledge_sources.chunk_count | int | Populated after ingest |
+| project_knowledge_chunks.content | text | Chunk text (~250 chars with overlap) |
+| project_knowledge_chunks.metadata | jsonb | heading, overlapPrev, overlapNext |
+| project_knowledge_chunks.embedding | vector(768) | pgvector cosine search |
 
 ### project_branches / branch_translations
 

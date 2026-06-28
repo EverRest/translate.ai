@@ -41,7 +41,9 @@ Load job + items
 Load TranslationJobItem + TranslationKey + Project context
   → Build prompt options (project name, description, context, content type)
   → For up to 3 attempts:
-      → Check TranslationMemory (skipped on retry attempts)
+      → Check TranslationMemory (exact hash, then semantic pgvector; skipped on retry attempts)
+      → Retrieve project knowledge RAG snippets (when enabled)
+      → LLM translate with glossary + knowledge context
           ├── HIT  → use cached translation
           └── MISS → AiProvider.translate()
               → Gemini: retry transient HTTP 502/503/429 in-provider before fallback

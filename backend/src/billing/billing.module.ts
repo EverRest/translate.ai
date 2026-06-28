@@ -15,6 +15,8 @@ import {
   GetTrafficSummaryHandler,
   GetTrafficTimelineHandler,
 } from './application/handlers/traffic-analytics.handlers';
+import { MemoryAnalyticsService } from './application/memory-analytics.service';
+import { GetMemoryCacheSummaryHandler } from './application/handlers/memory-analytics.handlers';
 import { TranslationQualityService } from './application/translation-quality.service';
 import { UsageAnalyticsService } from './application/usage-analytics.service';
 import { AnalyticsController } from './presentation/analytics.controller';
@@ -25,6 +27,7 @@ import { AnalyticsController } from './presentation/analytics.controller';
   providers: [
     AiUsageService,
     UsageAnalyticsService,
+    MemoryAnalyticsService,
     TranslationQualityService,
     GetUsageAnalyticsHandler,
     GetUsageSummaryHandler,
@@ -34,6 +37,7 @@ import { AnalyticsController } from './presentation/analytics.controller';
     GetTrafficTimelineHandler,
     GetQualitySummaryHandler,
     GetQualityLogsHandler,
+    GetMemoryCacheSummaryHandler,
   ],
   exports: [AiUsageService, TranslationQualityService],
 })

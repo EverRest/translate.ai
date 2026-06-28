@@ -342,6 +342,32 @@ Creates or updates `GlossaryTerm`; marks suggestion `approved`.
 
 ---
 
+### Project knowledge (RAG)
+
+#### GET `/api/v1/projects/{projectId}/knowledge/sources`
+
+**Response:** `{ success, data: { items: KnowledgeSource[] } }`
+
+#### POST `/api/v1/projects/{projectId}/knowledge/sources`
+
+**Body:** `{ name, sourceType: text|markdown|file, content, originalFilename? }`
+
+Enqueues `knowledge.ingest` worker job.
+
+**Response:** `{ success, data: { source, queued: true } }`
+
+#### POST `/api/v1/projects/{projectId}/knowledge/sources/upload`
+
+Multipart file upload (`.txt`, `.md`).
+
+#### DELETE `/api/v1/projects/{projectId}/knowledge/sources/{sourceId}`
+
+**Response:** `{ success, data: { deleted: true } }`
+
+**Dashboard:** Project → **Knowledge** tab.
+
+---
+
 ### Export
 
 #### GET `/api/v1/projects/{projectId}/export`
@@ -381,6 +407,30 @@ Download completed export file. **Response:** File download.
 | `format` | json, yaml, csv, android-xml, ios-strings, po |
 | `language` | Optional filter (e.g. `de`) |
 | `status` | draft, review, approved, published (default: published) |
+
+---
+
+### Analytics
+
+#### GET `/api/v1/analytics/cache/summary`
+
+**Auth:** JWT; roles `admin`, `developer`.
+
+**Query:** `projectId`, `from`, `to` (ISO dates; same as usage analytics).
+
+**Response data:**
+
+| Field | Description |
+|-------|-------------|
+| `memoryHitExact` | Exact hash TM hits |
+| `memoryHitSemantic` | pgvector similarity hits |
+| `llmCalls` | AI usage log count in range |
+| `exactHitRate` | exact / total lookups |
+| `semanticHitRate` | semantic / total lookups |
+| `combinedHitRate` | (exact + semantic) / total |
+| `timeline` | Daily `{ date, exact, semantic }` |
+
+**Dashboard:** Analytics → **Translation memory** section.
 
 ---
 

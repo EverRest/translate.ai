@@ -5,6 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AiProviderModule } from '../ai-provider/ai-provider.module';
 import { BillingModule } from '../billing/billing.module';
 import { GlossaryModule } from '../glossary/glossary.module';
+import { KnowledgeModule } from '../knowledge/knowledge.module';
+import { MonitoringModule } from '../shared/monitoring/monitoring.module';
 import { ProjectModule } from '../project/project.module';
 import {
   CancelTranslationJobHandler,
@@ -27,12 +29,16 @@ import {
   LookupTranslationsHandler,
 } from './application/handlers/translation-query.handlers';
 import { RecordTranslationQualityHandler } from './application/handlers/record-translation-quality.handler';
+import { EmbedJobRunnerService } from './application/services/embed-job-runner.service';
 import { JobCompletionService } from './application/services/job-completion.service';
+import { MemoryHitService } from './application/services/memory-hit.service';
+import { SemanticMemoryService } from './application/services/semantic-memory.service';
 import { TranslationSseService } from './application/services/translation-sse.service';
 import { TranslateTextService } from './application/services/translate-text.service';
 import { TranslationJobRunnerService } from './application/services/translation-job-runner.service';
 import { TranslationOutputValidator } from './application/services/translation-output.validator';
 import { TranslationMemoryService } from './application/services/translation-memory.service';
+import { EmbedQueueService } from './infrastructure/embed-queue.service';
 import { TranslationQueueService } from './infrastructure/translation-queue.service';
 import { JobsController } from './presentation/jobs.controller';
 import { TranslationKeysController } from './presentation/translation-keys.controller';
@@ -59,7 +65,11 @@ const queryHandlers = [
 
 const services = [
   TranslationQueueService,
+  EmbedQueueService,
   TranslationMemoryService,
+  SemanticMemoryService,
+  MemoryHitService,
+  EmbedJobRunnerService,
   TranslateTextService,
   JobCompletionService,
   TranslationJobRunnerService,
@@ -82,6 +92,8 @@ const services = [
     AiProviderModule,
     BillingModule,
     GlossaryModule,
+    KnowledgeModule,
+    MonitoringModule,
   ],
   controllers: [
     JobsController,
@@ -89,6 +101,11 @@ const services = [
     TranslationsController,
   ],
   providers: [...commandHandlers, ...queryHandlers, ...services],
-  exports: [...services, TranslationQueueService, TranslationMemoryService],
+  exports: [
+    ...services,
+    TranslationQueueService,
+    TranslationMemoryService,
+    EmbedJobRunnerService,
+  ],
 })
 export class TranslationModule {}
