@@ -13,6 +13,7 @@ import { cancelJob, createJob } from '../../translation-jobs/api/jobs.api';
 import { useProjectLanguages } from '../../project-settings/hooks/useProjectSettings';
 import {
   bulkImportKeys,
+  listAllTranslationKeyNames,
   listTranslationKeys,
 } from '../../translation-keys/api/translation-keys.api';
 import { useDeleteTranslationKey, useRefetchTranslationKeys } from '../../translation-keys/hooks/useTranslationKeys';
@@ -345,6 +346,58 @@ export function ProjectTranslationsPage() {
   // ── translate modal ───────────────────────────────────────────────────────
   const [translateModalOpen, setTranslateModalOpen] = useState(false);
 
+  // ── sequential lang queue ─────────────────────────────────────────────────
+  const langQueueRef = useRef<string[]>([]);       // remaining languages to translate
+  const batchKeyNamesRef = useRef<string[]>([]);   // key names for current batch
+  const batchKeyIdsRef = useRef<string[]>([]);
+  const [langProgress, setLangProgress] = useState<{ current: number; total: number } | null>(null);
+
+  const LANG_DELAY_MS = 3000; // pause between language jobs to let the model breathe
+
+  const startNextInQueue = useCallback(async () => {
+    if (!projectId) return;
+    const queue = langQueueRef.current;
+    if (queue.length === 0) {
+      setLangProgress(null);
+      return;
+    }
+    const lang = queue[0];
+    langQueueRef.current = queue.slice(1);
+
+    const total = langProgress?.total ?? 1;
+    const current = total - queue.length;
+    setLangProgress({ current, total });
+
+    const toastId = toast.loading(
+      `Translating → ${lang.toUpperCase()} (${current}/${total})…`,
+    );
+    activeToastRef.current = toastId;
+    setTranslatingKeys(new Set(batchKeyIdsRef.current));
+
+    try {
+      const job = await createJob({
+        projectId,
+        languages: [lang],
+        keys: batchKeyNamesRef.current,
+      });
+      setActiveJobId(job.jobId);
+    } catch (err) {
+      toast.update(toastId, err instanceof Error ? err.message : `Failed to start job for ${lang}.`, 'error');
+      activeToastRef.current = null;
+      setTranslatingKeys(new Set());
+      // still try next language after delay
+      if (langQueueRef.current.length > 0) {
+        setTimeout(() => void startNextInQueue(), LANG_DELAY_MS);
+      } else {
+        setLangProgress(null);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, toast]);
+
+  const startNextInQueueRef = useRef(startNextInQueue);
+  startNextInQueueRef.current = startNextInQueue;
+
   // ── startJob ──────────────────────────────────────────────────────────────
   const startJob = useCallback(
     async (keyNames: string[], keyIds: string[], label: string, targetLangs?: string[]) => {
@@ -354,16 +407,43 @@ export function ProjectTranslationsPage() {
         toast.error('No target languages configured. Add languages in Settings.');
         return;
       }
-      const toastId = toast.loading(label);
+
+      // Single language or single-row translate — run directly (no queue UI)
+      if (langs.length === 1) {
+        const toastId = toast.loading(label);
+        activeToastRef.current = toastId;
+        setTranslatingKeys(new Set(keyIds));
+        try {
+          const job = await createJob({ projectId, languages: langs, keys: keyNames });
+          setActiveJobId(job.jobId);
+        } catch (err) {
+          toast.update(toastId, err instanceof Error ? err.message : 'Failed to start translation job.', 'error');
+          activeToastRef.current = null;
+          setTranslatingKeys(new Set());
+        }
+        return;
+      }
+
+      // Multiple languages — translate sequentially one by one
+      batchKeyNamesRef.current = keyNames;
+      batchKeyIdsRef.current = keyIds;
+      langQueueRef.current = langs.slice(1); // first lang starts immediately below
+      setLangProgress({ current: 1, total: langs.length });
+
+      const firstLang = langs[0];
+      const toastId = toast.loading(`Translating → ${firstLang.toUpperCase()} (1/${langs.length})…`);
       activeToastRef.current = toastId;
       setTranslatingKeys(new Set(keyIds));
+
       try {
-        const job = await createJob({ projectId, languages: langs, keys: keyNames });
+        const job = await createJob({ projectId, languages: [firstLang], keys: keyNames });
         setActiveJobId(job.jobId);
       } catch (err) {
         toast.update(toastId, err instanceof Error ? err.message : 'Failed to start translation job.', 'error');
         activeToastRef.current = null;
         setTranslatingKeys(new Set());
+        langQueueRef.current = [];
+        setLangProgress(null);
       }
     },
     [projectId, languages, toast],
@@ -385,22 +465,41 @@ export function ProjectTranslationsPage() {
   const handleComplete = useCallback(async () => {
     await refetchTranslations();
     setLiveTranslations(new Map());
-    setTranslatingKeys(new Set());
-    if (activeToastRef.current) {
-      toast.update(activeToastRef.current, 'Translation complete ✓', 'success');
-      activeToastRef.current = null;
-    }
     setActiveJobId(null);
+
+    const hasMore = langQueueRef.current.length > 0;
+
+    if (hasMore) {
+      if (activeToastRef.current) {
+        toast.dismiss(activeToastRef.current);
+        activeToastRef.current = null;
+      }
+      // Pause before next language so the model can breathe
+      setTimeout(() => void startNextInQueueRef.current(), LANG_DELAY_MS);
+    } else {
+      setTranslatingKeys(new Set());
+      setLangProgress(null);
+      if (activeToastRef.current) {
+        toast.update(activeToastRef.current, 'All translations complete ✓', 'success');
+        activeToastRef.current = null;
+      }
+    }
   }, [refetchTranslations, toast]);
 
   const handleError = useCallback((msg: string) => {
     setLiveTranslations(new Map());
-    setTranslatingKeys(new Set());
+    setActiveJobId(null);
     if (activeToastRef.current) {
       toast.update(activeToastRef.current, msg, 'error');
       activeToastRef.current = null;
     }
-    setActiveJobId(null);
+    // On error, still try next language in queue after delay
+    if (langQueueRef.current.length > 0) {
+      setTimeout(() => void startNextInQueueRef.current(), LANG_DELAY_MS);
+    } else {
+      setTranslatingKeys(new Set());
+      setLangProgress(null);
+    }
   }, [toast]);
 
   useJobSSE(activeJobId, projectId ?? '', handleSseTranslation, handleComplete, handleError);
@@ -408,6 +507,8 @@ export function ProjectTranslationsPage() {
   // ── handleCancelJob ───────────────────────────────────────────────────────
   const handleCancelJob = useCallback(async () => {
     if (!activeJobId) return;
+    langQueueRef.current = []; // stop the queue
+    setLangProgress(null);
     try {
       await cancelJob(activeJobId);
       setTranslatingKeys(new Set());
@@ -473,7 +574,9 @@ export function ProjectTranslationsPage() {
         render: (row: KeyRow) => {
           const langMap = byKey.get(row.key);
           const t = langMap?.[lang.code];
-          const isTranslating = translatingKeys.has(row.keyId);
+          const isTranslating = translatingKeys.size > 0
+            ? translatingKeys.has(row.keyId)
+            : activeJobId !== null;
           if (isTranslating && !t) {
             return (
               <span className="flex items-center gap-1.5 text-xs text-sky-500">
@@ -512,7 +615,7 @@ export function ProjectTranslationsPage() {
         ),
       },
     ];
-  }, [defaultLang, languages, byKey, translatingKeys, deleteKey.isPending, deleteKey.variables]);
+  }, [defaultLang, languages, byKey, translatingKeys, activeJobId, deleteKey.isPending, deleteKey.variables]);
 
   // ── fetchFn ───────────────────────────────────────────────────────────────
   const fetchFn = useCallback(async (params: GridFetchParams) => {
@@ -654,7 +757,9 @@ export function ProjectTranslationsPage() {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
-            Translating…
+            {langProgress
+              ? `Language ${langProgress.current} of ${langProgress.total}…`
+              : 'Translating…'}
           </span>
           <button
             type="button"
@@ -687,14 +792,23 @@ export function ProjectTranslationsPage() {
           onClose={() => setTranslateModalOpen(false)}
           onConfirm={(langs) => {
             setTranslateModalOpen(false);
-            const allKeys = Array.from(byKey.keys());
-            if (allKeys.length === 0) return;
-            void startJob(
-              allKeys,
-              [],
-              `Translating ${allKeys.length} key${allKeys.length === 1 ? '' : 's'}…`,
-              langs,
-            );
+            if (!projectId) return;
+            void (async () => {
+              const toastId = toast.loading('Loading keys…');
+              try {
+                const allKeys = await listAllTranslationKeyNames(projectId);
+                toast.dismiss(toastId);
+                if (allKeys.length === 0) { toast.error('No keys found.'); return; }
+                void startJob(
+                  allKeys,
+                  [],
+                  `Translating ${allKeys.length} key${allKeys.length === 1 ? '' : 's'}…`,
+                  langs,
+                );
+              } catch {
+                toast.update(toastId, 'Failed to load keys.', 'error');
+              }
+            })();
           }}
         />
       )}

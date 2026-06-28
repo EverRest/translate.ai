@@ -7,6 +7,7 @@ import {
 import { JobItemStatus, JobStatus, TranslationKey } from '@prisma/client';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { isValidLanguageCode } from '../../../shared/utils/string.utils';
+import { resolveJobAiProvider } from '../../../ai-provider/domain/ai-provider.utils';
 import { ProjectAccessService } from '../../../project/infrastructure/project-access.service';
 import { TranslationQueueService } from '../../infrastructure/translation-queue.service';
 import { TranslationJobRunnerService } from '../services/translation-job-runner.service';
@@ -48,7 +49,7 @@ export class CreateTranslationJobHandler implements ICommandHandler<CreateTransl
       command.keyItems,
     );
 
-    const provider = command.provider ?? 'gemini';
+    const provider = resolveJobAiProvider(command.provider);
 
     const job = await this.prisma.translationJob.create({
       data: {

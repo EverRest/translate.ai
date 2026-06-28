@@ -57,11 +57,51 @@ describe('TranslationOutputValidator', () => {
     expect(result.reason).toContain('script');
   });
 
+  it('allows short single-token Latin labels for Cyrillic targets', () => {
+    const result = validator.validate('Cast', 'Cast', 'en', 'ru');
+    expect(result.valid).toBe(false);
+    expect(result.reason).toContain('identical');
+  });
+
+  it('skips script check for short single-token non-identical output', () => {
+    const result = validator.validate('Roles', 'Cast', 'en', 'ru');
+    expect(result.valid).toBe(true);
+  });
+
   it('can be disabled via config', () => {
     const disabled = new TranslationOutputValidator({
       get: () => false,
     } as never);
     const result = disabled.validate('', 'Checkout', 'en', 'de');
+    expect(result.valid).toBe(true);
+  });
+
+  it('rejects output that drops placeholders after heuristics pass', () => {
+    const result = validator.validate(
+      'Hola amigo',
+      'Hello {{name}}',
+      'en',
+      'es',
+    );
+    expect(result.valid).toBe(false);
+    expect(result.reason).toContain('PlaceholderValidator');
+  });
+
+  it('skips QA validators when TRANSLATION_QA_VALIDATORS_ENABLED is false', () => {
+    const qaDisabled = new TranslationOutputValidator({
+      get: (key: string, defaultValue?: unknown) => {
+        if (key === 'TRANSLATION_QA_VALIDATORS_ENABLED') {
+          return false;
+        }
+        return defaultValue;
+      },
+    } as never);
+    const result = qaDisabled.validate(
+      'Hola amigo',
+      'Hello {{name}}',
+      'en',
+      'es',
+    );
     expect(result.valid).toBe(true);
   });
 });

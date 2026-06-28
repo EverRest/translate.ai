@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
+import { AdminModule } from './admin/admin.module';
 import { AiProviderModule } from './ai-provider/ai-provider.module';
 import { ApprovalModule } from './approval/approval.module';
 import { AuditModule } from './audit/audit.module';
@@ -43,6 +44,7 @@ import { RolesGuard } from './shared/auth/guards/roles.guard';
       }),
     }),
     QueuesModule,
+    AdminModule,
     SharedModule,
     MonitoringModule,
     HealthModule,

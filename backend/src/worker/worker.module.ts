@@ -9,6 +9,7 @@ import { QueuesModule } from '../shared/queues/queues.module';
 import { SharedModule } from '../shared/shared.module';
 import { validationSchema } from '../shared/config/validation.schema';
 import { TranslationModule } from '../translation/translation.module';
+import { ExportModule } from '../export/export.module';
 import { WebhookModule } from '../webhook/webhook.module';
 import {
   TranslationCreateProcessor,
@@ -16,6 +17,7 @@ import {
   TranslationRetryProcessor,
   WebhookSendProcessor,
 } from './processors/translation.processor';
+import { ExportProcessor } from './processors/export.processor';
 
 @Module({
   imports: [
@@ -30,6 +32,7 @@ import {
     AiProviderModule,
     TranslationModule,
     WebhookModule,
+    ExportModule,
     BullModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -46,6 +49,7 @@ import {
     TranslationProcessProcessor,
     TranslationRetryProcessor,
     WebhookSendProcessor,
+    ExportProcessor,
   ],
 })
 export class WorkerModule {}

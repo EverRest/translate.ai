@@ -67,6 +67,13 @@ enum QualityVerdict {
   inaccurate
 }
 
+enum ExportJobStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
 model Tenant {
   id                String    @id @default(uuid()) @db.Uuid
   name              String
@@ -85,6 +92,7 @@ model Tenant {
   aiUsageLogs        AiUsageLog[]
   apiRequestLogs     ApiRequestLog[]
   qualityMetrics     TranslationQualityMetric[]
+  exportJobs         ExportJob[]
 
   @@map("tenants")
 }
@@ -125,6 +133,7 @@ model Project {
   providerConfigs  ProviderConfig[]
   glossary         Glossary?
   branches         ProjectBranch[]
+  exportJobs       ExportJob[]
 
   @@index([tenantId])
   @@map("projects")
@@ -428,4 +437,29 @@ model TranslationQualityMetric {
   @@index([projectId, createdAt])
   @@index([translationId, createdAt])
   @@map("translation_quality_metrics")
+}
+
+model ExportJob {
+  id           String            @id @default(uuid()) @db.Uuid
+  tenantId     String            @map("tenant_id") @db.Uuid
+  projectId    String            @map("project_id") @db.Uuid
+  format       String            @db.VarChar(20)
+  language     String?           @db.VarChar(5)
+  statusFilter TranslationStatus @map("status_filter")
+  exportStatus ExportJobStatus   @default(pending) @map("export_status")
+  rowCount     Int               @default(0) @map("row_count")
+  filename     String?
+  contentType  String?           @map("content_type")
+  storagePath  String?           @map("storage_path")
+  errorMessage String?           @map("error_message")
+  expiresAt    DateTime?         @map("expires_at")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  completedAt  DateTime?         @map("completed_at")
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+  @@index([projectId, createdAt])
+  @@map("export_jobs")
 }

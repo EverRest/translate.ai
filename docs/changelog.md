@@ -4,6 +4,59 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Export UI + async export queue
+
+Per [backlog/shipped-baseline.md](./backlog/shipped-baseline.md):
+
+- **Frontend:** project **Export** tab — format, language, status; polls async jobs until download ready
+- **Sync API:** `GET /projects/:id/export` (unchanged fast path)
+- **Async API:** `POST /projects/:id/exports`, `GET /exports/:id`, `GET /exports/:id/download`
+- **Worker:** `translation.export` processor; `ExportJob` Prisma model; files in `EXPORT_STORAGE_DIR`
+- **Config:** `EXPORT_ASYNC_THRESHOLD` (default 1000), `EXPORT_JOB_TTL_HOURS`, `EXPORT_STORAGE_DIR`
+- **Tests:** `ExportFormatService` unit tests; `RequestExportHandler` async/sync handler tests
+
+### Added — Extended QA validators
+
+Per extended [adr/0008-translation-output-validation.md](./adr/0008-translation-output-validation.md) and [backlog/shipped-baseline.md](./backlog/shipped-baseline.md):
+
+- **PlaceholderValidator** (`translation/application/validators/`): reject output when `{{...}}` or `%%...%%` tokens differ from source
+- **HtmlTagBalanceValidator:** reject unbalanced HTML when source contains tags
+- **Integration:** composable QA chain runs after heuristic checks in `TranslationOutputValidator`; failures retry up to 3 attempts with validator name in job item error
+- **Config:** `TRANSLATION_QA_VALIDATORS_ENABLED` (default `true`; heuristics still controlled by `TRANSLATION_VALIDATION_ENABLED`)
+- **Deferred:** markdown fence validator, link warn-only mode, per-project `qaProfile` (future backlog)
+
+### Added — Gemini model tier fallback
+
+Per [adr/0011-gemini-model-fallback.md](./adr/0011-gemini-model-fallback.md):
+
+- **GeminiProvider:** after primary model exhausts transient retries, try `GEMINI_MODEL_FALLBACK` before provider fallback to Ollama
+- **Config:** `GEMINI_MODEL_FALLBACK` (optional)
+
+### Added — Gemini transient HTTP retry
+
+Per [adr/0010-gemini-transient-http-retry.md](./adr/0010-gemini-transient-http-retry.md):
+
+- **GeminiProvider:** exponential backoff retry on HTTP 502/503/429 before provider fallback
+- **Config:** `GEMINI_TRANSIENT_RETRIES`, `GEMINI_TRANSIENT_RETRY_DELAY_MS`
+
+### Added — Cross-locale reference on retry
+
+Per [features/cross-locale-reference.md](./features/cross-locale-reference.md) and [adr/0009-cross-locale-reference-on-retry.md](./adr/0009-cross-locale-reference-on-retry.md):
+
+- **Reference translations:** on validation retry (attempt ≥ 2) or manual job retry, inject up to 8 sibling locale translations into the AI prompt
+- **Utils:** `reference-translation.utils.ts`, `reference-translation-prompt.utils.ts`
+- **Payload:** `includeReferenceTranslations` on `translation.process` queue jobs from `translation.retry`
+
+### Changed — Agent instructions
+
+- **AGENTS.md:** Full rewrite — agent system prompt, mandatory workflow (understand → plan → TDD → implement → verify), SOLID/DRY/KISS/CQRS/DDD, updated translation pipeline, complete docs/ADR map, definition of done
+
+### Added — Product backlog (LocalizationOps)
+
+- **docs/backlog/:** Restructured from [raw.md](./backlog/raw.md) vision into phased tasks (P1–P3)
+- [shipped-baseline.md](./backlog/shipped-baseline.md) — reference for already-built capabilities
+- Removed completed micro-tasks (context, validation, trimming) — covered in shipped baseline + ADRs
+
 ### Added — Developer tooling
 
 - **Makefile:** `make help`, `install`, `lint`, `format`, `typecheck`, `test`, `build`, `ci`, dev/db/docker targets

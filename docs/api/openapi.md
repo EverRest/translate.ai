@@ -318,15 +318,41 @@ Pending translations for review.
 
 #### GET `/api/v1/projects/{projectId}/export`
 
-**Query:**
+Synchronous download (same filters as below). Audit log recorded.
+
+**Response:** File download (`Content-Disposition: attachment`).
+
+#### POST `/api/v1/projects/{projectId}/exports`
+
+**Body:**
+
+| Field | Values |
+|-------|--------|
+| `format` | json, yaml, csv, android-xml, ios-strings, po |
+| `language` | Optional filter (e.g. `de`) |
+| `status` | draft, review, approved, published (default: published) |
+
+**Behavior:** If matching row count ≤ `EXPORT_ASYNC_THRESHOLD` (default 1000), completes inline and returns `exportStatus: completed` with `downloadUrl`. Otherwise enqueues `translation.export` and returns `exportStatus: pending`.
+
+**Response:** `{ success, data: ExportJob }`
+
+#### GET `/api/v1/exports/{exportJobId}`
+
+Poll export job status. **Response:** `{ success, data: ExportJob }`
+
+#### GET `/api/v1/exports/{exportJobId}/download`
+
+Download completed export file. **Response:** File download.
+
+**Dashboard:** Project → **Export** tab uses POST + poll + download.
+
+**Query (GET sync only):**
 
 | Param | Values |
 |-------|--------|
-| `format` | json, yaml, csv, xlsx, android-xml, ios-strings, po |
+| `format` | json, yaml, csv, android-xml, ios-strings, po |
 | `language` | Optional filter (e.g. `de`) |
-| `status` | draft, approved, published (default: published) |
-
-**Response:** File download (`Content-Disposition: attachment`).
+| `status` | draft, review, approved, published (default: published) |
 
 ---
 

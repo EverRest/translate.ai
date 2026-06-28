@@ -72,6 +72,18 @@ Separate aggregate for cost optimization.
 
 **Rule:** Always check memory before AI call. Store result after successful AI translation.
 
+## Output validation
+
+After AI translation and sanitization, `TranslationOutputValidator` runs heuristic checks then a QA chain (ADR 0008):
+
+| Check | Purpose |
+|-------|---------|
+| Heuristics | Empty output, refusals, identical source, length ratio, script |
+| PlaceholderValidator | Preserve `{{...}}` and `%%...%%` tokens from source |
+| HtmlTagBalanceValidator | Balanced HTML tags when source contains markup |
+
+Failures retry up to 3 times in-process; job item `errorMessage` includes the validator name. Disable QA only via `TRANSLATION_QA_VALIDATORS_ENABLED=false`.
+
 ## Commands
 
 - `CreateTranslationJobCommand`

@@ -69,6 +69,22 @@ export async function deleteAllTranslationKeys(projectId: string) {
   return response.data;
 }
 
+export async function listAllTranslationKeyNames(projectId: string): Promise<string[]> {
+  const PAGE_SIZE = 2000;
+  const first = await listTranslationKeys(projectId, 1, PAGE_SIZE);
+  const total = first.meta.total;
+  const names = first.items.map((k) => k.key);
+  if (total <= PAGE_SIZE) return names;
+
+  const pages = Math.ceil(total / PAGE_SIZE);
+  const rest = await Promise.all(
+    Array.from({ length: pages - 1 }, (_, i) =>
+      listTranslationKeys(projectId, i + 2, PAGE_SIZE).then((r) => r.items.map((k) => k.key)),
+    ),
+  );
+  return [...names, ...rest.flat()];
+}
+
 export async function bulkImportKeys(
   projectId: string,
   keys: Array<{ key: string; sourceText: string }>,

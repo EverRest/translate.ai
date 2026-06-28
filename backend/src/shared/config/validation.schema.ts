@@ -28,10 +28,21 @@ export const validationSchema = Joi.object({
   OLLAMA_TIMEOUT_MS: Joi.number().integer().min(30_000).default(600_000),
   OPENAI_MODEL: Joi.string().default('gpt-4o-mini'),
   GEMINI_MODEL: Joi.string().default('gemini-2.0-flash'),
+  GEMINI_MODEL_FALLBACK: Joi.string().allow('').default(''),
+  GEMINI_TRANSIENT_RETRIES: Joi.number().integer().min(0).max(5).default(2),
+  GEMINI_TRANSIENT_RETRY_DELAY_MS: Joi.number()
+    .integer()
+    .min(0)
+    .max(30_000)
+    .default(1000),
   AI_PROVIDER_FALLBACK: Joi.string().default('gemini,ollama'),
   DEFAULT_SOURCE_LANGUAGE: Joi.string().default('en'),
   MOCK_TRANSLATIONS: Joi.boolean().default(false),
   TRANSLATION_VALIDATION_ENABLED: Joi.boolean().default(true),
+  TRANSLATION_QA_VALIDATORS_ENABLED: Joi.boolean().default(true),
+  EXPORT_ASYNC_THRESHOLD: Joi.number().integer().min(1).default(1000),
+  EXPORT_STORAGE_DIR: Joi.string().default('.exports'),
+  EXPORT_JOB_TTL_HOURS: Joi.number().integer().min(1).max(168).default(24),
   ADMIN_EMAIL: Joi.string().email().default('admin@translate.ai'),
   ADMIN_PASSWORD: Joi.string().min(8).default('admin123'),
   ADMIN_TENANT_NAME: Joi.string().default('Default'),

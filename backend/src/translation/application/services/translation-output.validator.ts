@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { CYRILLIC_TARGET_LANGS } from '../../../shared/utils/language-script.utils';
 import { stripWrappingQuotes } from '../../../shared/utils/string.utils';
+import { runTranslationQaValidators } from '../validators/translation-qa.validators';
 
 export type ValidationResult = {
   valid: boolean;
@@ -21,16 +23,6 @@ const REFUSAL_PATTERNS: RegExp[] = [
   /\bunable to translate\b/i,
   /\bcannot provide\b/i,
 ];
-
-const CYRILLIC_TARGET_LANGS = new Set([
-  'ua',
-  'uk',
-  'ru',
-  'bg',
-  'sr',
-  'be',
-  'mk',
-]);
 
 const LATIN_TARGET_LANGS = new Set([
   'en',
@@ -58,6 +50,10 @@ export class TranslationOutputValidator {
 
   isEnabled(): boolean {
     return this.config.get<boolean>('TRANSLATION_VALIDATION_ENABLED', true);
+  }
+
+  isQaEnabled(): boolean {
+    return this.config.get<boolean>('TRANSLATION_QA_VALIDATORS_ENABLED', true);
   }
 
   validate(
@@ -117,6 +113,19 @@ export class TranslationOutputValidator {
       return scriptIssue;
     }
 
+    if (this.isQaEnabled()) {
+      const qaResult = runTranslationQaValidators(
+        normalizedSource,
+        normalizedOutput,
+      );
+      if (!qaResult.valid) {
+        return {
+          valid: false,
+          reason: qaResult.reason ?? 'Translation QA validation failed',
+        };
+      }
+    }
+
     return { valid: true, score: 0.85 };
   }
 
@@ -158,6 +167,11 @@ export class TranslationOutputValidator {
     const lang = targetLang.toLowerCase();
     const letters = output.replace(/[\s\d\p{P}\p{S}]/gu, '');
     if (letters.length < 3) {
+      return null;
+    }
+
+    // Short single-token labels (e.g. "cast", "VIP") are often loanwords; script ratio is noisy.
+    if (!/\s/u.test(output.trim()) && letters.length <= 12) {
       return null;
     }
 

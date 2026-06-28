@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { TranslateOptions } from '../../../ai-provider/domain/ai-provider.interface';
 import { TranslateContext } from '../../../ai-provider/domain/ai-provider.types';
 import { ProviderRegistryService } from '../../../ai-provider/application/provider-registry.service';
+import { resolveJobAiProvider } from '../../../ai-provider/domain/ai-provider.utils';
 import { AiUsageService } from '../../../billing/application/ai-usage.service';
 import { sanitizeTranslationOutput } from '../../../shared/utils/translation-sanitize.utils';
 import { TranslationMemoryService } from './translation-memory.service';
@@ -57,7 +58,7 @@ export class TranslateTextService {
     }
 
     const result = await this.providers.translateWithFallback(
-      request.providerName,
+      resolveJobAiProvider(request.providerName),
       request.text,
       source,
       request.targetLang,
