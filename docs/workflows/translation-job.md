@@ -44,6 +44,7 @@ Load TranslationJobItem + TranslationKey + Project context
       → Check TranslationMemory (skipped on retry attempts)
           ├── HIT  → use cached translation
           └── MISS → AiProvider.translate()
+              → Gemini: retry transient HTTP 502/503/429 in-provider before fallback
       → On attempt ≥ 2 or manual job retry: attach reference translations
           from sibling locales for the same key (published > approved > draft)
       → sanitizeTranslationOutput()
