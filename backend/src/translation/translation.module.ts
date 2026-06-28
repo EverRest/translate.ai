@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AiProviderModule } from '../ai-provider/ai-provider.module';
 import { BillingModule } from '../billing/billing.module';
 import { GlossaryModule } from '../glossary/glossary.module';
@@ -26,6 +28,7 @@ import {
 } from './application/handlers/translation-query.handlers';
 import { RecordTranslationQualityHandler } from './application/handlers/record-translation-quality.handler';
 import { JobCompletionService } from './application/services/job-completion.service';
+import { TranslationSseService } from './application/services/translation-sse.service';
 import { TranslateTextService } from './application/services/translate-text.service';
 import { TranslationJobRunnerService } from './application/services/translation-job-runner.service';
 import { TranslationOutputValidator } from './application/services/translation-output.validator';
@@ -61,11 +64,20 @@ const services = [
   JobCompletionService,
   TranslationJobRunnerService,
   TranslationOutputValidator,
+  TranslationSseService,
 ];
 
 @Module({
   imports: [
     CqrsModule,
+    ConfigModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.getOrThrow<string>('JWT_SECRET'),
+      }),
+    }),
     ProjectModule,
     AiProviderModule,
     BillingModule,

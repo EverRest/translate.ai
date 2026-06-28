@@ -23,6 +23,14 @@ export function useTranslationKeys(
   });
 }
 
+export function useRefetchTranslationKeys(projectId: string) {
+  const queryClient = useQueryClient();
+  return () =>
+    queryClient.invalidateQueries({
+      queryKey: ['translation-keys', projectId],
+    });
+}
+
 export function useCreateTranslationKey(projectId: string) {
   const queryClient = useQueryClient();
 

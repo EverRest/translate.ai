@@ -1,0 +1,21 @@
+# Changelog
+
+## [Unreleased]
+
+### Added
+- **Translations grid** — virtual scroll with infinite chunked loading (100 keys per page), fixes NaN height bug caused by scroll listener not attaching before data loaded
+- **SSE real-time updates** — per-cell translation progress via Server-Sent Events instead of polling; JWT passed as query param since EventSource doesn't support headers
+- **Import Excel** — bulk import from EW Main format (Field Id / Type / Field columns, only `title` rows)
+- **Export Excel** — download translations grid as Excel with all language columns
+- **Delete all translations** — bulk delete all translations for a project (keys preserved)
+- **Delete all keys** — bulk delete all translation keys and their translations for a project
+- **Bulk actions menu** — Import, Export, Delete all translations grouped under Actions dropdown in Translations page
+
+### Fixed
+- Default AI provider changed from `openai` to `gemini` in job handler and runner service
+- `AI_PROVIDER=gemini` added to `.env.docker` so worker picks up Gemini without OpenAI key
+- `useInfiniteKeys` — fixed `data.total` → `data.meta.total` (wrong field caused NaN height and empty grid)
+- `useInfiniteKeys` — replaced `loadingRef` guard with `cancelled` flag to fix React StrictMode double-invoke bug
+- `useInfiniteKeys` — added `refreshKey` counter so `refetch()` works when already on page 1
+- Infinite scroll trigger — moved loadMore guard checks into refs so they're reliable across renders
+- After bulk import, keys and translations both refetch immediately without page reload
