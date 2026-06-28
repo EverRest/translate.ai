@@ -31,6 +31,12 @@ export interface ReferenceTranslationOption {
   value: string;
 }
 
+export interface KnowledgeSnippetOption {
+  content: string;
+  sourceName?: string;
+  similarity?: number;
+}
+
 export interface TranslateOptions {
   context?: string;
   keyDescription?: string;
@@ -40,6 +46,7 @@ export interface TranslateOptions {
   glossary?: GlossaryTermOption[];
   contentType?: ContentType;
   referenceTranslations?: ReferenceTranslationOption[];
+  knowledgeSnippets?: KnowledgeSnippetOption[];
   retryHint?: string;
 }
 

@@ -15,7 +15,7 @@ Source changed slightly ("Login" → "Sign in") — reuse existing translation i
 
 | Layer | Change |
 |-------|--------|
-| **Depends on** | Shipped semantic TM (ADR 0012) |
+| **Depends on** | Shipped semantic TM (ADR 0013) |
 | **Service** | `SourceChangeAnalyzer` in `translation` module |
 | **Job runner** | Before LLM: if key.sourceText changed, compare to previous snapshot embedding |
 | **Threshold** | e.g. 92% semantic similarity → copy translation, mark `needs_review` |
@@ -23,7 +23,7 @@ Source changed slightly ("Login" → "Sign in") — reuse existing translation i
 
 ## Dependencies
 
-- Shipped semantic memory infrastructure (ADR 0012)
+- Shipped semantic memory infrastructure (ADR 0013)
 
 ## Acceptance criteria
 

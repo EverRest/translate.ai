@@ -9,6 +9,7 @@ import { resolveJobAiProvider } from '../../../ai-provider/domain/ai-provider.ut
 import { AiUsageService } from '../../../billing/application/ai-usage.service';
 import { sanitizeTranslationOutput } from '../../../shared/utils/translation-sanitize.utils';
 import { EmbedQueueService } from '../../infrastructure/embed-queue.service';
+import { RagRetrievalService } from '../../../knowledge/application/rag-retrieval.service';
 import { MemoryHitService } from './memory-hit.service';
 import { SemanticMemoryService } from './semantic-memory.service';
 import { TranslationMemoryService } from './translation-memory.service';
@@ -38,6 +39,7 @@ export class TranslateTextService {
     private readonly memoryHits: MemoryHitService,
     private readonly embeddings: EmbeddingRegistryService,
     private readonly embedQueue: EmbedQueueService,
+    private readonly ragRetrieval: RagRetrievalService,
     private readonly providers: ProviderRegistryService,
     private readonly usage: AiUsageService,
     private readonly config: ConfigService,
@@ -96,12 +98,17 @@ export class TranslateTextService {
       }
     }
 
+    const translateOptions = await this.withKnowledgeContext(
+      request,
+      queryEmbedding,
+    );
+
     const result = await this.providers.translateWithFallback(
       resolveJobAiProvider(request.providerName),
       request.text,
       source,
       request.targetLang,
-      request.options,
+      translateOptions,
       {
         tenantId: request.tenantId,
         projectId: request.projectId,
@@ -141,6 +148,43 @@ export class TranslateTextService {
       text: translatedText,
       provider: result.provider,
       usedFallback: result.usedFallback,
+    };
+  }
+
+  private async withKnowledgeContext(
+    request: TranslateRequest,
+    queryEmbedding?: number[],
+  ): Promise<TranslateOptions | undefined> {
+    if (
+      !request.projectId ||
+      !this.config.get<boolean>('PROJECT_RAG_ENABLED', true)
+    ) {
+      return request.options;
+    }
+
+    let embedding = queryEmbedding;
+    if (!embedding) {
+      embedding = await this.tryEmbed(request.text);
+    }
+    if (!embedding) {
+      return request.options;
+    }
+
+    const snippets = await this.ragRetrieval.retrieve(
+      request.projectId,
+      embedding,
+    );
+    if (snippets.length === 0) {
+      return request.options;
+    }
+
+    return {
+      ...request.options,
+      knowledgeSnippets: snippets.map((snippet) => ({
+        content: snippet.content,
+        sourceName: snippet.sourceName,
+        similarity: snippet.similarity,
+      })),
     };
   }
 

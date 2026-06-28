@@ -50,6 +50,23 @@ export function formatGlossaryPrompt(glossary: GlossaryTermOption[]): string {
   return `\nGlossary rules:\n${lines.join('\n')}`;
 }
 
+export function formatKnowledgePrompt(
+  snippets: Array<{ content: string; sourceName?: string }>,
+): string {
+  if (snippets.length === 0) {
+    return '';
+  }
+
+  const lines = snippets.map((snippet, index) => {
+    const label = snippet.sourceName
+      ? `[${snippet.sourceName}]`
+      : `[Snippet ${index + 1}]`;
+    return `${label}\n${snippet.content.trim()}`;
+  });
+
+  return `\nProject knowledge (use for terminology and tone when relevant):\n${lines.join('\n\n')}`;
+}
+
 function buildContentHint(contentType: ContentType): string {
   if (contentType === 'ui') {
     return '\nContent type: ui — short form field label or button. Use short, modern, commonly used terms as seen in web forms and apps. Avoid archaic or overly formal expressions.';
@@ -114,13 +131,16 @@ export function buildTranslationPrompts(
   const glossaryHint = options?.glossary
     ? formatGlossaryPrompt(options.glossary)
     : '';
+  const knowledgeHint = options?.knowledgeSnippets
+    ? formatKnowledgePrompt(options.knowledgeSnippets)
+    : '';
   const scriptHint = isCyrillicTargetLang(targetLang)
     ? `\n${cyrillicScriptHint(targetLang)}`
     : '';
 
   const systemPrompt = `You are a professional translator. Translate from ${sourceLang} to ${targetLang}.
 Preserve formatting, template placeholders (e.g. {{...}}, %%...%%), and HTML tags exactly as-is — do not translate or alter them.
-Return only the translated text without explanations or surrounding quotation marks.${toneHint}${contentHint}${contentTypeGuidance}${glossaryHint}${scriptHint}`;
+Return only the translated text without explanations or surrounding quotation marks.${toneHint}${contentHint}${contentTypeGuidance}${glossaryHint}${knowledgeHint}${scriptHint}`;
 
   const userPrompt = buildUserPromptParts(text, options);
 

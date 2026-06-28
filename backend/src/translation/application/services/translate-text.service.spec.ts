@@ -4,6 +4,7 @@ import { EmbeddingRegistryService } from '../../../ai-provider/application/embed
 import { ProviderRegistryService } from '../../../ai-provider/application/provider-registry.service';
 import { AiUsageService } from '../../../billing/application/ai-usage.service';
 import { EmbedQueueService } from '../../infrastructure/embed-queue.service';
+import { RagRetrievalService } from '../../../knowledge/application/rag-retrieval.service';
 import { MemoryHitService } from './memory-hit.service';
 import { SemanticMemoryService } from './semantic-memory.service';
 import { TranslateTextService } from './translate-text.service';
@@ -26,6 +27,9 @@ describe('TranslateTextService', () => {
   const embedQueue = {
     enqueueEmbed: jest.fn(),
   } as unknown as EmbedQueueService;
+  const ragRetrieval = {
+    retrieve: jest.fn(),
+  } as unknown as RagRetrievalService;
   const providers = {
     translateWithFallback: jest.fn(),
   } as unknown as ProviderRegistryService;
@@ -39,6 +43,9 @@ describe('TranslateTextService', () => {
       }
       if (key === 'DEFAULT_SOURCE_LANGUAGE') {
         return 'en';
+      }
+      if (key === 'PROJECT_RAG_ENABLED') {
+        return true;
       }
       return defaultValue;
     }),
@@ -54,10 +61,12 @@ describe('TranslateTextService', () => {
       memoryHits,
       embeddings,
       embedQueue,
+      ragRetrieval,
       providers,
       usage,
       config,
     );
+    (ragRetrieval.retrieve as jest.Mock).mockResolvedValue([]);
   });
 
   it('returns exact memory hit before embedding or LLM', async () => {
@@ -104,6 +113,56 @@ describe('TranslateTextService', () => {
     expect(providers.translateWithFallback).not.toHaveBeenCalled();
     expect(memoryHits.log).toHaveBeenCalledWith(
       expect.objectContaining({ hitType: MemoryHitType.semantic }),
+    );
+  });
+
+  it('passes knowledge snippets to LLM when RAG returns matches', async () => {
+    (memory.lookup as jest.Mock).mockResolvedValue(null);
+    (embeddings.embed as jest.Mock).mockResolvedValue([0.1]);
+    (semanticMemory.findSimilar as jest.Mock).mockResolvedValue(null);
+    (ragRetrieval.retrieve as jest.Mock).mockResolvedValue([
+      {
+        content: 'Use friendly tone.',
+        sourceName: 'Brand guide',
+        similarity: 0.91,
+      },
+    ]);
+    (providers.translateWithFallback as jest.Mock).mockResolvedValue({
+      text: 'Freundlicher Text',
+      provider: 'gemini',
+      primaryProvider: 'gemini',
+      usedFallback: false,
+      usage: {
+        model: 'gemini-2.0-flash',
+        inputTokens: 10,
+        outputTokens: 5,
+        estimatedCostUsd: 0,
+      },
+    });
+    (memory.store as jest.Mock).mockResolvedValue('mem-2');
+
+    await service.translate({
+      tenantId: 'tenant-1',
+      projectId: 'project-1',
+      text: 'Welcome back',
+      targetLang: 'de',
+      providerName: 'gemini',
+    });
+
+    expect(providers.translateWithFallback).toHaveBeenCalledWith(
+      expect.anything(),
+      'Welcome back',
+      'en',
+      'de',
+      expect.objectContaining({
+        knowledgeSnippets: [
+          expect.objectContaining({
+            content: 'Use friendly tone.',
+            sourceName: 'Brand guide',
+          }),
+        ],
+      }),
+      expect.anything(),
     );
   });
 });

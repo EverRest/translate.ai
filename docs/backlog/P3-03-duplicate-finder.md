@@ -23,7 +23,7 @@ Find duplicate/near-duplicate keys ("Login", "Log in", "Sign In") — consolidat
 
 ## Dependencies
 
-- Shipped semantic TM (ADR 0012) embeddings
+- Shipped semantic TM (ADR 0013) embeddings
 - Shares clustering with P2-05 terminology drift
 
 ## Acceptance criteria

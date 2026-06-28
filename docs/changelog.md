@@ -4,6 +4,17 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Project knowledge RAG
+
+Per [adr/0014-project-knowledge-rag.md](./adr/0014-project-knowledge-rag.md):
+
+- **Schema:** `project_knowledge_sources`, `project_knowledge_chunks` with pgvector HNSW index
+- **Chunker:** overlapping 200–300 char chunks with heading/overlap metadata
+- **Ingest API:** paste JSON or upload `.txt`/`.md`; async `knowledge.ingest` worker
+- **RAG pipeline:** top-K chunk retrieval injected into translation prompts
+- **UI:** Project **Knowledge** tab — add source, upload file, list/delete sources
+- **Config:** `KNOWLEDGE_CHUNK_*`, `PROJECT_RAG_*`
+
 ### Added — Semantic translation memory (pgvector)
 
 Per [adr/0013-semantic-translation-memory.md](./adr/0013-semantic-translation-memory.md):

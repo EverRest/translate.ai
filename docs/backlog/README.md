@@ -72,7 +72,7 @@ Goal: hard-to-replace infrastructure — replay, duplicates, CI pipeline, market
 
 ```text
 Shipped QA validators (ADR 0008) ──► P2-07 (PR review)
-Shipped semantic TM (ADR 0012) ──► P3-02 (semantic diff) ──► P3-03 (duplicates)
+Shipped semantic TM (ADR 0013) ──► P3-02 (semantic diff) ──► P3-03 (duplicates)
 P2-01 (prompt versioning) ──► P3-01 (replay)
 P2-02 (cost router) ──► P3-08 (simulator)
 P1-02 (VCS) ──► P1-06 (PR) ──► P3-07 (pipeline as code)

@@ -44,3 +44,9 @@ export interface TranslationEmbedJobPayload {
   memoryId?: string;
   limit?: number;
 }
+
+export interface KnowledgeIngestJobPayload {
+  tenantId: string;
+  projectId: string;
+  sourceId: string;
+}

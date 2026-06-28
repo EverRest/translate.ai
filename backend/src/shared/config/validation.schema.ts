@@ -55,6 +55,16 @@ export const validationSchema = Joi.object({
   EMBEDDING_DIMENSIONS: Joi.number().integer().min(1).max(3072).default(768),
   OPENAI_EMBEDDING_MODEL: Joi.string().default('text-embedding-3-small'),
   OLLAMA_EMBEDDING_MODEL: Joi.string().default('nomic-embed-text'),
+  KNOWLEDGE_CHUNK_SIZE: Joi.number().integer().min(200).max(300).default(250),
+  KNOWLEDGE_CHUNK_OVERLAP: Joi.number().integer().min(0).max(100).default(50),
+  PROJECT_RAG_ENABLED: Joi.boolean().default(true),
+  PROJECT_RAG_TOP_K: Joi.number().integer().min(1).max(10).default(3),
+  PROJECT_RAG_MIN_SIMILARITY: Joi.number().min(0).max(1).default(0.75),
+  PROJECT_RAG_MAX_CHARS: Joi.number()
+    .integer()
+    .min(100)
+    .max(10000)
+    .default(1500),
   ADMIN_EMAIL: Joi.string().email().default('admin@translate.ai'),
   ADMIN_PASSWORD: Joi.string().min(8).default('admin123'),
   ADMIN_TENANT_NAME: Joi.string().default('Default'),

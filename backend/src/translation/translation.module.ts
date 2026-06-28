@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AiProviderModule } from '../ai-provider/ai-provider.module';
 import { BillingModule } from '../billing/billing.module';
 import { GlossaryModule } from '../glossary/glossary.module';
+import { KnowledgeModule } from '../knowledge/knowledge.module';
 import { MonitoringModule } from '../shared/monitoring/monitoring.module';
 import { ProjectModule } from '../project/project.module';
 import {
@@ -91,6 +92,7 @@ const services = [
     AiProviderModule,
     BillingModule,
     GlossaryModule,
+    KnowledgeModule,
     MonitoringModule,
   ],
   controllers: [

@@ -85,6 +85,18 @@ enum MemoryHitType {
   semantic
 }
 
+enum KnowledgeSourceType {
+  text
+  markdown
+  file
+}
+
+enum KnowledgeSourceStatus {
+  pending
+  ready
+  failed
+}
+
 model Tenant {
   id                String    @id @default(uuid()) @db.Uuid
   name              String
@@ -147,6 +159,8 @@ model Project {
   branches         ProjectBranch[]
   exportJobs       ExportJob[]
   glossarySuggestions GlossarySuggestion[]
+  knowledgeSources    ProjectKnowledgeSource[]
+  knowledgeChunks     ProjectKnowledgeChunk[]
 
   @@index([tenantId])
   @@map("projects")
@@ -229,6 +243,49 @@ model GlossarySuggestion {
   @@index([projectId, status])
   @@index([projectId, sourceTerm])
   @@map("glossary_suggestions")
+}
+
+model ProjectKnowledgeSource {
+  id               String                @id @default(uuid()) @db.Uuid
+  projectId        String                @map("project_id") @db.Uuid
+  name             String
+  sourceType       KnowledgeSourceType   @map("source_type")
+  status           KnowledgeSourceStatus @default(pending)
+  rawContent       String                @map("raw_content")
+  originalFilename String?               @map("original_filename")
+  byteSize         Int                   @default(0) @map("byte_size")
+  chunkCount       Int                   @default(0) @map("chunk_count")
+  errorMessage     String?               @map("error_message")
+  createdAt        DateTime              @default(now()) @map("created_at")
+  updatedAt        DateTime              @updatedAt @map("updated_at")
+
+  project Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  chunks  ProjectKnowledgeChunk[]
+
+  @@index([projectId, status])
+  @@map("project_knowledge_sources")
+}
+
+model ProjectKnowledgeChunk {
+  id            String                       @id @default(uuid()) @db.Uuid
+  sourceId      String                       @map("source_id") @db.Uuid
+  projectId     String                       @map("project_id") @db.Uuid
+  content       String
+  chunkIndex    Int                          @map("chunk_index")
+  charStart     Int                          @map("char_start")
+  charEnd       Int                          @map("char_end")
+  tokenEstimate Int                          @map("token_estimate")
+  metadata      Json                         @default("{}")
+  embedding     Unsupported("vector(768)")?  @map("embedding")
+  embeddedAt    DateTime?                    @map("embedded_at")
+  createdAt     DateTime                     @default(now()) @map("created_at")
+
+  source  ProjectKnowledgeSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  project Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([sourceId, chunkIndex])
+  @@index([projectId])
+  @@map("project_knowledge_chunks")
 }
 
 model ApiKey {

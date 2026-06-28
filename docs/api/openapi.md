@@ -342,6 +342,32 @@ Creates or updates `GlossaryTerm`; marks suggestion `approved`.
 
 ---
 
+### Project knowledge (RAG)
+
+#### GET `/api/v1/projects/{projectId}/knowledge/sources`
+
+**Response:** `{ success, data: { items: KnowledgeSource[] } }`
+
+#### POST `/api/v1/projects/{projectId}/knowledge/sources`
+
+**Body:** `{ name, sourceType: text|markdown|file, content, originalFilename? }`
+
+Enqueues `knowledge.ingest` worker job.
+
+**Response:** `{ success, data: { source, queued: true } }`
+
+#### POST `/api/v1/projects/{projectId}/knowledge/sources/upload`
+
+Multipart file upload (`.txt`, `.md`).
+
+#### DELETE `/api/v1/projects/{projectId}/knowledge/sources/{sourceId}`
+
+**Response:** `{ success, data: { deleted: true } }`
+
+**Dashboard:** Project → **Knowledge** tab.
+
+---
+
 ### Export
 
 #### GET `/api/v1/projects/{projectId}/export`

@@ -30,7 +30,7 @@ Version, rollback, and A/B test system prompts — reproducible translations.
 
 ## Dependencies
 
-- Enables accurate cache invalidation for semantic TM (ADR 0012), P3-01 replay
+- Enables accurate cache invalidation for semantic TM (ADR 0013), P3-01 replay
 
 ## Acceptance criteria
 

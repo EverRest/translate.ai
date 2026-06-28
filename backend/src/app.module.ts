@@ -13,6 +13,7 @@ import { BillingModule } from './billing/billing.module';
 import { BranchingModule } from './branching/branching.module';
 import { ExportModule } from './export/export.module';
 import { GlossaryModule } from './glossary/glossary.module';
+import { KnowledgeModule } from './knowledge/knowledge.module';
 import { ProjectModule } from './project/project.module';
 import { SharedModule } from './shared/shared.module';
 import { HealthModule } from './shared/health/health.module';
@@ -60,6 +61,7 @@ import { RolesGuard } from './shared/auth/guards/roles.guard';
     AuditModule,
     BillingModule,
     GlossaryModule,
+    KnowledgeModule,
     BranchingModule,
   ],
   providers: [
