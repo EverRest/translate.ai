@@ -104,6 +104,7 @@ Pre-process (chunk, sanitize HTML)
 - Never import OpenAI SDK directly outside `ai-provider/infrastructure/`.
 - All provider errors mapped to domain exceptions (`ProviderUnavailableException`).
 - Timeouts required on every external call.
+- Gemini retries transient HTTP 502/503/429 in-process before fallback (ADR 0010).
 
 ## Related
 

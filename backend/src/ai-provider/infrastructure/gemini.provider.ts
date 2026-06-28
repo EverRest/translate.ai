@@ -7,6 +7,12 @@ import {
   estimateGeminiCost,
   ProviderTranslateResult,
 } from './prompt.builder';
+import {
+  computeRetryDelayMs,
+  isTransientHttpStatus,
+  parseHttpStatusFromProviderError,
+  sleep,
+} from './provider-http-retry.utils';
 
 @Injectable()
 export class GeminiProvider implements AiProvider {
@@ -36,6 +42,58 @@ export class GeminiProvider implements AiProvider {
       options,
     );
 
+    const maxRetries = this.config.get<number>('GEMINI_TRANSIENT_RETRIES', 2);
+    const baseDelayMs = this.config.get<number>(
+      'GEMINI_TRANSIENT_RETRY_DELAY_MS',
+      1000,
+    );
+    const maxAttempts = maxRetries + 1;
+    let lastError: ProviderUnavailableException | undefined;
+
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      try {
+        return await this.requestTranslation(
+          apiKey,
+          model,
+          systemPrompt,
+          userPrompt,
+        );
+      } catch (error) {
+        if (!(error instanceof ProviderUnavailableException)) {
+          throw error;
+        }
+
+        lastError = error;
+        const status = parseHttpStatusFromProviderError(error.message);
+        const canRetry =
+          attempt < maxAttempts - 1 &&
+          status !== null &&
+          isTransientHttpStatus(status);
+
+        if (!canRetry) {
+          throw error;
+        }
+
+        const delayMs = computeRetryDelayMs(attempt, baseDelayMs);
+        this.logger.warn(
+          `Gemini transient HTTP ${status}; retry ${attempt + 1}/${maxRetries} in ${delayMs}ms`,
+        );
+        await sleep(delayMs);
+      }
+    }
+
+    throw (
+      lastError ??
+      new ProviderUnavailableException('gemini', 'translation failed')
+    );
+  }
+
+  private async requestTranslation(
+    apiKey: string,
+    model: string,
+    systemPrompt: string,
+    userPrompt: string,
+  ): Promise<ProviderTranslateResult> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 60_000);
 

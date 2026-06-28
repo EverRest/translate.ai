@@ -4,6 +4,13 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Gemini transient HTTP retry
+
+Per [adr/0010-gemini-transient-http-retry.md](./adr/0010-gemini-transient-http-retry.md):
+
+- **GeminiProvider:** exponential backoff retry on HTTP 502/503/429 before provider fallback
+- **Config:** `GEMINI_TRANSIENT_RETRIES`, `GEMINI_TRANSIENT_RETRY_DELAY_MS`
+
 ### Added — Cross-locale reference on retry
 
 Per [features/cross-locale-reference.md](./features/cross-locale-reference.md) and [adr/0009-cross-locale-reference-on-retry.md](./adr/0009-cross-locale-reference-on-retry.md):
