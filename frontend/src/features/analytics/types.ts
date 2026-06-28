@@ -1,3 +1,14 @@
+export type MemoryCacheSummary = {
+  totalHits: number;
+  memoryHitExact: number;
+  memoryHitSemantic: number;
+  llmCalls: number;
+  exactHitRate: number;
+  semanticHitRate: number;
+  combinedHitRate: number;
+  timeline: Array<{ date: string; exact: number; semantic: number }>;
+};
+
 export type UsageBreakdownRow = {
   requests: number;
   inputTokens: number;

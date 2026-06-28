@@ -74,6 +74,11 @@ enum ExportJobStatus {
   failed
 }
 
+enum MemoryHitType {
+  exact
+  semantic
+}
+
 model Tenant {
   id                String    @id @default(uuid()) @db.Uuid
   name              String
@@ -92,7 +97,8 @@ model Tenant {
   aiUsageLogs        AiUsageLog[]
   apiRequestLogs     ApiRequestLog[]
   qualityMetrics     TranslationQualityMetric[]
-  exportJobs         ExportJob[]
+  exportJobs            ExportJob[]
+  translationMemoryHits TranslationMemoryHit[]
 
   @@map("tenants")
 }
@@ -307,19 +313,40 @@ model TranslationJobItem {
 }
 
 model TranslationMemory {
-  id             String @id @default(uuid()) @db.Uuid
-  tenantId       String @map("tenant_id") @db.Uuid
-  sourceLanguage String @map("source_language") @db.VarChar(5)
-  targetLanguage String @map("target_language") @db.VarChar(5)
-  sourceText     String @map("source_text")
-  translatedText String @map("translated_text")
+  id             String                       @id @default(uuid()) @db.Uuid
+  tenantId       String                       @map("tenant_id") @db.Uuid
+  sourceLanguage String                       @map("source_language") @db.VarChar(5)
+  targetLanguage String                       @map("target_language") @db.VarChar(5)
+  sourceText     String                       @map("source_text")
+  translatedText String                       @map("translated_text")
   hash           String
+  embedding      Unsupported("vector(768)")?  @map("embedding")
+  embeddedAt     DateTime?                    @map("embedded_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, hash])
   @@index([tenantId, hash])
   @@map("translation_memory")
+}
+
+model TranslationMemoryHit {
+  id         String        @id @default(uuid()) @db.Uuid
+  tenantId   String        @map("tenant_id") @db.Uuid
+  projectId  String?       @map("project_id") @db.Uuid
+  jobId      String?       @map("job_id") @db.Uuid
+  jobItemId  String?       @map("job_item_id") @db.Uuid
+  hitType    MemoryHitType @map("hit_type")
+  sourceLang String        @map("source_lang") @db.VarChar(5)
+  targetLang String        @map("target_lang") @db.VarChar(5)
+  similarity Float?
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, projectId, createdAt])
+  @@map("translation_memory_hits")
 }
 
 model Review {

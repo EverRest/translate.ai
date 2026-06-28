@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useProjectsList } from '../../projects/hooks/useProjects';
 import { ProviderCharts } from '../components/ProviderCharts';
+import { MemoryCharts } from '../components/MemoryCharts';
+import { MemorySummaryStats } from '../components/MemorySummaryStats';
 import { TokenUsageCharts } from '../components/TokenUsageCharts';
 import { QualityCharts } from '../components/QualityCharts';
 import { QualityLogsTable } from '../components/QualityLogsTable';
@@ -10,6 +12,7 @@ import { UsageSummaryStats } from '../components/UsageSummaryStats';
 import {
   isAnalyticsForbidden,
   useCanViewAnalytics,
+  useMemoryCacheSummary,
   useQualityLogs,
   useQualitySummary,
   useUsageLogs,
@@ -39,30 +42,34 @@ export function AnalyticsPage() {
   const logs = useUsageLogs(filters, canView);
   const qualitySummary = useQualitySummary(filters, canView);
   const qualityLogs = useQualityLogs(filters, canView);
+  const memorySummary = useMemoryCacheSummary(filters, canView);
 
   const forbidden =
     isAnalyticsForbidden(summary.error) ||
     isAnalyticsForbidden(logs.error) ||
     isAnalyticsForbidden(qualitySummary.error) ||
-    isAnalyticsForbidden(qualityLogs.error);
+    isAnalyticsForbidden(qualityLogs.error) ||
+    isAnalyticsForbidden(memorySummary.error);
   const loading =
     summary.isLoading ||
     timeline.isLoading ||
     logs.isLoading ||
     qualitySummary.isLoading ||
-    qualityLogs.isLoading;
+    qualityLogs.isLoading ||
+    memorySummary.isLoading;
   const hasError =
     summary.isError ||
     logs.isError ||
     qualitySummary.isError ||
-    qualityLogs.isError;
+    qualityLogs.isError ||
+    memorySummary.isError;
 
   return (
     <section className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-white">Analytics</h1>
         <p className="mt-1 text-sm text-slate-400">
-          AI usage, translation accuracy, and provider activity.
+          AI usage, translation memory, accuracy, and provider activity.
         </p>
       </div>
 
@@ -142,6 +149,21 @@ export function AnalyticsPage() {
                 timeline={timeline.data}
               />
               <ProviderCharts summary={summary.data} />
+            </>
+          )}
+
+          {!loading && !hasError && memorySummary.data && (
+            <>
+              <div>
+                <h2 className="text-lg font-medium text-white">
+                  Translation memory
+                </h2>
+                <p className="mt-1 text-sm text-slate-400">
+                  Exact hash hits vs semantic reuse from pgvector similarity.
+                </p>
+              </div>
+              <MemorySummaryStats summary={memorySummary.data} />
+              <MemoryCharts summary={memorySummary.data} />
             </>
           )}
 

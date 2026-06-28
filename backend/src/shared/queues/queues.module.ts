@@ -11,6 +11,7 @@ import { QUEUES } from '../constants/queues';
       { name: QUEUES.TRANSLATION_RETRY },
       { name: QUEUES.TRANSLATION_REVIEW },
       { name: QUEUES.TRANSLATION_EXPORT },
+      { name: QUEUES.TRANSLATION_EMBED },
       { name: QUEUES.WEBHOOK_SEND },
     ),
   ],

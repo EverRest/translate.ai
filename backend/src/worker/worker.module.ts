@@ -18,6 +18,7 @@ import {
   WebhookSendProcessor,
 } from './processors/translation.processor';
 import { ExportProcessor } from './processors/export.processor';
+import { EmbedProcessor } from './processors/embed.processor';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { ExportProcessor } from './processors/export.processor';
     TranslationRetryProcessor,
     WebhookSendProcessor,
     ExportProcessor,
+    EmbedProcessor,
   ],
 })
 export class WorkerModule {}

@@ -4,6 +4,19 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Semantic translation memory (pgvector)
+
+Per [adr/0012-semantic-translation-memory.md](./adr/0012-semantic-translation-memory.md):
+
+- **Pipeline:** exact hash → pgvector semantic similarity → LLM in `TranslateTextService`
+- **Embeddings:** OpenAI `text-embedding-3-small` (768d) with Ollama `nomic-embed-text` fallback
+- **Schema:** `translation_memory.embedding`, `translation_memory_hits` hit log
+- **Worker:** `translation.embed` queue for backfill of missing embeddings
+- **Analytics API:** `GET /analytics/cache/summary` (`memoryHitExact`, `memoryHitSemantic`, rates, timeline)
+- **Frontend:** Analytics **Translation memory** section with stat cards and charts
+- **Config:** `SEMANTIC_MEMORY_ENABLED`, `SEMANTIC_MEMORY_THRESHOLD`, `EMBEDDING_PROVIDER`, `EMBEDDING_DIMENSIONS`, `OPENAI_EMBEDDING_MODEL`, `OLLAMA_EMBEDDING_MODEL`
+- **Infra:** Docker/CI Postgres uses `pgvector/pgvector:pg16`
+
 ### Added — Export UI + async export queue
 
 Per [backlog/shipped-baseline.md](./backlog/shipped-baseline.md):
