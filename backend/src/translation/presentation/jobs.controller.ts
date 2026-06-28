@@ -146,10 +146,7 @@ export class JobsController {
 
     if (!projectId) throw new BadRequestException('projectId is required');
 
-    return this.sseService.streamJob(
-      jobId,
-      projectId,
-    ) as Observable<MessageEvent>;
+    return this.sseService.streamJob(jobId, projectId);
   }
 
   @Post(':jobId/cancel')

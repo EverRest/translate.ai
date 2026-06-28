@@ -20,9 +20,7 @@ export function TenantSection({ user }: TenantSectionProps) {
       <dl className="mt-6 grid gap-5 sm:grid-cols-2">
         <SettingsField label="Organization name" value={tenant?.name ?? '—'} />
         <SettingsField label="Slug" value={tenant?.slug ?? '—'} mono />
-        {tenant?.plan && (
-          <SettingsField label="Plan" value={tenant.plan} />
-        )}
+        {tenant?.plan && <SettingsField label="Plan" value={tenant.plan} />}
         <SettingsField label="Tenant ID" value={user.tenantId} mono />
       </dl>
     </section>

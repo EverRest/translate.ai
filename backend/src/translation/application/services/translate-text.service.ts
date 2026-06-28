@@ -70,10 +70,7 @@ export class TranslateTextService {
       },
     );
 
-    const translatedText = sanitizeTranslationOutput(
-      result.text,
-      request.text,
-    );
+    const translatedText = sanitizeTranslationOutput(result.text, request.text);
 
     await this.memory.store(
       request.tenantId,

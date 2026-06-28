@@ -76,7 +76,10 @@ export class TranslationOutputValidator {
     }
 
     if (this.isQuoteOnly(trimmed)) {
-      return { valid: false, reason: 'Translation output contains only quotes' };
+      return {
+        valid: false,
+        reason: 'Translation output contains only quotes',
+      };
     }
 
     for (const pattern of REFUSAL_PATTERNS) {
@@ -101,7 +104,10 @@ export class TranslationOutputValidator {
       };
     }
 
-    const lengthIssue = this.checkLengthRatio(normalizedSource, normalizedOutput);
+    const lengthIssue = this.checkLengthRatio(
+      normalizedSource,
+      normalizedOutput,
+    );
     if (lengthIssue) {
       return lengthIssue;
     }
@@ -145,7 +151,10 @@ export class TranslationOutputValidator {
     return null;
   }
 
-  private checkScript(output: string, targetLang: string): ValidationResult | null {
+  private checkScript(
+    output: string,
+    targetLang: string,
+  ): ValidationResult | null {
     const lang = targetLang.toLowerCase();
     const letters = output.replace(/[\s\d\p{P}\p{S}]/gu, '');
     if (letters.length < 3) {
@@ -157,7 +166,11 @@ export class TranslationOutputValidator {
     const cyrillicRatio = cyrillicCount / letters.length;
     const latinRatio = latinCount / letters.length;
 
-    if (CYRILLIC_TARGET_LANGS.has(lang) && latinRatio > 0.85 && cyrillicRatio < 0.1) {
+    if (
+      CYRILLIC_TARGET_LANGS.has(lang) &&
+      latinRatio > 0.85 &&
+      cyrillicRatio < 0.1
+    ) {
       return {
         valid: false,
         reason: `Translation output does not appear to use expected script for ${lang}`,

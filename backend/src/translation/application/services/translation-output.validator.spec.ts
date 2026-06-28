@@ -41,12 +41,7 @@ describe('TranslationOutputValidator', () => {
   });
 
   it('rejects unusually long output', () => {
-    const result = validator.validate(
-      'a'.repeat(200),
-      'Checkout',
-      'en',
-      'de',
-    );
+    const result = validator.validate('a'.repeat(200), 'Checkout', 'en', 'de');
     expect(result.valid).toBe(false);
     expect(result.reason).toContain('long');
   });

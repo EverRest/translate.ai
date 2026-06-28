@@ -170,7 +170,8 @@ export class TranslationJobRunnerService {
           break;
         }
 
-        lastFailureReason = validation.reason ?? 'Translation validation failed';
+        lastFailureReason =
+          validation.reason ?? 'Translation validation failed';
         this.logger.warn(
           `Validation failed for item ${item.id} attempt ${attempt}/${MAX_TRANSLATION_ATTEMPTS}: ${lastFailureReason}`,
         );

@@ -146,8 +146,7 @@ export class UsageAnalyticsService {
         requests: row._count.id,
         inputTokens: row._sum.inputTokens ?? 0,
         outputTokens: row._sum.outputTokens ?? 0,
-        totalTokens:
-          (row._sum.inputTokens ?? 0) + (row._sum.outputTokens ?? 0),
+        totalTokens: (row._sum.inputTokens ?? 0) + (row._sum.outputTokens ?? 0),
         estimatedCostUsd: Number(row._sum.estimatedCostUsd ?? 0),
       })),
       byModel: byModel.map((row) => ({
@@ -155,8 +154,7 @@ export class UsageAnalyticsService {
         requests: row._count.id,
         inputTokens: row._sum.inputTokens ?? 0,
         outputTokens: row._sum.outputTokens ?? 0,
-        totalTokens:
-          (row._sum.inputTokens ?? 0) + (row._sum.outputTokens ?? 0),
+        totalTokens: (row._sum.inputTokens ?? 0) + (row._sum.outputTokens ?? 0),
         estimatedCostUsd: Number(row._sum.estimatedCostUsd ?? 0),
       })),
       byUser: byUserRows.map((row) => ({

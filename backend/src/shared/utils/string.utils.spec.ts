@@ -2,7 +2,9 @@ import { stripWrappingQuotes } from './string.utils';
 
 describe('stripWrappingQuotes', () => {
   it('removes double quotes', () => {
-    expect(stripWrappingQuotes('"Llevarme más alto"')).toBe('Llevarme más alto');
+    expect(stripWrappingQuotes('"Llevarme más alto"')).toBe(
+      'Llevarme más alto',
+    );
   });
 
   it('removes single quotes', () => {
@@ -26,6 +28,6 @@ describe('stripWrappingQuotes', () => {
   });
 
   it('does not strip mismatched quotes', () => {
-    expect(stripWrappingQuotes("'mixed\"")).toBe("'mixed\"");
+    expect(stripWrappingQuotes('\'mixed"')).toBe('\'mixed"');
   });
 });

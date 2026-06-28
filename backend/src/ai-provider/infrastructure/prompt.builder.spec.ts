@@ -25,7 +25,9 @@ describe('prompt.builder', () => {
       expect(systemPrompt).toContain('Content type: ui');
       expect(systemPrompt).toContain('short form field label');
       expect(userPrompt).toContain('Project: Shop');
-      expect(userPrompt).toContain('Project description: E-commerce storefront');
+      expect(userPrompt).toContain(
+        'Project description: E-commerce storefront',
+      );
       expect(userPrompt).toContain('Description: Checkout button label');
       expect(userPrompt).toContain('Context: Cart page footer');
       expect(userPrompt).toContain('Hello');

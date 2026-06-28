@@ -76,7 +76,9 @@ export function JobDetailPage() {
               <span>{job.progress.completed} completed</span>
               {pendingCount > 0 && <span>{pendingCount} pending</span>}
               {job.progress.failed > 0 && (
-                <span className="text-red-400">{job.progress.failed} failed</span>
+                <span className="text-red-400">
+                  {job.progress.failed} failed
+                </span>
               )}
             </div>
             <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-800">
@@ -96,9 +98,9 @@ export function JobDetailPage() {
                 )}
                 {!job.failures && job.provider === 'ollama' && (
                   <p className="text-sm text-red-200/80">
-                    Check that Ollama is running and the worker is connected, then
-                    Retry. Older jobs may not include a detailed error — retry after
-                    restarting the worker.
+                    Check that Ollama is running and the worker is connected,
+                    then Retry. Older jobs may not include a detailed error —
+                    retry after restarting the worker.
                   </p>
                 )}
                 {(job.failures?.sampleErrors.length ?? 0) > 0 && (
