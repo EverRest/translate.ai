@@ -38,3 +38,9 @@ export interface GlossaryAnalyzeJobPayload {
   projectId: string;
   tenantId: string;
 }
+
+export interface TranslationEmbedJobPayload {
+  tenantId: string;
+  memoryId?: string;
+  limit?: number;
+}

@@ -13,6 +13,7 @@ describe('MetricsService', () => {
     metrics.recordTranslationJobItem('completed');
     metrics.recordWebhookDelivery(true);
     metrics.recordAiUsage('openai', 0.002, false);
+    metrics.recordMemoryHit('exact');
     metrics.setQueueDepth('translation.process', 3, 1, 0);
 
     const output = await metrics.getMetrics();
@@ -21,6 +22,7 @@ describe('MetricsService', () => {
     expect(output).toContain('translation_job_items_total');
     expect(output).toContain('webhook_deliveries_total');
     expect(output).toContain('ai_usage_cost_usd_total');
+    expect(output).toContain('memory_hits_total');
     expect(output).toContain('queue_jobs_waiting');
   });
 });

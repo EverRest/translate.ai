@@ -384,6 +384,30 @@ Download completed export file. **Response:** File download.
 
 ---
 
+### Analytics
+
+#### GET `/api/v1/analytics/cache/summary`
+
+**Auth:** JWT; roles `admin`, `developer`.
+
+**Query:** `projectId`, `from`, `to` (ISO dates; same as usage analytics).
+
+**Response data:**
+
+| Field | Description |
+|-------|-------------|
+| `memoryHitExact` | Exact hash TM hits |
+| `memoryHitSemantic` | pgvector similarity hits |
+| `llmCalls` | AI usage log count in range |
+| `exactHitRate` | exact / total lookups |
+| `semanticHitRate` | semantic / total lookups |
+| `combinedHitRate` | (exact + semantic) / total |
+| `timeline` | Daily `{ date, exact, semantic }` |
+
+**Dashboard:** Analytics → **Translation memory** section.
+
+---
+
 ### API keys
 
 #### GET `/api/v1/projects/{projectId}/api-keys`

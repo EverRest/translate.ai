@@ -15,7 +15,7 @@ Source changed slightly ("Login" → "Sign in") — reuse existing translation i
 
 | Layer | Change |
 |-------|--------|
-| **Depends on** | P1-01 pgvector or embedding API |
+| **Depends on** | Shipped semantic TM (ADR 0012) |
 | **Service** | `SourceChangeAnalyzer` in `translation` module |
 | **Job runner** | Before LLM: if key.sourceText changed, compare to previous snapshot embedding |
 | **Threshold** | e.g. 92% semantic similarity → copy translation, mark `needs_review` |
@@ -23,7 +23,7 @@ Source changed slightly ("Login" → "Sign in") — reuse existing translation i
 
 ## Dependencies
 
-- P1-01 semantic memory infrastructure
+- Shipped semantic memory infrastructure (ADR 0012)
 
 ## Acceptance criteria
 

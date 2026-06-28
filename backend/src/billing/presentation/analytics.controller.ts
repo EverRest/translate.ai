@@ -21,6 +21,7 @@ import {
   GetQualityLogsQuery,
   GetQualitySummaryQuery,
 } from '../application/translation-quality.service';
+import { GetMemoryCacheSummaryQuery } from '../application/memory-analytics.service';
 
 @ApiTags('analytics')
 @ApiBearerAuth()
@@ -159,5 +160,23 @@ export class AnalyticsController {
       ),
     );
     return successResponse({ items: data });
+  }
+
+  @Get('cache/summary')
+  @Roles(UserRole.admin, UserRole.developer)
+  @ApiOperation({ summary: 'Translation memory cache hit summary' })
+  async cacheSummary(
+    @CurrentUser() user: AuthUser,
+    @Query() query: { projectId?: string; from?: string; to?: string },
+  ) {
+    const data = await this.queryBus.execute(
+      new GetMemoryCacheSummaryQuery(
+        user.tenantId,
+        query.projectId,
+        query.from ? new Date(query.from) : undefined,
+        query.to ? new Date(query.to) : undefined,
+      ),
+    );
+    return successResponse(data);
   }
 }

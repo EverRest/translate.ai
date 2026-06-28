@@ -4,7 +4,7 @@ Reference only — do **not** re-implement. Details live in `docs/domain/`, `doc
 
 | Capability | Where |
 |------------|--------|
-| Translation memory (Postgres hash) | `TranslationMemoryService`, ADR implicit in patterns |
+| Translation memory (Postgres hash + pgvector semantic) | `TranslationMemoryService`, `SemanticMemoryService`, ADR 0012 |
 | Multi-provider fallback | `ProviderRegistryService`, ADR 0003 |
 | Ollama model router + classifier | ADR 0007, `OllamaModelRouterService` |
 | Key context + contentType in prompts | `translation-context.utils`, `prompt.builder` |

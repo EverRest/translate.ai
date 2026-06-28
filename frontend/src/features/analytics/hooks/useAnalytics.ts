@@ -3,6 +3,7 @@ import { ApiError } from '../../../shared/api/types';
 import { useAuth } from '../../auth/hooks/useAuth';
 import {
   fetchAccountUsage,
+  fetchMemoryCacheSummary,
   fetchQualityLogs,
   fetchQualitySummary,
   fetchUsageLogs,
@@ -71,6 +72,18 @@ export function useQualityLogs(filters: AnalyticsFilters, enabled: boolean) {
   return useQuery({
     queryKey: ['analytics', 'quality-logs', filters],
     queryFn: () => fetchQualityLogs(filters),
+    enabled,
+    retry: false,
+  });
+}
+
+export function useMemoryCacheSummary(
+  filters: AnalyticsFilters,
+  enabled: boolean,
+) {
+  return useQuery({
+    queryKey: ['analytics', 'cache', filters],
+    queryFn: () => fetchMemoryCacheSummary(filters),
     enabled,
     retry: false,
   });

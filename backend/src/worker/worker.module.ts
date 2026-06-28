@@ -20,6 +20,7 @@ import {
 } from './processors/translation.processor';
 import { ExportProcessor } from './processors/export.processor';
 import { GlossaryAnalyzeProcessor } from './processors/glossary.processor';
+import { EmbedProcessor } from './processors/embed.processor';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { GlossaryAnalyzeProcessor } from './processors/glossary.processor';
     WebhookSendProcessor,
     ExportProcessor,
     GlossaryAnalyzeProcessor,
+    EmbedProcessor,
   ],
 })
 export class WorkerModule {}

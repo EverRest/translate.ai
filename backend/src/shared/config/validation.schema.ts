@@ -49,6 +49,12 @@ export const validationSchema = Joi.object({
     .min(1)
     .max(500)
     .default(50),
+  SEMANTIC_MEMORY_ENABLED: Joi.boolean().default(true),
+  SEMANTIC_MEMORY_THRESHOLD: Joi.number().min(0).max(1).default(0.92),
+  EMBEDDING_PROVIDER: Joi.string().valid('openai', 'ollama').default('openai'),
+  EMBEDDING_DIMENSIONS: Joi.number().integer().min(1).max(3072).default(768),
+  OPENAI_EMBEDDING_MODEL: Joi.string().default('text-embedding-3-small'),
+  OLLAMA_EMBEDDING_MODEL: Joi.string().default('nomic-embed-text'),
   ADMIN_EMAIL: Joi.string().email().default('admin@translate.ai'),
   ADMIN_PASSWORD: Joi.string().min(8).default('admin123'),
   ADMIN_TENANT_NAME: Joi.string().default('Default'),
