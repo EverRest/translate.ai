@@ -1,149 +1,219 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
+import type { GridRef, GridFetchParams, BulkActionDef, ColumnDef } from '../../../shared/ui/DataGrid';
+import { useConfirm } from '../../../shared/ui/ConfirmDialog';
+import { DataGrid, RowMenu } from '../../../shared/ui/DataGrid';
 import type { Project } from '../../projects/types';
-import { deleteAllTranslationKeys } from '../api/translation-keys.api';
+import {
+  deleteAllTranslationKeys,
+  deleteTranslationKey,
+  listTranslationKeys,
+} from '../api/translation-keys.api';
 import {
   CreateTranslationKeyModal,
   EditTranslationKeyModal,
 } from '../components/TranslationKeyFormModal';
-import { TranslationKeysTable } from '../components/TranslationKeysTable';
 import {
   useCreateTranslationKey,
   useDeleteTranslationKey,
-  useRefetchTranslationKeys,
-  useTranslationKeys,
   useUpdateTranslationKey,
 } from '../hooks/useTranslationKeys';
 import type { TranslationKey } from '../types';
+
+const CHUNK_SIZE = 50;
+
+function ContentTypeBadge({ type }: { type: string | null }) {
+  if (!type) return <span className="text-xs text-slate-600">—</span>;
+  return (
+    <span className="rounded-full bg-slate-700/60 px-2 py-0.5 text-xs text-slate-300">
+      {type}
+    </span>
+  );
+}
 
 export function ProjectKeysPage() {
   const { projectId } = useParams<{ projectId: string }>();
   useOutletContext<{ project: Project }>();
 
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [editingKey, setEditingKey] = useState<TranslationKey | null>(null);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => setSearch(searchInput), 300);
-    return () => window.clearTimeout(timer);
-  }, [searchInput]);
-
-  const { data, isLoading, error } = useTranslationKeys(
-    projectId,
-    1,
-    50,
-    search,
-  );
   const create = useCreateTranslationKey(projectId ?? '');
   const update = useUpdateTranslationKey(projectId ?? '');
   const remove = useDeleteTranslationKey(projectId ?? '');
-  const refetch = useRefetchTranslationKeys(projectId ?? '');
-  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
+  const confirm = useConfirm();
+
+  const gridRef = useRef<GridRef | null>(null);
+
+  // ── fetchFn ────────────────────────────────────────────────────────────────
+  const fetchFn = useCallback(
+    async (params: GridFetchParams) => {
+      const pg = Math.floor(params.offset / CHUNK_SIZE) + 1;
+      const data = await listTranslationKeys(projectId!, pg, CHUNK_SIZE, params.search);
+      return { items: data.items, total: data.meta.total };
+    },
+    [projectId],
+  );
+
+  // ── Columns ────────────────────────────────────────────────────────────────
+  const columns = useMemo((): ColumnDef<TranslationKey>[] => [
+    {
+      key: 'key',
+      header: 'Key',
+      width: 240,
+      sortable: true,
+      sortValue: (row) => row.key,
+      filterable: true,
+      filterValue: (row) => `${row.key} ${row.description ?? ''}`,
+      render: (row) => (
+        <div className="min-w-0">
+          <p className="truncate font-mono text-xs text-slate-300" title={row.key}>
+            {row.key}
+          </p>
+          {row.description && (
+            <p className="truncate text-xs text-slate-500" title={row.description}>
+              {row.description}
+            </p>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'sourceText',
+      header: 'Source text',
+      width: 400,
+      sortable: true,
+      sortValue: (row) => row.sourceText ?? '',
+      filterable: true,
+      filterValue: (row) => row.sourceText ?? '',
+      render: (row) => (
+        <span className="truncate text-sm text-slate-200" title={row.sourceText ?? ''}>
+          {row.sourceText ?? <span className="text-slate-600">—</span>}
+        </span>
+      ),
+    },
+    {
+      key: 'type',
+      header: 'Type',
+      width: 120,
+      filterable: true,
+      filterValue: (row) => row.contentType ?? '',
+      render: (row) => <ContentTypeBadge type={row.contentType} />,
+    },
+    {
+      key: 'context',
+      header: 'Context',
+      width: 200,
+      filterable: true,
+      filterValue: (row) => row.context ?? '',
+      render: (row) => (
+        <span className="truncate text-xs text-slate-400" title={row.context ?? ''}>
+          {row.context ?? <span className="text-slate-600">—</span>}
+        </span>
+      ),
+    },
+    {
+      key: '_actions',
+      header: '',
+      width: 32,
+      noPadding: true,
+      overflow: 'visible',
+      sticky: 'right',
+      render: (row) => (
+        <RowMenu items={[
+          { label: 'Edit', onClick: () => setEditingKey(row) },
+          {
+            label: 'Delete',
+            variant: 'danger',
+            onClick: async () => {
+              if (await confirm({ title: `Delete key "${row.key}"?`, description: 'All existing translations for this key will be removed.', danger: true, confirmLabel: 'Delete' })) {
+                remove.mutate(row.id, { onSuccess: () => gridRef.current?.refetch() });
+              }
+            },
+          },
+        ]} />
+      ),
+    },
+  ], [remove.isPending, remove.variables]);
+
+  // ── Bulk actions ───────────────────────────────────────────────────────────
+  const bulkActions = useMemo((): BulkActionDef<TranslationKey>[] => [
+    {
+      key: 'delete',
+      label: 'Delete selected',
+      variant: 'danger',
+      onAction: async ({ selectedRows, clearSelection, refetch }) => {
+        if (
+          !await confirm({ title: `Delete ${selectedRows.length} key${selectedRows.length === 1 ? '' : 's'}?`, description: 'All existing translations for these keys will be removed.', danger: true, confirmLabel: 'Delete' })
+        )
+          return;
+        if (!projectId) return;
+        for (const row of selectedRows) {
+          await deleteTranslationKey(projectId, row.id).catch(() => undefined);
+        }
+        clearSelection();
+        refetch();
+      },
+    },
+  ], [projectId]);
+
+  // ── Delete all ─────────────────────────────────────────────────────────────
   const handleDeleteAll = async () => {
     if (!projectId) return;
     if (
-      !window.confirm(
-        'Delete ALL translation keys and their translations? This cannot be undone.',
-      )
+      !await confirm({ title: 'Delete all translation keys?', description: 'All translation keys and their translations will be permanently removed. This cannot be undone.', danger: true, confirmLabel: 'Delete all' })
     )
       return;
     setIsDeletingAll(true);
     try {
       await deleteAllTranslationKeys(projectId);
-      refetch();
+      gridRef.current?.refetch();
     } finally {
       setIsDeletingAll(false);
     }
   };
 
-  const items = data?.items ?? [];
-  const total = data?.meta.total ?? 0;
+  // ── Toolbar ────────────────────────────────────────────────────────────────
+  const toolbar = (
+    <>
+      <button
+        type="button"
+        disabled={isDeletingAll}
+        onClick={() => void handleDeleteAll()}
+        className="rounded-lg border border-red-800 px-4 py-2 text-sm font-medium text-red-400 hover:border-red-600 hover:text-red-300 disabled:opacity-50"
+      >
+        {isDeletingAll ? 'Deleting…' : 'Delete all'}
+      </button>
+      <button
+        type="button"
+        onClick={() => setCreateOpen(true)}
+        className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500"
+      >
+        Add key
+      </button>
+    </>
+  );
 
-  if (!projectId) {
-    return null;
-  }
+  if (!projectId) return null;
 
   return (
-    <section className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-medium text-white">Translation keys</h2>
-          <p className="mt-1 text-sm text-slate-400">
-            {total} key{total === 1 ? '' : 's'} in this project
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            disabled={isDeletingAll || total === 0}
-            onClick={() => void handleDeleteAll()}
-            className="rounded-lg border border-red-800 px-4 py-2 text-sm font-medium text-red-400 hover:border-red-600 hover:text-red-300 disabled:opacity-50"
-          >
-            {isDeletingAll ? 'Deleting…' : 'Delete all'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setCreateOpen(true)}
-            className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500"
-          >
-            Add key
-          </button>
-        </div>
-      </div>
-
-      <div>
-        <input
-          type="search"
-          value={searchInput}
-          onChange={(event) => setSearchInput(event.target.value)}
-          placeholder="Search keys or descriptions…"
-          className="w-full max-w-md rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-sky-500"
+    <section className="flex h-full min-h-0 flex-col gap-3">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <DataGrid<TranslationKey>
+          columns={columns}
+          fetchFn={fetchFn}
+          rowKey={(row) => row.id}
+          chunkSize={CHUNK_SIZE}
+          searchPlaceholder="Search keys or descriptions…"
+          toolbar={toolbar}
+          bulkActions={bulkActions}
+          emptyMessage="No translation keys yet."
+          gridRef={gridRef}
+          gridId="keys"
         />
       </div>
-
-      {isLoading && <p className="text-slate-400">Loading keys…</p>}
-      {error && (
-        <p className="text-red-400">
-          {error instanceof Error ? error.message : 'Failed to load keys.'}
-        </p>
-      )}
-
-      {!isLoading && !error && items.length === 0 && (
-        <div className="rounded-xl border border-dashed border-slate-700 p-10 text-center">
-          <p className="text-slate-400">
-            {search ? 'No keys match your search.' : 'No translation keys yet.'}
-          </p>
-          {!search && (
-            <button
-              type="button"
-              onClick={() => setCreateOpen(true)}
-              className="mt-4 text-sm text-sky-400 hover:text-sky-300"
-            >
-              Add your first key
-            </button>
-          )}
-        </div>
-      )}
-
-      {items.length > 0 && (
-        <TranslationKeysTable
-          keys={items}
-          onEdit={setEditingKey}
-          onDelete={(key) => {
-            if (
-              window.confirm(
-                `Delete key "${key.key}"? Existing translations will be removed.`,
-              )
-            ) {
-              remove.mutate(key.id);
-            }
-          }}
-          deletingId={remove.isPending ? remove.variables : undefined}
-        />
-      )}
 
       <CreateTranslationKeyModal
         open={createOpen}
@@ -152,11 +222,13 @@ export function ProjectKeysPage() {
         onClose={() => setCreateOpen(false)}
         onSubmit={(values) => {
           create.mutate(
+            { ...values, contentType: values.contentType || undefined },
             {
-              ...values,
-              contentType: values.contentType || undefined,
+              onSuccess: () => {
+                setCreateOpen(false);
+                gridRef.current?.refetch();
+              },
             },
-            { onSuccess: () => setCreateOpen(false) },
           );
         }}
       />
@@ -168,18 +240,18 @@ export function ProjectKeysPage() {
         error={update.error instanceof Error ? update.error.message : undefined}
         onClose={() => setEditingKey(null)}
         onSubmit={(values) => {
-          if (!editingKey) {
-            return;
-          }
+          if (!editingKey) return;
           update.mutate(
             {
               keyId: editingKey.id,
-              input: {
-                ...values,
-                contentType: values.contentType || null,
+              input: { ...values, contentType: values.contentType || null },
+            },
+            {
+              onSuccess: () => {
+                setEditingKey(null);
+                gridRef.current?.refetch();
               },
             },
-            { onSuccess: () => setEditingKey(null) },
           );
         }}
       />

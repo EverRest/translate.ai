@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useConfirm } from '../../../shared/ui/ConfirmDialog';
 import { ProjectFormModal } from '../components/ProjectFormModal';
 import { ProjectsTable } from '../components/ProjectsTable';
 import {
@@ -10,6 +11,7 @@ import {
 import type { Project } from '../types';
 
 export function ProjectsPage() {
+  const confirm = useConfirm();
   const { data, isLoading, error } = useProjectsList();
   const create = useCreateProject();
   const archive = useArchiveProject();
@@ -62,11 +64,14 @@ export function ProjectsPage() {
         <ProjectsTable
           projects={items}
           onEdit={setEditingProject}
-          onArchive={(project) => {
+          onArchive={async (project) => {
             if (
-              window.confirm(
-                `Archive "${project.name}"? This cannot be undone.`,
-              )
+              await confirm({
+                title: `Archive "${project.name}"?`,
+                description: 'This cannot be undone.',
+                danger: true,
+                confirmLabel: 'Archive',
+              })
             ) {
               archive.mutate(project.id);
             }
