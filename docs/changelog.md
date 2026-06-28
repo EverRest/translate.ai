@@ -4,6 +4,17 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Auto glossary suggestions (P1-03)
+
+Per [adr/0012-auto-glossary-suggestions.md](./adr/0012-auto-glossary-suggestions.md):
+
+- **Schema:** `GlossarySuggestion` + `GlossarySuggestionStatus` enum; migration `20260629120000_glossary_suggestions`
+- **Miner:** heuristic corpus scan (identical terms, stable pairs, product codes, capitalized tokens); unit tests for merge/ranking
+- **Queue:** `glossary.analyze` worker job replaces pending suggestions per project
+- **API:** `GET/POST .../glossary/suggestions`, analyze, approve, reject
+- **Config:** `GLOSSARY_ANALYZE_MIN_TRANSLATIONS`, `GLOSSARY_ANALYZE_MAX_SUGGESTIONS`
+- **UI:** Glossary tab — **Suggest terms**, pending suggestions table with approve/reject
+
 ### Added — Export UI + async export queue
 
 Per [backlog/shipped-baseline.md](./backlog/shipped-baseline.md):

@@ -10,6 +10,7 @@ import { SharedModule } from '../shared/shared.module';
 import { validationSchema } from '../shared/config/validation.schema';
 import { TranslationModule } from '../translation/translation.module';
 import { ExportModule } from '../export/export.module';
+import { GlossaryModule } from '../glossary/glossary.module';
 import { WebhookModule } from '../webhook/webhook.module';
 import {
   TranslationCreateProcessor,
@@ -18,6 +19,7 @@ import {
   WebhookSendProcessor,
 } from './processors/translation.processor';
 import { ExportProcessor } from './processors/export.processor';
+import { GlossaryAnalyzeProcessor } from './processors/glossary.processor';
 
 @Module({
   imports: [
@@ -33,6 +35,7 @@ import { ExportProcessor } from './processors/export.processor';
     TranslationModule,
     WebhookModule,
     ExportModule,
+    GlossaryModule,
     BullModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -50,6 +53,7 @@ import { ExportProcessor } from './processors/export.processor';
     TranslationRetryProcessor,
     WebhookSendProcessor,
     ExportProcessor,
+    GlossaryAnalyzeProcessor,
   ],
 })
 export class WorkerModule {}

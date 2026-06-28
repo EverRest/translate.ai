@@ -1,6 +1,6 @@
 # P1-03 — Auto glossary builder
 
-**Phase:** 1 · **Priority:** Medium · **Status:** Backlog
+**Phase:** 1 · **Priority:** Medium · **Status:** Shipped (ADR 0012)
 
 ## Goal
 
@@ -33,10 +33,10 @@ AI proposes glossary terms from existing translations; human approves — reduce
 
 ## Acceptance criteria
 
-- [ ] Analyze project with ≥100 translations produces ranked suggestions
-- [ ] Approve suggestion creates `GlossaryTerm`
-- [ ] Approved terms used in next job via existing pipeline
-- [ ] Unit tests for suggestion merge logic
+- [x] Analyze project with ≥100 translations produces ranked suggestions
+- [x] Approve suggestion creates `GlossaryTerm`
+- [x] Approved terms used in next job via existing pipeline
+- [x] Unit tests for suggestion merge logic
 
 ## Overlap with raw.md
 
