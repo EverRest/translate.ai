@@ -75,4 +75,33 @@ describe('TranslationOutputValidator', () => {
     const result = disabled.validate('', 'Checkout', 'en', 'de');
     expect(result.valid).toBe(true);
   });
+
+  it('rejects output that drops placeholders after heuristics pass', () => {
+    const result = validator.validate(
+      'Hola amigo',
+      'Hello {{name}}',
+      'en',
+      'es',
+    );
+    expect(result.valid).toBe(false);
+    expect(result.reason).toContain('PlaceholderValidator');
+  });
+
+  it('skips QA validators when TRANSLATION_QA_VALIDATORS_ENABLED is false', () => {
+    const qaDisabled = new TranslationOutputValidator({
+      get: (key: string, defaultValue?: unknown) => {
+        if (key === 'TRANSLATION_QA_VALIDATORS_ENABLED') {
+          return false;
+        }
+        return defaultValue;
+      },
+    } as never);
+    const result = qaDisabled.validate(
+      'Hola amigo',
+      'Hello {{name}}',
+      'en',
+      'es',
+    );
+    expect(result.valid).toBe(true);
+  });
 });

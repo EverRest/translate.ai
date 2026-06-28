@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CYRILLIC_TARGET_LANGS } from '../../../shared/utils/language-script.utils';
 import { stripWrappingQuotes } from '../../../shared/utils/string.utils';
+import { runTranslationQaValidators } from '../validators/translation-qa.validators';
 
 export type ValidationResult = {
   valid: boolean;
@@ -49,6 +50,10 @@ export class TranslationOutputValidator {
 
   isEnabled(): boolean {
     return this.config.get<boolean>('TRANSLATION_VALIDATION_ENABLED', true);
+  }
+
+  isQaEnabled(): boolean {
+    return this.config.get<boolean>('TRANSLATION_QA_VALIDATORS_ENABLED', true);
   }
 
   validate(
@@ -106,6 +111,19 @@ export class TranslationOutputValidator {
     const scriptIssue = this.checkScript(normalizedOutput, targetLang);
     if (scriptIssue) {
       return scriptIssue;
+    }
+
+    if (this.isQaEnabled()) {
+      const qaResult = runTranslationQaValidators(
+        normalizedSource,
+        normalizedOutput,
+      );
+      if (!qaResult.valid) {
+        return {
+          valid: false,
+          reason: qaResult.reason ?? 'Translation QA validation failed',
+        };
+      }
     }
 
     return { valid: true, score: 0.85 };

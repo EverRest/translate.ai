@@ -47,7 +47,9 @@ Load TranslationJobItem + TranslationKey + Project context
       → On attempt ≥ 2 or manual job retry: attach reference translations
           from sibling locales for the same key (published > approved > draft)
       → sanitizeTranslationOutput()
-      → TranslationOutputValidator (heuristic)
+      → TranslationOutputValidator
+          → heuristics (empty, refusal, length, script)
+          → QA chain: placeholders ({{...}}, %%...%%), HTML tag balance
           ├── PASS → save draft, record quality metric, complete item
           └── FAIL → retry with skipMemory + retry hint, or mark failed
   → If all items done → mark job completed/failed

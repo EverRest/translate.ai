@@ -4,6 +4,14 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Extended QA validators (P1-04 MVP)
+
+Per [backlog/P1-04-extended-qa-validators.md](./backlog/P1-04-extended-qa-validators.md) and extended [adr/0008-translation-output-validation.md](./adr/0008-translation-output-validation.md):
+
+- **PlaceholderValidator:** reject output when `{{...}}` or `%%...%%` tokens differ from source
+- **HtmlTagBalanceValidator:** reject unbalanced HTML when source contains tags
+- **Config:** `TRANSLATION_QA_VALIDATORS_ENABLED` (default `true`; heuristics still controlled by `TRANSLATION_VALIDATION_ENABLED`)
+
 ### Added — Cross-locale reference on retry
 
 Per [features/cross-locale-reference.md](./features/cross-locale-reference.md) and [adr/0009-cross-locale-reference-on-retry.md](./adr/0009-cross-locale-reference-on-retry.md):

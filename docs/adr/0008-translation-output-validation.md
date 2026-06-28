@@ -18,9 +18,17 @@ Add a synchronous **heuristic validator** after translation (before saving draft
 - Absurd length ratio vs source
 - Unexpected script for target language
 
-On failure, retry up to **3 attempts** in-process with `skipMemory` and a retry hint in the prompt. After exhaustion, mark the job item failed with a validation message.
+After heuristics pass, run a **QA validator chain** (`translation/application/validators/`):
 
-Feature flag: `TRANSLATION_VALIDATION_ENABLED` (default `true`).
+- **PlaceholderValidator** — `{{...}}` and `%%...%%` tokens in output must match source exactly (count + text)
+- **HtmlTagBalanceValidator** — when source contains HTML tags, output tag stack must be balanced
+
+On failure, retry up to **3 attempts** in-process with `skipMemory` and a retry hint in the prompt. After exhaustion, mark the job item failed with a validation message naming the failing validator (e.g. `PlaceholderValidator: missing placeholder {{name}}`).
+
+Feature flags:
+
+- `TRANSLATION_VALIDATION_ENABLED` (default `true`) — heuristic checks
+- `TRANSLATION_QA_VALIDATORS_ENABLED` (default `true`) — placeholder/HTML QA chain only
 
 ## Consequences
 
