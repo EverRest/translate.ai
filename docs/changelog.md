@@ -12,6 +12,16 @@ Per [features/cross-locale-reference.md](./features/cross-locale-reference.md) a
 - **Utils:** `reference-translation.utils.ts`, `reference-translation-prompt.utils.ts`
 - **Payload:** `includeReferenceTranslations` on `translation.process` queue jobs from `translation.retry`
 
+### Changed — Agent instructions
+
+- **AGENTS.md:** Full rewrite — agent system prompt, mandatory workflow (understand → plan → TDD → implement → verify), SOLID/DRY/KISS/CQRS/DDD, updated translation pipeline, complete docs/ADR map, definition of done
+
+### Added — Product backlog (LocalizationOps)
+
+- **docs/backlog/:** Restructured from [raw.md](./backlog/raw.md) vision into 24 phased tasks (P1–P3)
+- [shipped-baseline.md](./backlog/shipped-baseline.md) — reference for already-built capabilities
+- Removed completed micro-tasks (context, validation, trimming) — covered in shipped baseline + ADRs
+
 ### Added — Developer tooling
 
 - **Makefile:** `make help`, `install`, `lint`, `format`, `typecheck`, `test`, `build`, `ci`, dev/db/docker targets

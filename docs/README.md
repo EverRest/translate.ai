@@ -17,8 +17,8 @@ Read this index first. Each doc is written so an agent can understand the system
 
 | Doc | Purpose |
 |-----|---------|
-| [../AGENTS.md](../AGENTS.md) | Cursor / LLM agent instructions (root) |
-| [important.md](./important.md) | How this docs pack is organized for vibe coding |
+| [../AGENTS.md](../AGENTS.md) | **Canonical agent playbook** — system prompt, TDD workflow, principles, docs map |
+| [important.md](./important.md) | How this docs pack is organized for AI-first development |
 
 ## Implementation guides
 
@@ -72,12 +72,20 @@ Read this index first. Each doc is written so an agent can understand the system
 | [adr/0003-ai-provider-abstraction.md](./adr/0003-ai-provider-abstraction.md) | Multi-provider AI layer |
 | [adr/0004-multi-tenant-isolation.md](./adr/0004-multi-tenant-isolation.md) | Tenant scoping strategy |
 | [adr/0007-ollama-model-router.md](./adr/0007-ollama-model-router.md) | Ollama model routing inside ai-provider |
+| [adr/0008-translation-output-validation.md](./adr/0008-translation-output-validation.md) | Heuristic output validation + auto-retries |
 
 ## Changelog
 
 | Doc | Purpose |
 |-----|---------|
 | [changelog.md](./changelog.md) | Project change log |
+
+## Product backlog (LocalizationOps)
+
+| Doc | Purpose |
+|-----|---------|
+| [backlog/README.md](./backlog/README.md) | Phased tasks P1–P3 (VCS, semantic TM, replay, pipeline-as-code) |
+| [backlog/shipped-baseline.md](./backlog/shipped-baseline.md) | Capabilities already shipped |
 
 ## Stack (reference)
 
