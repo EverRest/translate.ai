@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
+import { useConfirm } from '../../../shared/ui/ConfirmDialog';
 import { useAuth } from '../../auth/hooks/useAuth';
 import type { Project } from '../../projects/types';
 import { BranchDiffTable } from '../components/BranchDiffTable';
@@ -17,6 +18,7 @@ import type { BranchDiffItem, ProjectBranch } from '../types';
 const MUTATION_ROLES = new Set(['admin', 'developer']);
 
 export function ProjectBranchesPage() {
+  const confirm = useConfirm();
   const { projectId } = useParams<{ projectId: string }>();
   useOutletContext<{ project: Project }>();
   const { user } = useAuth();
@@ -123,11 +125,14 @@ export function ProjectBranchesPage() {
               canMerge={canMutate}
               merging={merge.isPending}
               savingKey={savingKey}
-              onMerge={() => {
+              onMerge={async () => {
                 if (
-                  window.confirm(
-                    `Merge "${activeBranch.name}" into main? This updates main translations.`,
-                  )
+                  await confirm({
+                    title: `Merge "${activeBranch.name}" into main?`,
+                    description: 'This updates main translations.',
+                    danger: true,
+                    confirmLabel: 'Merge',
+                  })
                 ) {
                   merge.mutate(activeBranch.id, {
                     onSuccess: () => {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
+import { useConfirm } from '../../../shared/ui/ConfirmDialog';
 import type { Project } from '../../projects/types';
 import {
   CreateGlossaryTermModal,
@@ -15,6 +16,7 @@ import {
 import type { GlossaryTerm } from '../types';
 
 export function ProjectGlossaryPage() {
+  const confirm = useConfirm();
   const { projectId } = useParams<{ projectId: string }>();
   useOutletContext<{ project: Project }>();
 
@@ -97,8 +99,8 @@ export function ProjectGlossaryPage() {
         <GlossaryTermsTable
           terms={items}
           onEdit={setEditingTerm}
-          onDelete={(term) => {
-            if (window.confirm(`Delete glossary term "${term.sourceTerm}"?`)) {
+          onDelete={async (term) => {
+            if (await confirm({ title: `Delete "${term.sourceTerm}"?`, description: 'This glossary term will be permanently deleted.', danger: true, confirmLabel: 'Delete' })) {
               remove.mutate(term.id);
             }
           }}

@@ -1,9 +1,11 @@
 import { Link, useParams } from 'react-router-dom';
+import { useConfirm } from '../../../shared/ui/ConfirmDialog';
 import { useProject } from '../../projects/hooks/useProjects';
 import { JobStatusBadge } from '../components/JobStatusBadge';
 import { useCancelJob, useJob, useRetryJob } from '../hooks/useTranslationJobs';
 
 export function JobDetailPage() {
+  const confirm = useConfirm();
   const { jobId } = useParams<{ jobId: string }>();
   const { data: job, isLoading, error } = useJob(jobId);
   const { data: project } = useProject(job?.projectId);
@@ -190,8 +192,8 @@ export function JobDetailPage() {
           <button
             type="button"
             disabled={cancel.isPending}
-            onClick={() => {
-              if (window.confirm('Cancel this job?')) {
+            onClick={async () => {
+              if (await confirm({ title: 'Cancel this job?', description: 'The job will be stopped and cannot be resumed.', danger: true, confirmLabel: 'Cancel job' })) {
                 cancel.mutate();
               }
             }}

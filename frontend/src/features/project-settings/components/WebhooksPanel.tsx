@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useConfirm } from '../../../shared/ui/ConfirmDialog';
 import { Modal } from '../../../shared/ui/Modal';
 import {
   useCreateWebhook,
@@ -14,6 +15,7 @@ type WebhooksPanelProps = {
 };
 
 export function WebhooksPanel({ projectId, projectName }: WebhooksPanelProps) {
+  const confirm = useConfirm();
   const [url, setUrl] = useState('');
   const [createdSecret, setCreatedSecret] = useState<string | null>(null);
   const { data: webhooks, isLoading, error } = useWebhooks(projectId);
@@ -85,8 +87,8 @@ export function WebhooksPanel({ projectId, projectName }: WebhooksPanelProps) {
             onToggle={(enabled) =>
               update.mutate({ webhookId: webhook.id, input: { enabled } })
             }
-            onDelete={() => {
-              if (window.confirm(`Delete webhook ${webhook.url}?`)) {
+            onDelete={async () => {
+              if (await confirm({ title: 'Delete webhook?', description: `Webhook ${webhook.url} will be permanently deleted.`, danger: true, confirmLabel: 'Delete' })) {
                 remove.mutate(webhook.id);
               }
             }}

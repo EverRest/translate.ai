@@ -15,7 +15,7 @@ export function AppLayout() {
   const logout = useLogout();
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100">
+    <div className="flex h-screen overflow-hidden bg-slate-950 text-slate-100">
       <aside className="flex w-56 flex-col border-r border-slate-800 bg-slate-900/50">
         <div className="border-b border-slate-800 px-5 py-5">
           <span className="text-lg font-semibold text-white">translate.ai</span>
@@ -51,8 +51,8 @@ export function AppLayout() {
           </button>
         </div>
       </aside>
-      <div className="flex flex-1 flex-col">
-        <main className="flex-1 px-8 py-8">
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <main className="flex flex-1 flex-col overflow-hidden px-8 py-8">
           <Outlet />
         </main>
       </div>
