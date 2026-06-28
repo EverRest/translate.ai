@@ -10,6 +10,7 @@ const tabs = [
   { to: 'branches', label: 'Branches' },
   { to: 'jobs', label: 'Jobs' },
   { to: 'approvals', label: 'Approvals' },
+  { to: 'export', label: 'Export' },
   { to: 'settings', label: 'Settings' },
 ];
 

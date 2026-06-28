@@ -4,6 +4,14 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Export UI (sync download)
+
+Per [backlog/P1-05-export-ui-async-queue.md](./backlog/P1-05-export-ui-async-queue.md):
+
+- **Frontend:** project **Export** tab — format, language, status filters; downloads via existing `GET /projects/:id/export`
+- **API client:** `apiDownload` helper with `Content-Disposition` filename parsing
+- **Deferred:** async `translation.export` queue, `export_jobs` schema, poll UI
+
 ### Added — Extended QA validators
 
 Per extended [adr/0008-translation-output-validation.md](./adr/0008-translation-output-validation.md) and [backlog/shipped-baseline.md](./backlog/shipped-baseline.md):
