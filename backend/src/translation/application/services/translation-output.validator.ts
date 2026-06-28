@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CYRILLIC_TARGET_LANGS } from '../../../shared/utils/language-script.utils';
+import { looksLikeInternalMetaLeak } from '../../../shared/utils/translation-meta-leak.utils';
 import { stripWrappingQuotes } from '../../../shared/utils/string.utils';
 import { runTranslationQaValidators } from '../validators/translation-qa.validators';
 
@@ -85,6 +86,14 @@ export class TranslationOutputValidator {
           reason: 'Translation output looks like a refusal or meta reply',
         };
       }
+    }
+
+    if (looksLikeInternalMetaLeak(trimmed)) {
+      return {
+        valid: false,
+        reason:
+          'Translation output looks like internal tool or meta instruction',
+      };
     }
 
     const normalizedSource = sourceText.trim();

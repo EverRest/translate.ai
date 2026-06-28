@@ -29,6 +29,28 @@ describe('TranslationOutputValidator', () => {
     expect(result.reason).toContain('refusal');
   });
 
+  it('rejects tool-call JSON leaked as translation output', () => {
+    const result = validator.validate(
+      '{"tool":"search_knowledge_base","args":{"query":"hours"}}',
+      'What are your hours?',
+      'en',
+      'de',
+    );
+    expect(result.valid).toBe(false);
+    expect(result.reason).toContain('internal tool');
+  });
+
+  it('rejects internal availability meta phrase', () => {
+    const result = validator.validate(
+      'Check AI availability',
+      'Can I book tomorrow?',
+      'en',
+      'de',
+    );
+    expect(result.valid).toBe(false);
+    expect(result.reason).toContain('internal tool');
+  });
+
   it('rejects identical source and target for different languages', () => {
     const result = validator.validate('Checkout', 'Checkout', 'en', 'de');
     expect(result.valid).toBe(false);
