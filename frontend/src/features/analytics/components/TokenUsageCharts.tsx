@@ -94,8 +94,12 @@ function TimelineChart({
 
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
-      <h2 className="text-sm font-medium text-slate-300">Token usage over time</h2>
-      <p className="mt-1 text-xs text-slate-500">Daily total tokens (input + output)</p>
+      <h2 className="text-sm font-medium text-slate-300">
+        Token usage over time
+      </h2>
+      <p className="mt-1 text-xs text-slate-500">
+        Daily total tokens (input + output)
+      </p>
       <div className={`mt-5 flex items-end gap-1 ${height}`}>
         {points.map((point) => (
           <div
@@ -147,8 +151,16 @@ export function TokenUsageCharts({
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <BarChart title="Tokens by model" rows={modelRows} colorClass="bg-violet-500" />
-      <BarChart title="Tokens by user" rows={userRows} colorClass="bg-sky-500" />
+      <BarChart
+        title="Tokens by model"
+        rows={modelRows}
+        colorClass="bg-violet-500"
+      />
+      <BarChart
+        title="Tokens by user"
+        rows={userRows}
+        colorClass="bg-sky-500"
+      />
       {timeline && (
         <div className="lg:col-span-2">
           <TimelineChart points={timeline.points} compact={compact} />

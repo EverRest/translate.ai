@@ -324,7 +324,9 @@ export function CreateJobModal({
                 value={inlineKeys}
                 onChange={(event) => setInlineKeys(event.target.value)}
                 rows={6}
-                placeholder={'greeting.hello | Hello world\ncart.checkout | Checkout'}
+                placeholder={
+                  'greeting.hello | Hello world\ncart.checkout | Checkout'
+                }
                 className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-white outline-none focus:border-sky-500"
               />
             </div>

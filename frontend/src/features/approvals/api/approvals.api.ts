@@ -79,9 +79,6 @@ export async function retranslateTranslation(
   const response = await apiPost<
     ApiSuccess<{ jobId: string; translationId: string; status: string }>,
     { provider?: string }
-  >(
-    `/translations/${translationId}/retranslate`,
-    provider ? { provider } : {},
-  );
+  >(`/translations/${translationId}/retranslate`, provider ? { provider } : {});
   return response.data;
 }

@@ -28,7 +28,9 @@ export function AccountUsageSection({ data }: AccountUsageSectionProps) {
     <section className="space-y-6">
       <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
         <div>
-          <h2 className="text-lg font-medium text-white">Subscription & usage</h2>
+          <h2 className="text-lg font-medium text-white">
+            Subscription & usage
+          </h2>
           <p className="mt-1 text-sm text-slate-400">
             Lifetime AI token usage for your organization (client tenant).
           </p>

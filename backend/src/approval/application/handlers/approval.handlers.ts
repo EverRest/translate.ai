@@ -451,10 +451,7 @@ export class RetranslateTranslationHandler implements ICommandHandler<Retranslat
       throw new BadRequestException('Translation key has empty source text');
     }
 
-    const sourceLang = this.config.get<string>(
-      'DEFAULT_SOURCE_LANGUAGE',
-      'en',
-    );
+    const sourceLang = this.config.get<string>('DEFAULT_SOURCE_LANGUAGE', 'en');
 
     await this.memory.forget(
       command.tenantId,
@@ -463,8 +460,7 @@ export class RetranslateTranslationHandler implements ICommandHandler<Retranslat
       translation.language,
     );
 
-    const provider =
-      command.provider ?? translation.provider ?? 'openai';
+    const provider = command.provider ?? translation.provider ?? 'openai';
 
     const job = await this.commandBus.execute(
       new CreateTranslationJobCommand(

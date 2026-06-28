@@ -1,4 +1,7 @@
-import { ContentType, TranslateOptions } from '../../../ai-provider/domain/ai-provider.interface';
+import {
+  ContentType,
+  TranslateOptions,
+} from '../../../ai-provider/domain/ai-provider.interface';
 import { inferContentTypeFromContext } from '../../../ai-provider/application/content-classifier.utils';
 
 export const VALID_CONTENT_TYPES: ContentType[] = [

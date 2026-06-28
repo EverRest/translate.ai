@@ -44,7 +44,12 @@ export function ProjectKeysPage() {
 
   const handleDeleteAll = async () => {
     if (!projectId) return;
-    if (!window.confirm('Delete ALL translation keys and their translations? This cannot be undone.')) return;
+    if (
+      !window.confirm(
+        'Delete ALL translation keys and their translations? This cannot be undone.',
+      )
+    )
+      return;
     setIsDeletingAll(true);
     try {
       await deleteAllTranslationKeys(projectId);
