@@ -1,5 +1,15 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { PrismaService } from '../../shared/prisma/prisma.service';
+import { ProjectAccessService } from '../../project/infrastructure/project-access.service';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { TranslationStatus } from '@prisma/client';
 import type { AuthUser } from '../../shared/auth/auth-user.interface';
@@ -29,7 +39,22 @@ export class TranslationsController {
   constructor(
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
+    private readonly prisma: PrismaService,
+    private readonly projectAccess: ProjectAccessService,
   ) {}
+
+  @Delete()
+  @ApiOperation({ summary: 'Delete all translations for a project' })
+  async deleteAll(
+    @CurrentUser() user: AuthUser,
+    @Param('projectId') projectId: string,
+  ) {
+    await this.projectAccess.getProjectForTenant(user.tenantId, projectId);
+    const { count } = await this.prisma.translation.deleteMany({
+      where: { translationKey: { projectId } },
+    });
+    return successResponse({ deleted: count });
+  }
 
   @Get()
   @ApiOperation({ summary: 'List translations for a project' })

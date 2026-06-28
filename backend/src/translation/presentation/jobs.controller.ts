@@ -4,14 +4,20 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  MessageEvent,
   Param,
   Post,
   Query,
+  Sse,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { JwtService } from '@nestjs/jwt';
+import { Observable } from 'rxjs';
 import type { AuthUser } from '../../shared/auth/auth-user.interface';
 import { AllowApiKey } from '../../shared/auth/decorators/allow-api-key.decorator';
+import { Public } from '../../shared/auth/decorators/public.decorator';
 import { CurrentUser } from '../../shared/auth/decorators/current-user.decorator';
 import {
   paginatedResponse,
@@ -25,6 +31,7 @@ import {
   ListTranslationJobsQuery,
   RetryTranslationJobCommand,
 } from '../application/job.commands';
+import { TranslationSseService } from '../application/services/translation-sse.service';
 import { CreateJobDto } from './dto/create-job.dto';
 
 function scopedProjectId(user: AuthUser): string | undefined {
@@ -58,6 +65,8 @@ export class JobsController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly sseService: TranslationSseService,
+    private readonly jwtService: JwtService,
   ) {}
 
   @Post()
@@ -118,6 +127,29 @@ export class JobsController {
       ),
     );
     return successResponse(data);
+  }
+
+  @Public()
+  @Sse(':jobId/stream')
+  @ApiOperation({ summary: 'Stream job progress via SSE' })
+  streamJob(
+    @Param('jobId') jobId: string,
+    @Query('projectId') projectId: string,
+    @Query('token') token: string,
+  ): Observable<MessageEvent> {
+    if (!token) throw new UnauthorizedException('Missing token');
+    try {
+      this.jwtService.verify(token);
+    } catch {
+      throw new UnauthorizedException('Invalid token');
+    }
+
+    if (!projectId) throw new BadRequestException('projectId is required');
+
+    return this.sseService.streamJob(
+      jobId,
+      projectId,
+    ) as Observable<MessageEvent>;
   }
 
   @Post(':jobId/cancel')

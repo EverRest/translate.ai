@@ -61,3 +61,21 @@ export async function deleteTranslationKey(projectId: string, keyId: string) {
   );
   return response.data;
 }
+
+export async function deleteAllTranslationKeys(projectId: string) {
+  const response = await apiDelete<ApiSuccess<{ deleted: number }>>(
+    `/projects/${projectId}/keys`,
+  );
+  return response.data;
+}
+
+export async function bulkImportKeys(
+  projectId: string,
+  keys: Array<{ key: string; sourceText: string }>,
+) {
+  const response = await apiPost<
+    ApiSuccess<{ created: number; total: number }>,
+    { keys: Array<{ key: string; sourceText: string }> }
+  >(`/projects/${projectId}/keys/bulk-import`, { keys });
+  return response.data;
+}

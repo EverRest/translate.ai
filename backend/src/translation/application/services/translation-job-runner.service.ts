@@ -92,7 +92,10 @@ export class TranslationJobRunnerService {
 
     const sourceText = item.translationKey.sourceText;
     if (!sourceText?.trim()) {
-      await this.markItemFailed(item.id, 'Translation key has empty source text');
+      await this.markItemFailed(
+        item.id,
+        'Translation key has empty source text',
+      );
       this.metrics.recordTranslationJobItem('failed');
       await this.jobCompletion.checkAndFinalize(item.jobId, payload.tenantId);
       return;
@@ -116,7 +119,7 @@ export class TranslationJobRunnerService {
         jobItemId: item.id,
         text: sourceText,
         targetLang: item.language,
-        providerName: item.job.provider ?? 'openai',
+        providerName: item.job.provider ?? 'gemini',
         options: {
           context: keyContext,
           contentType: inferContentTypeFromContext(keyContext),
@@ -180,9 +183,7 @@ export class TranslationJobRunnerService {
       this.metrics.recordTranslationJobItem('completed');
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn(
-        `Failed to process item ${item.id}: ${message}`,
-      );
+      this.logger.warn(`Failed to process item ${item.id}: ${message}`);
       await this.markItemFailed(item.id, message);
       this.metrics.recordTranslationJobItem('failed');
     }

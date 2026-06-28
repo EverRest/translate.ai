@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
 import type { Project } from '../../projects/types';
+import { deleteAllTranslationKeys } from '../api/translation-keys.api';
 import {
   CreateTranslationKeyModal,
   EditTranslationKeyModal,
@@ -9,6 +10,7 @@ import { TranslationKeysTable } from '../components/TranslationKeysTable';
 import {
   useCreateTranslationKey,
   useDeleteTranslationKey,
+  useRefetchTranslationKeys,
   useTranslationKeys,
   useUpdateTranslationKey,
 } from '../hooks/useTranslationKeys';
@@ -37,6 +39,20 @@ export function ProjectKeysPage() {
   const create = useCreateTranslationKey(projectId ?? '');
   const update = useUpdateTranslationKey(projectId ?? '');
   const remove = useDeleteTranslationKey(projectId ?? '');
+  const refetch = useRefetchTranslationKeys(projectId ?? '');
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
+
+  const handleDeleteAll = async () => {
+    if (!projectId) return;
+    if (!window.confirm('Delete ALL translation keys and their translations? This cannot be undone.')) return;
+    setIsDeletingAll(true);
+    try {
+      await deleteAllTranslationKeys(projectId);
+      refetch();
+    } finally {
+      setIsDeletingAll(false);
+    }
+  };
 
   const items = data?.items ?? [];
   const total = data?.meta.total ?? 0;
@@ -54,13 +70,23 @@ export function ProjectKeysPage() {
             {total} key{total === 1 ? '' : 's'} in this project
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setCreateOpen(true)}
-          className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500"
-        >
-          Add key
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={isDeletingAll || total === 0}
+            onClick={() => void handleDeleteAll()}
+            className="rounded-lg border border-red-800 px-4 py-2 text-sm font-medium text-red-400 hover:border-red-600 hover:text-red-300 disabled:opacity-50"
+          >
+            {isDeletingAll ? 'Deleting…' : 'Delete all'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setCreateOpen(true)}
+            className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500"
+          >
+            Add key
+          </button>
+        </div>
       </div>
 
       <div>

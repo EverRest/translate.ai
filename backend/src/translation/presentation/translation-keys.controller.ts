@@ -25,9 +25,12 @@ import {
   UpdateTranslationKeyCommand,
 } from '../application/translation-key.commands';
 import {
+  BulkImportKeysDto,
   CreateTranslationKeyDto,
   UpdateTranslationKeyDto,
 } from './dto/translation-key.dto';
+import { PrismaService } from '../../shared/prisma/prisma.service';
+import { ProjectAccessService } from '../../project/infrastructure/project-access.service';
 
 @ApiTags('translation-keys')
 @ApiBearerAuth()
@@ -37,6 +40,8 @@ export class TranslationKeysController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly prisma: PrismaService,
+    private readonly projectAccess: ProjectAccessService,
   ) {}
 
   @Get()
@@ -79,6 +84,37 @@ export class TranslationKeysController {
     return successResponse(data);
   }
 
+  @Post('bulk-import')
+  @ApiOperation({ summary: 'Bulk upsert translation keys' })
+  async bulkImport(
+    @CurrentUser() user: AuthUser,
+    @Param('projectId') projectId: string,
+    @Body() dto: BulkImportKeysDto,
+  ) {
+    await this.projectAccess.getProjectForTenant(user.tenantId, projectId);
+
+    const data = dto.keys.map((item) => ({
+      projectId,
+      key: item.key,
+      sourceText: item.sourceText,
+    }));
+
+    await this.prisma.translationKey.createMany({
+      data,
+      skipDuplicates: true,
+    });
+
+    const existing = await this.prisma.translationKey.findMany({
+      where: { projectId, key: { in: dto.keys.map((k) => k.key) } },
+      select: { id: true, key: true },
+    });
+
+    return successResponse({
+      created: existing.length,
+      total: dto.keys.length,
+    });
+  }
+
   @Patch(':keyId')
   @ApiOperation({ summary: 'Update translation key' })
   async update(
@@ -97,6 +133,19 @@ export class TranslationKeysController {
       ),
     );
     return successResponse(data);
+  }
+
+  @Delete()
+  @ApiOperation({ summary: 'Delete all translation keys for a project' })
+  async removeAll(
+    @CurrentUser() user: AuthUser,
+    @Param('projectId') projectId: string,
+  ) {
+    await this.projectAccess.getProjectForTenant(user.tenantId, projectId);
+    const { count } = await this.prisma.translationKey.deleteMany({
+      where: { projectId },
+    });
+    return successResponse({ deleted: count });
   }
 
   @Delete(':keyId')

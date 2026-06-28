@@ -48,7 +48,7 @@ export class CreateTranslationJobHandler implements ICommandHandler<CreateTransl
       command.keyItems,
     );
 
-    const provider = command.provider ?? 'openai';
+    const provider = command.provider ?? 'gemini';
 
     const job = await this.prisma.translationJob.create({
       data: {
@@ -177,10 +177,7 @@ export class RetryTranslationJobHandler implements ICommandHandler<RetryTranslat
     if (!job || job.project.tenantId !== command.tenantId) {
       throw new NotFoundException('Translation job not found');
     }
-    if (
-      command.scopedProjectId &&
-      job.projectId !== command.scopedProjectId
-    ) {
+    if (command.scopedProjectId && job.projectId !== command.scopedProjectId) {
       throw new NotFoundException('Translation job not found');
     }
 
@@ -215,10 +212,7 @@ export class CancelTranslationJobHandler implements ICommandHandler<CancelTransl
     if (!job || job.project.tenantId !== command.tenantId) {
       throw new NotFoundException('Translation job not found');
     }
-    if (
-      command.scopedProjectId &&
-      job.projectId !== command.scopedProjectId
-    ) {
+    if (command.scopedProjectId && job.projectId !== command.scopedProjectId) {
       throw new NotFoundException('Translation job not found');
     }
 
