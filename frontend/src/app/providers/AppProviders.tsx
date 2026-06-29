@@ -10,9 +10,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <ToastProvider>
-          <ConfirmDialogProvider>
-            {children}
-          </ConfirmDialogProvider>
+          <ConfirmDialogProvider>{children}</ConfirmDialogProvider>
         </ToastProvider>
       </BrowserRouter>
     </QueryClientProvider>

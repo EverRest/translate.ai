@@ -28,9 +28,9 @@ export function ApiKeysPanel({ projectId, projectName }: ApiKeysPanelProps) {
     "languages": ["de"],
     "keyItems": [
       { "key": "greeting.hello", "sourceText": "Hello world" }
-    ],
-    "provider": "ollama"
-  }'`
+    ]
+  }'
+# provider is optional — defaults to server AI_PROVIDER (e.g. gemini)`
     : '';
 
   return (
@@ -102,7 +102,15 @@ export function ApiKeysPanel({ projectId, projectName }: ApiKeysPanelProps) {
               type="button"
               disabled={revoke.isPending}
               onClick={async () => {
-                if (await confirm({ title: `Revoke API key "${key.name}"?`, description: 'This key will stop working immediately. This action cannot be undone.', danger: true, confirmLabel: 'Revoke' })) {
+                if (
+                  await confirm({
+                    title: `Revoke API key "${key.name}"?`,
+                    description:
+                      'This key will stop working immediately. This action cannot be undone.',
+                    danger: true,
+                    confirmLabel: 'Revoke',
+                  })
+                ) {
                   revoke.mutate(key.id);
                 }
               }}

@@ -5,6 +5,7 @@ import { useAuthStore } from '../../../features/auth/store/auth.store';
 import { useToast } from '../../../shared/ui/use-toast';
 import type {
   BulkActionDef,
+  ColumnDef,
   GridFetchParams,
   GridRef,
 } from '../../../shared/ui/DataGrid';
@@ -16,10 +17,16 @@ import {
   listAllTranslationKeyNames,
   listTranslationKeys,
 } from '../../translation-keys/api/translation-keys.api';
-import { useDeleteTranslationKey, useRefetchTranslationKeys } from '../../translation-keys/hooks/useTranslationKeys';
+import {
+  useDeleteTranslationKey,
+  useRefetchTranslationKeys,
+} from '../../translation-keys/hooks/useTranslationKeys';
 import type { Project } from '../../projects/types';
 import { deleteAllTranslations } from '../api/translations.api';
-import { useTranslations, useRefetchTranslations } from '../hooks/useTranslations';
+import {
+  useTranslations,
+  useRefetchTranslations,
+} from '../hooks/useTranslations';
 import type { Translation } from '../types';
 import { useConfirm } from '../../../shared/ui/ConfirmDialog';
 
@@ -45,7 +52,14 @@ function useJobSSE(
 
     es.onmessage = (e) => {
       type SsePayload =
-        | { type: 'translation'; key: string; sourceText: string; language: string; value: string; status: string }
+        | {
+            type: 'translation';
+            key: string;
+            sourceText: string;
+            language: string;
+            value: string;
+            status: string;
+          }
         | { type: 'done'; jobStatus: string }
         | { type: 'error'; message: string };
       const data = JSON.parse(e.data as string) as SsePayload;
@@ -92,19 +106,36 @@ function TranslateModal({
   onConfirm: (langs: string[]) => void;
   onClose: () => void;
 }) {
-  const [selected, setSelected] = useState<Set<string>>(new Set(languages.map((l) => l.code)));
+  const [selected, setSelected] = useState<Set<string>>(
+    new Set(languages.map((l) => l.code)),
+  );
   const allChecked = selected.size === languages.length;
 
   const toggle = (code: string) =>
-    setSelected((prev) => { const n = new Set(prev); n.has(code) ? n.delete(code) : n.add(code); return n; });
+    setSelected((prev) => {
+      const n = new Set(prev);
+      if (n.has(code)) {
+        n.delete(code);
+      } else {
+        n.add(code);
+      }
+      return n;
+    });
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-800 shadow-2xl">
         <div className="border-b border-slate-700 px-6 py-4">
-          <h2 className="text-base font-semibold text-white">Translate all keys</h2>
-          <p className="mt-1 text-sm text-slate-400">Select target languages to translate into</p>
+          <h2 className="text-base font-semibold text-white">
+            Translate all keys
+          </h2>
+          <p className="mt-1 text-sm text-slate-400">
+            Select target languages to translate into
+          </p>
         </div>
 
         <div className="px-6 py-3">
@@ -112,22 +143,35 @@ function TranslateModal({
             <input
               type="checkbox"
               checked={allChecked}
-              onChange={() => setSelected(allChecked ? new Set() : new Set(languages.map((l) => l.code)))}
+              onChange={() =>
+                setSelected(
+                  allChecked
+                    ? new Set()
+                    : new Set(languages.map((l) => l.code)),
+                )
+              }
               className="h-4 w-4 accent-sky-500"
             />
-            <span className="text-sm font-medium text-slate-300">Select all</span>
+            <span className="text-sm font-medium text-slate-300">
+              Select all
+            </span>
           </label>
           <div className="my-2 border-t border-slate-700/60" />
           <div className="max-h-64 overflow-y-auto space-y-0.5">
             {languages.map((l) => (
-              <label key={l.code} className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 hover:bg-slate-700/50">
+              <label
+                key={l.code}
+                className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 hover:bg-slate-700/50"
+              >
                 <input
                   type="checkbox"
                   checked={selected.has(l.code)}
                   onChange={() => toggle(l.code)}
                   className="h-4 w-4 accent-sky-500"
                 />
-                <span className="flex-1 text-sm text-slate-200">{l.code.toUpperCase()}</span>
+                <span className="flex-1 text-sm text-slate-200">
+                  {l.code.toUpperCase()}
+                </span>
               </label>
             ))}
           </div>
@@ -208,24 +252,47 @@ function BulkMenu({
           <button
             type="button"
             disabled={isTranslating || !hasRows}
-            onClick={() => { close(); onTranslateAll(); }}
+            onClick={() => {
+              close();
+              onTranslateAll();
+            }}
             className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-sky-400 hover:bg-slate-700 disabled:opacity-50"
           >
             {isTranslating ? (
               <>
-                <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                <svg
+                  className="h-3.5 w-3.5 animate-spin"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
                 </svg>
                 Translating…
               </>
-            ) : '⚡ Translate all'}
+            ) : (
+              '⚡ Translate all'
+            )}
           </button>
           <div className="my-1 border-t border-slate-700" />
           <button
             type="button"
             disabled={isImporting}
-            onClick={() => { close(); onImport(); }}
+            onClick={() => {
+              close();
+              onImport();
+            }}
             className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-slate-300 hover:bg-slate-700 disabled:opacity-50"
           >
             ↑ Import Excel
@@ -233,7 +300,10 @@ function BulkMenu({
           <button
             type="button"
             disabled={!hasRows}
-            onClick={() => { close(); onExport(); }}
+            onClick={() => {
+              close();
+              onExport();
+            }}
             className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-slate-300 hover:bg-slate-700 disabled:opacity-50"
           >
             ↓ Export Excel
@@ -241,7 +311,10 @@ function BulkMenu({
           <div className="my-1 border-t border-slate-700" />
           <button
             type="button"
-            onClick={() => { close(); onDeleteAll(); }}
+            onClick={() => {
+              close();
+              onDeleteAll();
+            }}
             className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-400 hover:bg-slate-700"
           >
             ✕ Delete all translations
@@ -258,7 +331,9 @@ function TranslationCell({ translation }: { translation: Translation }) {
   const [localValue, setLocalValue] = useState(translation.value);
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => setLocalValue(translation.value), [translation.value]);
-  useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
+  useEffect(() => {
+    if (editing) inputRef.current?.focus();
+  }, [editing]);
 
   const statusDot: Record<string, string> = {
     draft: 'bg-slate-500',
@@ -274,7 +349,9 @@ function TranslationCell({ translation }: { translation: Translation }) {
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
         onBlur={() => setEditing(false)}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Escape') setEditing(false); }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === 'Escape') setEditing(false);
+        }}
         className="w-full rounded border border-sky-600 bg-slate-800 px-2 py-1 text-sm text-white outline-none"
       />
     );
@@ -287,7 +364,9 @@ function TranslationCell({ translation }: { translation: Translation }) {
       className="flex w-full items-center gap-1.5 rounded px-1 py-0.5 text-left hover:bg-slate-700/40"
       title={`${localValue} (${translation.status}) — click to edit`}
     >
-      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${statusDot[translation.status] ?? 'bg-slate-500'}`} />
+      <span
+        className={`h-1.5 w-1.5 shrink-0 rounded-full ${statusDot[translation.status] ?? 'bg-slate-500'}`}
+      />
       <span className="truncate text-sm text-slate-200">{localValue}</span>
     </button>
   );
@@ -307,17 +386,27 @@ export function ProjectTranslationsPage() {
   const { data: translationsData } = useTranslations(projectId);
   const deleteKey = useDeleteTranslationKey(projectId ?? '');
 
-  const languages = useMemo(() => (langData ?? []).filter((l) => !l.isDefault), [langData]);
-  const defaultLang = useMemo(() => langData?.find((l) => l.isDefault), [langData]);
+  const languages = useMemo(
+    () => (langData ?? []).filter((l) => !l.isDefault),
+    [langData],
+  );
+  const defaultLang = useMemo(
+    () => langData?.find((l) => l.isDefault),
+    [langData],
+  );
 
   // ── gridRef ───────────────────────────────────────────────────────────────
   const gridRef = useRef<GridRef | null>(null);
 
   // ── Live translations (SSE) ───────────────────────────────────────────────
-  const [translatingKeys, setTranslatingKeys] = useState<Set<string>>(new Set());
+  const [translatingKeys, setTranslatingKeys] = useState<Set<string>>(
+    new Set(),
+  );
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const activeToastRef = useRef<string | null>(null);
-  const [liveTranslations, setLiveTranslations] = useState<Map<string, Translation>>(new Map());
+  const [liveTranslations, setLiveTranslations] = useState<
+    Map<string, Translation>
+  >(new Map());
 
   const handleSseTranslation = useCallback((t: Translation) => {
     setLiveTranslations((prev) => {
@@ -347,10 +436,13 @@ export function ProjectTranslationsPage() {
   const [translateModalOpen, setTranslateModalOpen] = useState(false);
 
   // ── sequential lang queue ─────────────────────────────────────────────────
-  const langQueueRef = useRef<string[]>([]);       // remaining languages to translate
-  const batchKeyNamesRef = useRef<string[]>([]);   // key names for current batch
+  const langQueueRef = useRef<string[]>([]); // remaining languages to translate
+  const batchKeyNamesRef = useRef<string[]>([]); // key names for current batch
   const batchKeyIdsRef = useRef<string[]>([]);
-  const [langProgress, setLangProgress] = useState<{ current: number; total: number } | null>(null);
+  const [langProgress, setLangProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
 
   const LANG_DELAY_MS = 3000; // pause between language jobs to let the model breathe
 
@@ -382,7 +474,11 @@ export function ProjectTranslationsPage() {
       });
       setActiveJobId(job.jobId);
     } catch (err) {
-      toast.update(toastId, err instanceof Error ? err.message : `Failed to start job for ${lang}.`, 'error');
+      toast.update(
+        toastId,
+        err instanceof Error ? err.message : `Failed to start job for ${lang}.`,
+        'error',
+      );
       activeToastRef.current = null;
       setTranslatingKeys(new Set());
       // still try next language after delay
@@ -392,7 +488,7 @@ export function ProjectTranslationsPage() {
         setLangProgress(null);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, toast]);
 
   const startNextInQueueRef = useRef(startNextInQueue);
@@ -400,11 +496,18 @@ export function ProjectTranslationsPage() {
 
   // ── startJob ──────────────────────────────────────────────────────────────
   const startJob = useCallback(
-    async (keyNames: string[], keyIds: string[], label: string, targetLangs?: string[]) => {
+    async (
+      keyNames: string[],
+      keyIds: string[],
+      label: string,
+      targetLangs?: string[],
+    ) => {
       if (!projectId) return;
       const langs = targetLangs ?? languages.map((l) => l.code);
       if (langs.length === 0) {
-        toast.error('No target languages configured. Add languages in Settings.');
+        toast.error(
+          'No target languages configured. Add languages in Settings.',
+        );
         return;
       }
 
@@ -414,10 +517,20 @@ export function ProjectTranslationsPage() {
         activeToastRef.current = toastId;
         setTranslatingKeys(new Set(keyIds));
         try {
-          const job = await createJob({ projectId, languages: langs, keys: keyNames });
+          const job = await createJob({
+            projectId,
+            languages: langs,
+            keys: keyNames,
+          });
           setActiveJobId(job.jobId);
         } catch (err) {
-          toast.update(toastId, err instanceof Error ? err.message : 'Failed to start translation job.', 'error');
+          toast.update(
+            toastId,
+            err instanceof Error
+              ? err.message
+              : 'Failed to start translation job.',
+            'error',
+          );
           activeToastRef.current = null;
           setTranslatingKeys(new Set());
         }
@@ -431,15 +544,27 @@ export function ProjectTranslationsPage() {
       setLangProgress({ current: 1, total: langs.length });
 
       const firstLang = langs[0];
-      const toastId = toast.loading(`Translating → ${firstLang.toUpperCase()} (1/${langs.length})…`);
+      const toastId = toast.loading(
+        `Translating → ${firstLang.toUpperCase()} (1/${langs.length})…`,
+      );
       activeToastRef.current = toastId;
       setTranslatingKeys(new Set(keyIds));
 
       try {
-        const job = await createJob({ projectId, languages: [firstLang], keys: keyNames });
+        const job = await createJob({
+          projectId,
+          languages: [firstLang],
+          keys: keyNames,
+        });
         setActiveJobId(job.jobId);
       } catch (err) {
-        toast.update(toastId, err instanceof Error ? err.message : 'Failed to start translation job.', 'error');
+        toast.update(
+          toastId,
+          err instanceof Error
+            ? err.message
+            : 'Failed to start translation job.',
+          'error',
+        );
         activeToastRef.current = null;
         setTranslatingKeys(new Set());
         langQueueRef.current = [];
@@ -452,13 +577,24 @@ export function ProjectTranslationsPage() {
   // ── handleDeleteRow ───────────────────────────────────────────────────────
   const handleDeleteRow = useCallback(
     async (row: KeyRow) => {
-      if (!await confirm({ title: `Delete key "${row.key}"?`, description: 'All translations for this key will be removed.', danger: true, confirmLabel: 'Delete' })) return;
+      if (
+        !(await confirm({
+          title: `Delete key "${row.key}"?`,
+          description: 'All translations for this key will be removed.',
+          danger: true,
+          confirmLabel: 'Delete',
+        }))
+      )
+        return;
       deleteKey.mutate(row.keyId, {
-        onError: (err) => toast.error(err instanceof Error ? err.message : 'Failed to delete key.'),
+        onError: (err) =>
+          toast.error(
+            err instanceof Error ? err.message : 'Failed to delete key.',
+          ),
         onSuccess: () => gridRef.current?.refetch(),
       });
     },
-    [deleteKey, toast],
+    [deleteKey, toast, confirm],
   );
 
   // ── SSE callbacks ─────────────────────────────────────────────────────────
@@ -480,29 +616,42 @@ export function ProjectTranslationsPage() {
       setTranslatingKeys(new Set());
       setLangProgress(null);
       if (activeToastRef.current) {
-        toast.update(activeToastRef.current, 'All translations complete ✓', 'success');
+        toast.update(
+          activeToastRef.current,
+          'All translations complete ✓',
+          'success',
+        );
         activeToastRef.current = null;
       }
     }
   }, [refetchTranslations, toast]);
 
-  const handleError = useCallback((msg: string) => {
-    setLiveTranslations(new Map());
-    setActiveJobId(null);
-    if (activeToastRef.current) {
-      toast.update(activeToastRef.current, msg, 'error');
-      activeToastRef.current = null;
-    }
-    // On error, still try next language in queue after delay
-    if (langQueueRef.current.length > 0) {
-      setTimeout(() => void startNextInQueueRef.current(), LANG_DELAY_MS);
-    } else {
-      setTranslatingKeys(new Set());
-      setLangProgress(null);
-    }
-  }, [toast]);
+  const handleError = useCallback(
+    (msg: string) => {
+      setLiveTranslations(new Map());
+      setActiveJobId(null);
+      if (activeToastRef.current) {
+        toast.update(activeToastRef.current, msg, 'error');
+        activeToastRef.current = null;
+      }
+      // On error, still try next language in queue after delay
+      if (langQueueRef.current.length > 0) {
+        setTimeout(() => void startNextInQueueRef.current(), LANG_DELAY_MS);
+      } else {
+        setTranslatingKeys(new Set());
+        setLangProgress(null);
+      }
+    },
+    [toast],
+  );
 
-  useJobSSE(activeJobId, projectId ?? '', handleSseTranslation, handleComplete, handleError);
+  useJobSSE(
+    activeJobId,
+    projectId ?? '',
+    handleSseTranslation,
+    handleComplete,
+    handleError,
+  );
 
   // ── handleCancelJob ───────────────────────────────────────────────────────
   const handleCancelJob = useCallback(async () => {
@@ -533,7 +682,7 @@ export function ProjectTranslationsPage() {
   const deleteKeyRef = useRef(deleteKey);
   deleteKeyRef.current = deleteKey;
 
-  const columns = useMemo(() => {
+  const columns = useMemo((): ColumnDef<KeyRow>[] => {
     return [
       {
         key: 'key',
@@ -544,7 +693,10 @@ export function ProjectTranslationsPage() {
         filterable: true,
         filterValue: (row: KeyRow) => row.key,
         render: (row: KeyRow) => (
-          <span className="truncate font-mono text-xs text-slate-300" title={row.key}>
+          <span
+            className="truncate font-mono text-xs text-slate-300"
+            title={row.key}
+          >
             {row.key}
           </span>
         ),
@@ -558,7 +710,10 @@ export function ProjectTranslationsPage() {
         filterable: true,
         filterValue: (row: KeyRow) => row.sourceText,
         render: (row: KeyRow) => (
-          <span className="truncate text-sm text-slate-200" title={row.sourceText}>
+          <span
+            className="truncate text-sm text-slate-200"
+            title={row.sourceText}
+          >
             {row.sourceText}
           </span>
         ),
@@ -568,21 +723,39 @@ export function ProjectTranslationsPage() {
         header: lang.code.toUpperCase(),
         width: 192,
         sortable: true,
-        sortValue: (row: KeyRow) => byKey.get(row.key)?.[lang.code]?.value ?? '',
+        sortValue: (row: KeyRow) =>
+          byKey.get(row.key)?.[lang.code]?.value ?? '',
         filterable: true,
-        filterValue: (row: KeyRow) => byKey.get(row.key)?.[lang.code]?.value ?? '',
+        filterValue: (row: KeyRow) =>
+          byKey.get(row.key)?.[lang.code]?.value ?? '',
         render: (row: KeyRow) => {
           const langMap = byKey.get(row.key);
           const t = langMap?.[lang.code];
-          const isTranslating = translatingKeys.size > 0
-            ? translatingKeys.has(row.keyId)
-            : activeJobId !== null;
+          const isTranslating =
+            translatingKeys.size > 0
+              ? translatingKeys.has(row.keyId)
+              : activeJobId !== null;
           if (isTranslating && !t) {
             return (
               <span className="flex items-center gap-1.5 text-xs text-sky-500">
-                <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                <svg
+                  className="h-3 w-3 animate-spin"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
                 </svg>
                 translating…
               </span>
@@ -601,116 +774,182 @@ export function ProjectTranslationsPage() {
         overflow: 'visible',
         sticky: 'right',
         render: (row: KeyRow) => (
-          <RowMenu items={[
-            {
-              label: 'Translate',
-              onClick: () => void startJobRef.current([row.key], [row.keyId], `Translating "${row.key}"…`),
-            },
-            {
-              label: 'Delete',
-              variant: 'danger',
-              onClick: () => void handleDeleteRowRef.current(row),
-            },
-          ]} />
+          <RowMenu
+            items={[
+              {
+                label: 'Translate',
+                onClick: () =>
+                  void startJobRef.current(
+                    [row.key],
+                    [row.keyId],
+                    `Translating "${row.key}"…`,
+                  ),
+              },
+              {
+                label: 'Delete',
+                variant: 'danger',
+                onClick: () => void handleDeleteRowRef.current(row),
+              },
+            ]}
+          />
         ),
       },
     ];
-  }, [defaultLang, languages, byKey, translatingKeys, activeJobId, deleteKey.isPending, deleteKey.variables]);
+  }, [defaultLang, languages, byKey, translatingKeys, activeJobId]);
 
   // ── fetchFn ───────────────────────────────────────────────────────────────
-  const fetchFn = useCallback(async (params: GridFetchParams) => {
-    const pg = Math.floor(params.offset / CHUNK_SIZE) + 1;
-    const data = await listTranslationKeys(projectId!, pg, CHUNK_SIZE, params.search);
-    return {
-      items: data.items.map((k) => ({ keyId: k.id, key: k.key, sourceText: k.sourceText ?? '' })),
-      total: data.meta.total,
-    };
-  }, [projectId]);
+  const fetchFn = useCallback(
+    async (params: GridFetchParams) => {
+      const pg = Math.floor(params.offset / CHUNK_SIZE) + 1;
+      const data = await listTranslationKeys(
+        projectId!,
+        pg,
+        CHUNK_SIZE,
+        params.search,
+      );
+      return {
+        items: data.items.map((k) => ({
+          keyId: k.id,
+          key: k.key,
+          sourceText: k.sourceText ?? '',
+        })),
+        total: data.meta.total,
+      };
+    },
+    [projectId],
+  );
 
   // ── bulkActions ───────────────────────────────────────────────────────────
-  const bulkActions = useMemo((): BulkActionDef<KeyRow>[] => [
-    {
-      key: 'translate',
-      label: 'Translate selected',
-      variant: 'primary',
-      onAction: ({ selectedRows, clearSelection }) => {
-        void startJobRef.current(
-          selectedRows.map((r) => r.key),
-          selectedRows.map((r) => r.keyId),
-          `Translating ${selectedRows.length} key${selectedRows.length === 1 ? '' : 's'}…`,
-        );
-        clearSelection();
+  const bulkActions = useMemo(
+    (): BulkActionDef<KeyRow>[] => [
+      {
+        key: 'translate',
+        label: 'Translate selected',
+        variant: 'primary',
+        onAction: ({ selectedRows, clearSelection }) => {
+          void startJobRef.current(
+            selectedRows.map((r) => r.key),
+            selectedRows.map((r) => r.keyId),
+            `Translating ${selectedRows.length} key${selectedRows.length === 1 ? '' : 's'}…`,
+          );
+          clearSelection();
+        },
       },
-    },
-    {
-      key: 'delete',
-      label: 'Delete selected',
-      variant: 'danger',
-      onAction: async ({ selectedRows, clearSelection, refetch }) => {
-        if (!await confirm({ title: `Delete ${selectedRows.length} key${selectedRows.length === 1 ? '' : 's'}?`, description: 'All translations for these keys will be removed.', danger: true, confirmLabel: 'Delete' })) return;
-        if (!projectId) return;
-        for (const row of selectedRows) {
-          await deleteKey.mutateAsync(row.keyId).catch(() => undefined);
-        }
-        clearSelection();
-        refetch();
+      {
+        key: 'delete',
+        label: 'Delete selected',
+        variant: 'danger',
+        onAction: async ({ selectedRows, clearSelection, refetch }) => {
+          if (
+            !(await confirm({
+              title: `Delete ${selectedRows.length} key${selectedRows.length === 1 ? '' : 's'}?`,
+              description: 'All translations for these keys will be removed.',
+              danger: true,
+              confirmLabel: 'Delete',
+            }))
+          )
+            return;
+          if (!projectId) return;
+          for (const row of selectedRows) {
+            await deleteKey.mutateAsync(row.keyId).catch(() => undefined);
+          }
+          clearSelection();
+          refetch();
+        },
       },
-    },
-  ], [projectId, deleteKey]);
+    ],
+    [projectId, deleteKey, confirm],
+  );
 
   // ── handleDeleteAll ───────────────────────────────────────────────────────
   const handleDeleteAll = useCallback(async () => {
     if (!projectId) return;
-    if (!await confirm({ title: 'Delete all translations?', description: 'All translations for this project will be permanently removed. This cannot be undone.', danger: true, confirmLabel: 'Delete all' })) return;
+    if (
+      !(await confirm({
+        title: 'Delete all translations?',
+        description:
+          'All translations for this project will be permanently removed. This cannot be undone.',
+        danger: true,
+        confirmLabel: 'Delete all',
+      }))
+    )
+      return;
     const toastId = toast.loading('Deleting all translations…');
     try {
       const result = await deleteAllTranslations(projectId);
-      toast.update(toastId, `Deleted ${result.deleted} translations`, 'success');
+      toast.update(
+        toastId,
+        `Deleted ${result.deleted} translations`,
+        'success',
+      );
       setLiveTranslations(new Map());
       await refetchTranslations();
       gridRef.current?.refetch();
     } catch (err) {
-      toast.update(toastId, err instanceof Error ? err.message : 'Delete failed.', 'error');
+      toast.update(
+        toastId,
+        err instanceof Error ? err.message : 'Delete failed.',
+        'error',
+      );
     }
-  }, [projectId, toast, refetchTranslations]);
+  }, [projectId, toast, refetchTranslations, confirm]);
 
   // ── Import / Export ───────────────────────────────────────────────────────
   const importFileRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
 
-  const handleImport = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !projectId) return;
-    e.target.value = '';
-    setIsImporting(true);
-    const toastId = toast.loading('Parsing Excel file…');
-    try {
-      const buf = await file.arrayBuffer();
-      const wb = XLSX.read(buf, { type: 'array' });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const sheetRows = XLSX.utils.sheet_to_json<Record<string, string>>(ws, { defval: '' });
-      const keys = sheetRows
-        .filter((r) => (r['Type'] ?? r['type'] ?? '').toString().toLowerCase() === 'title')
-        .map((r) => ({
-          key: (r['Field Id'] ?? r['field_id'] ?? r['FieldId'] ?? '').toString().trim(),
-          sourceText: (r['Field'] ?? r['field'] ?? '').toString().trim(),
-        }))
-        .filter((k) => k.key && k.sourceText);
-      if (keys.length === 0) {
-        toast.update(toastId, 'No valid title rows found in file.', 'error');
-        return;
+  const handleImport = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file || !projectId) return;
+      e.target.value = '';
+      setIsImporting(true);
+      const toastId = toast.loading('Parsing Excel file…');
+      try {
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const sheetRows = XLSX.utils.sheet_to_json<Record<string, string>>(ws, {
+          defval: '',
+        });
+        const keys = sheetRows
+          .filter(
+            (r) =>
+              (r['Type'] ?? r['type'] ?? '').toString().toLowerCase() ===
+              'title',
+          )
+          .map((r) => ({
+            key: (r['Field Id'] ?? r['field_id'] ?? r['FieldId'] ?? '')
+              .toString()
+              .trim(),
+            sourceText: (r['Field'] ?? r['field'] ?? '').toString().trim(),
+          }))
+          .filter((k) => k.key && k.sourceText);
+        if (keys.length === 0) {
+          toast.update(toastId, 'No valid title rows found in file.', 'error');
+          return;
+        }
+        toast.update(toastId, `Importing ${keys.length} keys…`, 'loading');
+        const result = await bulkImportKeys(projectId, keys);
+        toast.update(
+          toastId,
+          `Imported ${result.created} of ${result.total} keys`,
+          'success',
+        );
+        await Promise.all([refetchKeys(), refetchTranslations()]);
+        gridRef.current?.refetch();
+      } catch (err) {
+        toast.update(
+          toastId,
+          err instanceof Error ? err.message : 'Import failed.',
+          'error',
+        );
+      } finally {
+        setIsImporting(false);
       }
-      toast.update(toastId, `Importing ${keys.length} keys…`, 'loading');
-      const result = await bulkImportKeys(projectId, keys);
-      toast.update(toastId, `Imported ${result.created} of ${result.total} keys`, 'success');
-      await Promise.all([refetchKeys(), refetchTranslations()]);
-      gridRef.current?.refetch();
-    } catch (err) {
-      toast.update(toastId, err instanceof Error ? err.message : 'Import failed.', 'error');
-    } finally {
-      setIsImporting(false);
-    }
-  }, [projectId, toast, refetchKeys, refetchTranslations]);
+    },
+    [projectId, toast, refetchKeys, refetchTranslations],
+  );
 
   const handleExport = useCallback(() => {
     const langCodes = languages.map((l) => l.code);
@@ -720,13 +959,21 @@ export function ProjectTranslationsPage() {
       if (!byKeyExport.has(t.key)) byKeyExport.set(t.key, {});
       byKeyExport.get(t.key)![t.language] = t.value;
     }
-    const keyList = Array.from(new Set(allTranslations.map((t) => t.key))).sort();
+    const keyList = Array.from(
+      new Set(allTranslations.map((t) => t.key)),
+    ).sort();
     const wsData = [
       ['Field Id', 'Type', 'Field', ...langCodes],
       ...keyList.map((key) => {
         const langMap = byKeyExport.get(key) ?? {};
-        const sourceText = allTranslations.find((t) => t.key === key)?.sourceText ?? '';
-        return [key, 'title', sourceText, ...langCodes.map((lang) => langMap[lang] ?? '')];
+        const sourceText =
+          allTranslations.find((t) => t.key === key)?.sourceText ?? '';
+        return [
+          key,
+          'title',
+          sourceText,
+          ...langCodes.map((lang) => langMap[lang] ?? ''),
+        ];
       }),
     ];
     const ws = XLSX.utils.aoa_to_sheet(wsData);
@@ -738,7 +985,6 @@ export function ProjectTranslationsPage() {
   // ── Derived ────────────────────────────────────────────────────────────────
   const isTranslating = translatingKeys.size > 0;
   const showLangWarning = langData !== undefined && languages.length === 0;
-
 
   // ── Toolbar ────────────────────────────────────────────────────────────────
   const toolbar = (
@@ -753,9 +999,24 @@ export function ProjectTranslationsPage() {
       {isTranslating && (
         <>
           <span className="flex items-center gap-1.5 text-sm text-sky-400">
-            <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            <svg
+              className="h-3.5 w-3.5 animate-spin"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
             </svg>
             {langProgress
               ? `Language ${langProgress.current} of ${langProgress.total}…`
@@ -798,7 +1059,10 @@ export function ProjectTranslationsPage() {
               try {
                 const allKeys = await listAllTranslationKeyNames(projectId);
                 toast.dismiss(toastId);
-                if (allKeys.length === 0) { toast.error('No keys found.'); return; }
+                if (allKeys.length === 0) {
+                  toast.error('No keys found.');
+                  return;
+                }
                 void startJob(
                   allKeys,
                   [],

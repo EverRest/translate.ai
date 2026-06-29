@@ -69,7 +69,9 @@ export async function deleteAllTranslationKeys(projectId: string) {
   return response.data;
 }
 
-export async function listAllTranslationKeyNames(projectId: string): Promise<string[]> {
+export async function listAllTranslationKeyNames(
+  projectId: string,
+): Promise<string[]> {
   const PAGE_SIZE = 2000;
   const first = await listTranslationKeys(projectId, 1, PAGE_SIZE);
   const total = first.meta.total;
@@ -79,7 +81,9 @@ export async function listAllTranslationKeyNames(projectId: string): Promise<str
   const pages = Math.ceil(total / PAGE_SIZE);
   const rest = await Promise.all(
     Array.from({ length: pages - 1 }, (_, i) =>
-      listTranslationKeys(projectId, i + 2, PAGE_SIZE).then((r) => r.items.map((k) => k.key)),
+      listTranslationKeys(projectId, i + 2, PAGE_SIZE).then((r) =>
+        r.items.map((k) => k.key),
+      ),
     ),
   );
   return [...names, ...rest.flat()];

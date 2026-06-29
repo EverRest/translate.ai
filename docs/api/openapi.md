@@ -225,6 +225,27 @@ Archive project (soft delete).
 
 ---
 
+### AI config
+
+#### GET `/api/v1/config/ai`
+
+Authenticated (JWT or project API key). Returns server AI provider defaults — no API keys or model secrets.
+
+**Response `200`:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "defaultProvider": "gemini",
+    "supportedProviders": ["openai", "gemini", "ollama"],
+    "providerFallback": ["openai"]
+  }
+}
+```
+
+---
+
 ### Translation jobs
 
 #### POST `/api/v1/jobs`
@@ -238,10 +259,12 @@ Create async translation job. Returns immediately; processing via BullMQ.
   "projectId": "550e8400-e29b-41d4-a716-446655440000",
   "languages": ["de", "fr", "es"],
   "keys": ["cart.checkout", "cart.total"],
-  "provider": "openai",
+  "provider": "gemini",
   "clientRequestId": "optional-idempotency-key"
 }
 ```
+
+`provider` is **optional**. When omitted, the server uses `AI_PROVIDER` env (default `gemini`). The dashboard does not send `provider`; set it only for explicit API overrides.
 
 **Response `201`:**
 

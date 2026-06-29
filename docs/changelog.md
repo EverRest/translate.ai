@@ -4,6 +4,13 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Changed — AI provider UI uses server config
+
+- **API:** `GET /api/v1/config/ai` — `defaultProvider`, `supportedProviders`, `providerFallback` (no secrets)
+- **UI:** Removed hardcoded provider dropdown from Create Job modal; jobs use server `AI_PROVIDER` unless API sets `provider`
+- **UI:** Jobs list/detail show `defaultProvider` from config when job has no stored provider
+- **Docs:** OpenAPI updated for optional `provider` on job create
+
 ### Added — Gemini-primary cloud provider stack (P1-07, shipped)
 
 Per [adr/0013-openai-model-fallback.md](./adr/0013-openai-model-fallback.md), [domain/ai-provider.md](./domain/ai-provider.md), and [backlog/shipped-baseline.md](./backlog/shipped-baseline.md):
@@ -12,7 +19,7 @@ Per [adr/0013-openai-model-fallback.md](./adr/0013-openai-model-fallback.md), [d
 - **Env:** `AI_PROVIDER_FALLBACK=openai` for cloud testing (Gemini → OpenAI only, no Ollama)
 - **Models:** `GEMINI_MODEL=gemini-2.5-flash-lite`, `OPENAI_MODEL=gpt-4.1-mini`, `OPENAI_MODEL_FALLBACK=gpt-4.1`
 - **OpenAI:** model-tier fallback inside `OpenAiProvider` (mirrors ADR 0011 Gemini pattern)
-- **UI:** Create job modal defaults to `gemini` (matches backend)
+- **UI:** Create job modal no longer sends a hardcoded provider; server `AI_PROVIDER` applies
 - **Cost:** analytics rates for `gpt-4.1-mini`, `gpt-4.1`, `gemini-2.5-flash-lite` in `prompt.builder`
 - **Templates:** `backend/.env.example`, `.env.dev.example`, `.env.docker` updated
 - **Tests:** provider registry, model-chain utils, cost estimator unit tests

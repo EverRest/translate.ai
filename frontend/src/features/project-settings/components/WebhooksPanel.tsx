@@ -88,7 +88,14 @@ export function WebhooksPanel({ projectId, projectName }: WebhooksPanelProps) {
               update.mutate({ webhookId: webhook.id, input: { enabled } })
             }
             onDelete={async () => {
-              if (await confirm({ title: 'Delete webhook?', description: `Webhook ${webhook.url} will be permanently deleted.`, danger: true, confirmLabel: 'Delete' })) {
+              if (
+                await confirm({
+                  title: 'Delete webhook?',
+                  description: `Webhook ${webhook.url} will be permanently deleted.`,
+                  danger: true,
+                  confirmLabel: 'Delete',
+                })
+              ) {
                 remove.mutate(webhook.id);
               }
             }}

@@ -84,6 +84,12 @@ Env vars:
 | `GEMINI_MODEL` / `GEMINI_MODEL_FALLBACK` | Primary + optional in-provider Gemini tier |
 | `OPENAI_MODEL` / `OPENAI_MODEL_FALLBACK` | Primary + optional in-provider OpenAI tier |
 
+## Dashboard and API defaults
+
+- **Dashboard:** Create Job does not send `provider`; server `AI_PROVIDER` applies.
+- **API:** `GET /config/ai` exposes `defaultProvider`, `supportedProviders`, and `providerFallback` for clients.
+- **Override:** `POST /jobs` optional `provider` field for programmatic per-job choice.
+
 ## Prompt rules
 
 System prompt must instruct model to:
