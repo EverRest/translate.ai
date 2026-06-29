@@ -1,5 +1,7 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
+import { ObjectFilterChip } from '../../localization-objects/components/ObjectFilterChip';
+import { useObjectFilterFromUrl } from '../../localization-objects/hooks/useObjectFilterFromUrl';
 import type {
   GridRef,
   GridFetchParams,
@@ -49,8 +51,19 @@ export function ProjectKeysPage() {
   const remove = useDeleteTranslationKey(projectId ?? '');
 
   const confirm = useConfirm();
+  const { localizationObjectId, objectName, clearFilter } =
+    useObjectFilterFromUrl();
 
   const gridRef = useRef<GridRef | null>(null);
+
+  useEffect(() => {
+    gridRef.current?.refetch();
+  }, [localizationObjectId]);
+
+  const keyFilter = useMemo(
+    () => (localizationObjectId ? { localizationObjectId } : undefined),
+    [localizationObjectId],
+  );
 
   // ── fetchFn ────────────────────────────────────────────────────────────────
   const fetchFn = useCallback(
@@ -61,10 +74,11 @@ export function ProjectKeysPage() {
         pg,
         CHUNK_SIZE,
         params.search,
+        keyFilter,
       );
       return { items: data.items, total: data.meta.total };
     },
-    [projectId],
+    [projectId, keyFilter],
   );
 
   // ── Columns ────────────────────────────────────────────────────────────────
@@ -232,6 +246,7 @@ export function ProjectKeysPage() {
   // ── Toolbar ────────────────────────────────────────────────────────────────
   const toolbar = (
     <>
+      <ObjectFilterChip objectName={objectName} onClear={clearFilter} />
       <button
         type="button"
         disabled={isDeletingAll}

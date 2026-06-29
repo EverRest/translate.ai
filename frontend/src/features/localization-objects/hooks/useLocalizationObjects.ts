@@ -12,11 +12,13 @@ import {
   materializeLocalizationObject,
   translateLocalizationObject,
   updateLocalizationNode,
+  updateLocalizationObject,
 } from '../api/localization-objects.api';
 import type {
   CreateLocalizationNodeInput,
   CreateLocalizationObjectInput,
   UpdateLocalizationNodeInput,
+  UpdateLocalizationObjectInput,
 } from '../types';
 
 export function useLocalizationObjects(
@@ -73,6 +75,26 @@ export function useDeleteLocalizationObject(projectId: string) {
     mutationFn: (objectId: string) =>
       deleteLocalizationObject(projectId, objectId),
     onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['localization-objects', projectId],
+      });
+    },
+  });
+}
+
+export function useUpdateLocalizationObject(
+  projectId: string,
+  objectId: string,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: UpdateLocalizationObjectInput) =>
+      updateLocalizationObject(projectId, objectId, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['localization-object', projectId, objectId],
+      });
       void queryClient.invalidateQueries({
         queryKey: ['localization-objects', projectId],
       });
@@ -140,7 +162,8 @@ export function useMaterializeLocalizationObject(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => materializeLocalizationObject(projectId, objectId),
+    mutationFn: (options?: { prune?: boolean }) =>
+      materializeLocalizationObject(projectId, objectId, options),
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: ['localization-object', projectId, objectId],

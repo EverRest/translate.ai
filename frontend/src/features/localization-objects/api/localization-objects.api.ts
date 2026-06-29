@@ -15,6 +15,7 @@ import type {
   MaterializeResult,
   ObjectTemplateSummary,
   UpdateLocalizationNodeInput,
+  UpdateLocalizationObjectInput,
 } from '../types';
 
 export async function listLocalizationObjects(
@@ -55,6 +56,18 @@ export async function createLocalizationObject(
     ApiSuccess<LocalizationObjectSummary>,
     CreateLocalizationObjectInput
   >(`/projects/${projectId}/objects`, input);
+  return response.data;
+}
+
+export async function updateLocalizationObject(
+  projectId: string,
+  objectId: string,
+  input: UpdateLocalizationObjectInput,
+) {
+  const response = await apiPatch<
+    ApiSuccess<LocalizationObjectSummary>,
+    UpdateLocalizationObjectInput
+  >(`/projects/${projectId}/objects/${objectId}`, input);
   return response.data;
 }
 
@@ -107,9 +120,15 @@ export async function deleteLocalizationNode(
 export async function materializeLocalizationObject(
   projectId: string,
   objectId: string,
+  options?: { prune?: boolean },
 ) {
+  const params = new URLSearchParams();
+  if (options?.prune) {
+    params.set('prune', 'true');
+  }
+  const query = params.toString();
   const response = await apiPost<ApiSuccess<MaterializeResult>>(
-    `/projects/${projectId}/objects/${objectId}/materialize`,
+    `/projects/${projectId}/objects/${objectId}/materialize${query ? `?${query}` : ''}`,
   );
   return response.data;
 }

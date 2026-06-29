@@ -1,6 +1,6 @@
 # P3-12 — Localization objects (nested structure)
 
-**Phase:** 3 · **Priority:** High · **Status:** Shipped (P3-12a MVP)
+**Phase:** 3 · **Priority:** High · **Status:** Shipped (P3-12a/b/c + polish)
 
 ## Goal
 
@@ -137,10 +137,18 @@ Match existing design: slate-900 cards, sky accents, `DataGrid` patterns where l
 - [x] ADR 0014 — dual model (tree authoring + flat execution)
 - [x] Docs: `docs/domain/localization-object.md`, openapi.md, changelog
 
-### Phase 2 (P3-12b)
+### Phase 2 (P3-12b/c)
 
-- [ ] AI generate structure queue + UI “Generate” button
-- [ ] Object templates seed (Login Form, Registration Form)
+- [x] AI generate structure queue + UI “Generate” button
+- [x] Object templates seed (Login Form, Registration Form)
+
+### Polish (P3-12 follow-up)
+
+- [x] Filter keys/translations by `localizationObjectId` or key prefix
+- [x] Node inspector sidebar — `contentType`, `description`, `context`
+- [x] Edit object name/description in UI
+- [x] Optional prune on materialize (`?prune=true`)
+- [x] List cards: materialized % + last updated; node type icons
 
 ## Implementation notes
 

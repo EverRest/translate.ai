@@ -4,6 +4,19 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Localization objects polish (P3-12 follow-up)
+
+- **API:** `localizationObjectId` / `keyPrefix` filters on keys and translations list
+- **API:** `POST .../materialize?prune=true` removes orphan keys for an object
+- **UI:** Node inspector sidebar, edit object metadata, object filter chip on Keys/Translations
+- **UI:** Materialize prune checkbox, list progress bar, node type icons
+
+### Fixed — E2E test isolation
+
+- **E2E:** `BULLMQ_PREFIX=e2e-{pid}` isolates BullMQ queues from local dev worker
+- **E2E:** `MOCK_TRANSLATIONS=true` via `setupFiles` + test-env fallback in `TranslateTextService`
+- **Tests:** `localization-objects.e2e-spec.ts` — template + materialize smoke (no AI)
+
 ### Added — Localization objects AI + templates (P3-12b/c)
 
 - **Queue:** `localization-object.generate` — AI builds node tree from object name/description

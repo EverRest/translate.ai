@@ -24,6 +24,7 @@ import { UserModule } from './user/user.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { QueuesModule } from './shared/queues/queues.module';
 import { validationSchema } from './shared/config/validation.schema';
+import { buildBullRootConfig } from './shared/config/bull-root.config';
 import { CombinedAuthGuard } from './shared/auth/guards/combined-auth.guard';
 import { ApiKeyAccessGuard } from './shared/auth/guards/api-key-access.guard';
 import { RolesGuard } from './shared/auth/guards/roles.guard';
@@ -37,12 +38,7 @@ import { RolesGuard } from './shared/auth/guards/roles.guard';
     CqrsModule.forRoot(),
     BullModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        connection: {
-          host: config.get<string>('REDIS_HOST', 'localhost'),
-          port: config.get<number>('REDIS_PORT', 6379),
-        },
-      }),
+      useFactory: (config: ConfigService) => buildBullRootConfig(config),
     }),
     QueuesModule,
     AdminModule,
