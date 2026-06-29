@@ -4,6 +4,25 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Localization objects AI + templates (P3-12b/c)
+
+- **Queue:** `localization-object.generate` — AI builds node tree from object name/description
+- **API:** `POST .../generate-structure`, `POST .../apply-template`, `GET .../objects/templates`
+- **Templates:** `login_form`, `registration_form` (built-in, no AI)
+- **UI:** **Generate with AI** button + **Apply template** dropdown on object detail
+- **Schema:** `generationStatus`, `generationError` on `LocalizationObject`
+- **Service:** `AiCompletionService` for JSON structure generation (Gemini → OpenAI fallback)
+
+### Added — Localization objects (P3-12a)
+
+Per [adr/0014-localization-objects.md](./adr/0014-localization-objects.md) and [domain/localization-object.md](./domain/localization-object.md):
+
+- **Schema:** `LocalizationObject`, `LocalizationNode`; optional `TranslationKey.localizationObjectId`
+- **API:** CRUD objects/nodes, `materialize`, `translate` under `/projects/:id/objects`
+- **Module:** `localization-object` — flatten tree → dotted keys, idempotent materialize
+- **UI:** Project tab **Objects** — list, tree editor, materialize, translate all
+- **Tests:** `flatten-tree.utils`, `materialize-object.service`, node content-type mapping
+
 ### Changed — AI provider UI uses server config
 
 - **API:** `GET /api/v1/config/ai` — `defaultProvider`, `supportedProviders`, `providerFallback` (no secrets)

@@ -66,6 +66,7 @@ Goal: hard-to-replace infrastructure — replay, duplicates, CI pipeline, market
 | [P3-09](./P3-09-feature-flag-localization.md) | Feature-flag–gated localization | Low |
 | [P3-10](./P3-10-shared-cache-premium.md) | Tenant-shared anonymous TM (premium) | Low |
 | [P3-11](./P3-11-ai-marketplace.md) | Plugin marketplace (validators, providers) | Low |
+| [P3-12](./P3-12-nested-translation.md) | Localization objects (nested forms/pages → flat keys) | High |
 
 ---
 
@@ -77,6 +78,7 @@ P1-01 (pgvector) ──► P3-02 (semantic diff) ──► P3-03 (duplicates)
 P2-01 (prompt versioning) ──► P3-01 (replay)
 P2-02 (cost router) ──► P3-08 (simulator)
 P1-02 (VCS) ──► P1-06 (PR) ──► P3-07 (pipeline as code)
+P3-12 (localization objects) ──► P3-04 (dependency graph) · P3-07 (pipeline)
 ```
 
 ---
