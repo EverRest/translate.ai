@@ -43,4 +43,5 @@ Defaults:
 - ADR 0011 (Gemini model tier fallback)
 - ADR 0010 (transient HTTP retry)
 - ADR 0003 (provider abstraction)
-- [docs/backlog/P1-07-gemini-primary-openai-fallback.md](../backlog/P1-07-gemini-primary-openai-fallback.md)
+- [docs/domain/ai-provider.md](../domain/ai-provider.md)
+- [docs/backlog/shipped-baseline.md](../backlog/shipped-baseline.md)

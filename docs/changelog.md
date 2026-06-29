@@ -4,16 +4,18 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
-### Added — Gemini-primary cloud provider stack (P1-07)
+### Added — Gemini-primary cloud provider stack (P1-07, shipped)
 
-Per [backlog/P1-07-gemini-primary-openai-fallback.md](./backlog/P1-07-gemini-primary-openai-fallback.md) and [adr/0013-openai-model-fallback.md](./adr/0013-openai-model-fallback.md):
+Per [adr/0013-openai-model-fallback.md](./adr/0013-openai-model-fallback.md), [domain/ai-provider.md](./domain/ai-provider.md), and [backlog/shipped-baseline.md](./backlog/shipped-baseline.md):
 
-- **Env:** `AI_PROVIDER=gemini` default job provider; `AI_PROVIDER_FALLBACK=openai` for cloud testing
+- **Config:** `AI_PROVIDER` env (default `gemini`) wired in validation schema and job creation when API/UI omit provider
+- **Env:** `AI_PROVIDER_FALLBACK=openai` for cloud testing (Gemini → OpenAI only, no Ollama)
 - **Models:** `GEMINI_MODEL=gemini-2.5-flash-lite`, `OPENAI_MODEL=gpt-4.1-mini`, `OPENAI_MODEL_FALLBACK=gpt-4.1`
 - **OpenAI:** model-tier fallback inside `OpenAiProvider` (mirrors ADR 0011 Gemini pattern)
 - **UI:** Create job modal defaults to `gemini` (matches backend)
-- **Cost:** analytics rates for `gpt-4.1-mini`, `gpt-4.1`, `gemini-2.5-flash-lite`
-- **Templates:** `.env.example`, `.env.dev.example`, `.env.docker` updated
+- **Cost:** analytics rates for `gpt-4.1-mini`, `gpt-4.1`, `gemini-2.5-flash-lite` in `prompt.builder`
+- **Templates:** `backend/.env.example`, `.env.dev.example`, `.env.docker` updated
+- **Tests:** provider registry, model-chain utils, cost estimator unit tests
 
 ### Added — Auto glossary suggestions (P1-03)
 

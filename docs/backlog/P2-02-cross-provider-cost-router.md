@@ -8,7 +8,7 @@ Route strings to the right **provider + model** by content type, length, and ten
 
 ## Current state
 
-- Fallback chain on **failure** only: `ProviderRegistryService` (e.g. gemini → openai for cloud; see P1-07)
+- Fallback chain on **failure** only: `ProviderRegistryService` (e.g. gemini → openai for cloud; shipped — see [shipped-baseline.md](./shipped-baseline.md))
 - **Gemini model tier fallback** (ADR 0011): optional `GEMINI_MODEL_FALLBACK` inside `GeminiProvider`
 - **OpenAI model tier fallback** (ADR 0013): optional `OPENAI_MODEL_FALLBACK` inside `OpenAiProvider`
 - **Ollama-only** model pick by contentType: `OllamaModelRouterService` (ADR 0007)

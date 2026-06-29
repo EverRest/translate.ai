@@ -6,6 +6,7 @@ Reference only — do **not** re-implement. Details live in `docs/domain/`, `doc
 |------------|--------|
 | Translation memory (Postgres hash) | `TranslationMemoryService`, ADR implicit in patterns |
 | Multi-provider fallback | `ProviderRegistryService`, ADR 0003 |
+| Gemini-primary cloud stack | `AI_PROVIDER`, `AI_PROVIDER_FALLBACK`, ADR 0010/0011/0013, `OpenAiProvider`, `GeminiProvider` |
 | Ollama model router + classifier | ADR 0007, `OllamaModelRouterService` |
 | Key context + contentType in prompts | `translation-context.utils`, `prompt.builder` |
 | Output sanitize + heuristic validation + 3 retries | ADR 0008, `translation-sanitize.utils`, `TranslationOutputValidator` |
