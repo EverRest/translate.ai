@@ -3,7 +3,7 @@
 Product direction: from **AI translator** → **localization pipeline platform** (see [raw.md](./raw.md) vision).
 
 **Baseline already in production:** [shipped-baseline.md](./shipped-baseline.md)  
-**FIFA / WIZ client track:** [fifa-wiz/](./fifa-wiz/README.md) (P0-01 … P0-D09)  
+**FIFA / WIZ client track:** [fifa-wiz/](demo/README.md) (P0-01 … P0-D09)  
 **Agent rules:** [../AGENTS.md](../AGENTS.md)
 
 ---

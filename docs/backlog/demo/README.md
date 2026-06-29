@@ -1,6 +1,6 @@
 # FIFA / WIZ Client Backlog
 
-Prioritized from [client-ideas-fifa-wiz.md](../client-ideas-fifa-wiz.md) with EverRest review comments (Jun 2026).
+Prioritized from [client-ideas-fifa-wiz.md](../demo) with EverRest review comments (Jun 2026).
 
 **Goal:** zero-friction adoption for BMA/PMA/SEQ teams (Confluence + Excel today) → AI-assisted localization before runtime API.
 
@@ -104,6 +104,6 @@ See [P0-S01](./P0-S01-glossary-platform.md) · [P0-S02](./P0-S02-placeholder-pro
 
 ## Source
 
-- Raw ideas: [client-ideas-fifa-wiz.md](../client-ideas-fifa-wiz.md)
+- Raw ideas: [client-ideas-fifa-wiz.md](../demo)
 - EverRest inline comments (Jun 29–30, 2026)
 - Platform baseline: [shipped-baseline.md](../shipped-baseline.md)
