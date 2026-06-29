@@ -97,7 +97,14 @@ export type UpdateLocalizationNodeInput = {
 export type MaterializeResult = {
   created: number;
   updated: number;
+  pruned: number;
   total: number;
+};
+
+export type UpdateLocalizationObjectInput = {
+  name?: string;
+  description?: string | null;
+  templateType?: LocalizationTemplateType;
 };
 
 export type ObjectTemplateSummary = {

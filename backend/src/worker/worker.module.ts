@@ -8,6 +8,7 @@ import { MonitoringModule } from '../shared/monitoring/monitoring.module';
 import { QueuesModule } from '../shared/queues/queues.module';
 import { SharedModule } from '../shared/shared.module';
 import { validationSchema } from '../shared/config/validation.schema';
+import { buildBullRootConfig } from '../shared/config/bull-root.config';
 import { TranslationModule } from '../translation/translation.module';
 import { ExportModule } from '../export/export.module';
 import { GlossaryModule } from '../glossary/glossary.module';
@@ -41,12 +42,7 @@ import { LocalizationObjectGenerateProcessor } from './processors/localization-o
     LocalizationObjectModule,
     BullModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        connection: {
-          host: config.get<string>('REDIS_HOST', 'localhost'),
-          port: config.get<number>('REDIS_PORT', 6379),
-        },
-      }),
+      useFactory: (config: ConfigService) => buildBullRootConfig(config),
     }),
     QueuesModule,
   ],

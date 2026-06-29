@@ -33,7 +33,7 @@ export class TranslateTextService {
   ) {}
 
   async translate(request: TranslateRequest): Promise<TranslateResult> {
-    if (this.config.get<boolean>('MOCK_TRANSLATIONS')) {
+    if (this.isMockTranslationsEnabled()) {
       return {
         text: `[${request.targetLang}] ${request.text}`,
         provider: 'mock',
@@ -98,5 +98,19 @@ export class TranslateTextService {
       provider: result.provider,
       usedFallback: result.usedFallback,
     };
+  }
+
+  private isMockTranslationsEnabled(): boolean {
+    const fromConfig = this.config.get<string | boolean>('MOCK_TRANSLATIONS');
+    if (fromConfig === true || fromConfig === 'true') {
+      return true;
+    }
+
+    if (process.env.NODE_ENV === 'test') {
+      const fromEnv = process.env.MOCK_TRANSLATIONS;
+      return fromEnv === 'true' || fromEnv === '1';
+    }
+
+    return false;
   }
 }

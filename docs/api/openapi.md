@@ -195,7 +195,7 @@ Archive project (soft delete).
 
 #### GET `/api/v1/projects/{projectId}/keys`
 
-**Query:** `page`, `limit`, `search`
+**Query:** `page`, `limit`, `search`, `localizationObjectId`, `keyPrefix`
 
 #### POST `/api/v1/projects/{projectId}/keys`
 
@@ -219,7 +219,7 @@ Archive project (soft delete).
 
 #### GET `/api/v1/projects/{projectId}/translations`
 
-**Query:** `language`, `status`, `key`
+**Query:** `language`, `status`, `keys`, `localizationObjectId`, `keyPrefix`
 
 #### GET `/api/v1/projects/{projectId}/translations/{translationId}`
 
@@ -371,7 +371,9 @@ Deletes tree; materialized translation keys remain.
 
 #### POST `/api/v1/projects/{projectId}/objects/{objectId}/materialize`
 
-**Response:** `{ created, updated, total }`
+**Query:** `prune` — `true` to delete materialized keys no longer present in the tree (default `false`).
+
+**Response:** `{ created, updated, pruned, total }`
 
 #### POST `/api/v1/projects/{projectId}/objects/{objectId}/translate`
 

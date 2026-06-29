@@ -227,12 +227,14 @@ export class LocalizationObjectsController {
     @CurrentUser() user: AuthUser,
     @Param('projectId') projectId: string,
     @Param('objectId') objectId: string,
+    @Query('prune') prune?: string,
   ) {
     const data = await this.commandBus.execute(
       new MaterializeLocalizationObjectCommand(
         user.tenantId,
         projectId,
         objectId,
+        prune === 'true' || prune === '1',
       ),
     );
     return successResponse(data);

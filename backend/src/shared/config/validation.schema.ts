@@ -42,6 +42,7 @@ export const validationSchema = Joi.object({
   AI_PROVIDER_FALLBACK: Joi.string().default('gemini,ollama'),
   DEFAULT_SOURCE_LANGUAGE: Joi.string().default('en'),
   MOCK_TRANSLATIONS: Joi.boolean().default(false),
+  BULLMQ_PREFIX: Joi.string().allow('').optional(),
   TRANSLATION_VALIDATION_ENABLED: Joi.boolean().default(true),
   TRANSLATION_QA_VALIDATORS_ENABLED: Joi.boolean().default(true),
   EXPORT_ASYNC_THRESHOLD: Joi.number().integer().min(1).default(1000),

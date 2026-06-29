@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { useAuthStore } from '../../../features/auth/store/auth.store';
+import { ObjectFilterChip } from '../../localization-objects/components/ObjectFilterChip';
+import { useObjectFilterFromUrl } from '../../localization-objects/hooks/useObjectFilterFromUrl';
 import { useToast } from '../../../shared/ui/use-toast';
 import type {
   BulkActionDef,
@@ -465,6 +467,8 @@ export function ProjectTranslationsPage() {
 
   const toast = useToast();
   const confirm = useConfirm();
+  const { localizationObjectId, objectName, clearFilter } =
+    useObjectFilterFromUrl();
   const refetchTranslations = useRefetchTranslations(projectId ?? '');
   const refetchKeys = useRefetchTranslationKeys(projectId ?? '');
 
@@ -483,6 +487,15 @@ export function ProjectTranslationsPage() {
 
   // ── gridRef ───────────────────────────────────────────────────────────────
   const gridRef = useRef<GridRef | null>(null);
+
+  useEffect(() => {
+    gridRef.current?.refetch();
+  }, [localizationObjectId]);
+
+  const keyFilter = useMemo(
+    () => (localizationObjectId ? { localizationObjectId } : undefined),
+    [localizationObjectId],
+  );
 
   // ── Live translations (SSE) ───────────────────────────────────────────────
   const [translatingKeys, setTranslatingKeys] = useState<Set<string>>(
@@ -863,6 +876,7 @@ export function ProjectTranslationsPage() {
         pg,
         CHUNK_SIZE,
         params.search,
+        keyFilter,
       );
       return {
         items: data.items.map((k) => ({
@@ -873,7 +887,7 @@ export function ProjectTranslationsPage() {
         total: data.meta.total,
       };
     },
-    [projectId],
+    [projectId, keyFilter],
   );
 
   // ── bulkActions ───────────────────────────────────────────────────────────
@@ -1046,6 +1060,7 @@ export function ProjectTranslationsPage() {
   // ── Toolbar ────────────────────────────────────────────────────────────────
   const toolbar = (
     <>
+      <ObjectFilterChip objectName={objectName} onClear={clearFilter} />
       <input
         ref={importFileRef}
         type="file"
