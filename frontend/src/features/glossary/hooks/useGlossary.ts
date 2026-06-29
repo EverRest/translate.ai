@@ -1,28 +1,71 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  activateGlossarySet,
   analyzeGlossary,
   approveGlossarySuggestion,
-  createGlossaryTerm,
+  createGlossarySet,
   deleteGlossaryTerm,
+  listGlossaries,
   listGlossarySuggestions,
   listGlossaryTerms,
   rejectGlossarySuggestion,
   updateGlossaryTerm,
+  upsertGlossaryTerm,
 } from '../api/glossary.api';
 import type {
   CreateGlossaryTermInput,
   UpdateGlossaryTermInput,
 } from '../types';
 
+export function useGlossarySets(projectId: string | undefined) {
+  return useQuery({
+    queryKey: ['glossary-sets', projectId],
+    queryFn: () => listGlossaries(projectId!),
+    enabled: Boolean(projectId),
+  });
+}
+
+export function useCreateGlossarySet(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: { name: string; cloneFromActive?: boolean }) =>
+      createGlossarySet(projectId, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['glossary-sets', projectId],
+      });
+      void queryClient.invalidateQueries({ queryKey: ['glossary', projectId] });
+    },
+  });
+}
+
+export function useActivateGlossarySet(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (glossaryId: string) =>
+      activateGlossarySet(projectId, glossaryId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['glossary-sets', projectId],
+      });
+      void queryClient.invalidateQueries({ queryKey: ['glossary', projectId] });
+    },
+  });
+}
+
 export function useGlossaryTerms(
   projectId: string | undefined,
   page = 1,
   limit = 50,
   search?: string,
+  glossaryId?: string,
 ) {
   return useQuery({
-    queryKey: ['glossary', projectId, page, limit, search],
-    queryFn: () => listGlossaryTerms(projectId!, page, limit, search),
+    queryKey: ['glossary', projectId, page, limit, search, glossaryId],
+    queryFn: () =>
+      listGlossaryTerms(projectId!, page, limit, search, glossaryId),
     enabled: Boolean(projectId),
   });
 }
@@ -32,7 +75,7 @@ export function useCreateGlossaryTerm(projectId: string) {
 
   return useMutation({
     mutationFn: (input: CreateGlossaryTermInput) =>
-      createGlossaryTerm(projectId, input),
+      upsertGlossaryTerm(projectId, input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['glossary', projectId] });
     },

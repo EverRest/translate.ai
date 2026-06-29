@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useParams } from 'react-router-dom';
+import { TerminologyDriftBadge } from '../../glossary/components/TerminologyDriftBadge';
 import { useConfirm } from '../../../shared/ui/ConfirmDialog';
 import { useArchiveProject, useProject } from '../hooks/useProjects';
 
@@ -89,6 +90,11 @@ export function ProjectDetailLayout() {
             }
           >
             {tab.label}
+            {tab.to === 'glossary' && projectId && (
+              <span className="ml-2 inline-flex align-middle">
+                <TerminologyDriftBadge projectId={projectId} />
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>

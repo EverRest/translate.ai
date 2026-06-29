@@ -24,6 +24,7 @@ import {
   useRefetchTranslationKeys,
 } from '../../translation-keys/hooks/useTranslationKeys';
 import type { Project } from '../../projects/types';
+import { TerminologyDriftBadge } from '../../glossary/components/TerminologyDriftBadge';
 import { deleteAllTranslations } from '../api/translations.api';
 import {
   useTranslations,
@@ -1004,6 +1005,7 @@ export function ProjectTranslationsPage() {
   const toolbar = (
     <>
       <ObjectFilterChip objectName={objectName} onClear={clearFilter} />
+      {projectId && <TerminologyDriftBadge projectId={projectId} />}
       <input
         ref={importFileRef}
         type="file"

@@ -6,6 +6,7 @@ export const QUEUES = {
   TRANSLATION_EXPORT: 'translation.export',
   GLOSSARY_ANALYZE: 'glossary.analyze',
   LOCALIZATION_OBJECT_GENERATE: 'localization-object.generate',
+  TERMINOLOGY_SCAN: 'terminology.scan',
   WEBHOOK_SEND: 'webhook.send',
 } as const;
 

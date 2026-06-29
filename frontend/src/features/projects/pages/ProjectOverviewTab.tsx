@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import { ProjectConsistencyWidget } from '../../glossary/components/ProjectConsistencyWidget';
 import { ProjectFormModal } from '../components/ProjectFormModal';
 import { useUpdateProject } from '../hooks/useProjects';
 import type { Project } from '../types';
@@ -10,7 +11,9 @@ export function ProjectOverviewTab() {
   const update = useUpdateProject();
 
   return (
-    <>
+    <div className="space-y-6">
+      <ProjectConsistencyWidget projectId={project.id} />
+
       <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -60,6 +63,6 @@ export function ProjectOverviewTab() {
           );
         }}
       />
-    </>
+    </div>
   );
 }

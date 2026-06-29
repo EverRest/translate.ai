@@ -83,6 +83,9 @@ smoke: ## Live API smoke test (requires running API)
 perf: ## Live API performance test (requires running API)
 	node scripts/performance-test.mjs
 
+repro-drift: ## Seed Title/Label drift repro corpus (postgres; SCAN=1 queues worker scan)
+	bash scripts/repro-terminology-drift.sh
+
 test-cov: ## Unit tests with coverage
 	cd $(BACKEND) && npm run test:cov
 	cd $(FRONTEND) && npm run test:cov

@@ -1,3 +1,24 @@
+export type GlossaryPreset = {
+  id: string;
+  name: string;
+  description: string;
+  terms: Array<{
+    sourceTerm: string;
+    targetTerm?: string;
+    doNotTranslate?: boolean;
+    note?: string;
+  }>;
+};
+
+export type GlossarySet = {
+  id: string;
+  name: string;
+  isDefault: boolean;
+  isActive: boolean;
+  termCount: number;
+  createdAt: string;
+};
+
 export type GlossaryTerm = {
   id: string;
   sourceTerm: string;

@@ -1,6 +1,6 @@
 # P2-05 — Terminology drift detection
 
-**Phase:** 2 · **Priority:** Medium · **Status:** Backlog
+**Status:** Shipped (see changelog — terminology drift API + Drift tab)
 
 ## Goal
 
@@ -29,9 +29,9 @@ Detect inconsistent translations for the same source term over time (e.g. Custom
 
 ## Acceptance criteria
 
-- [ ] Scan finds ≥2 variants for same EN term in UA with suggestion
-- [ ] User promotes variant to glossary preferred term
-- [ ] Unit tests with fixture corpus
+- [x] Scan finds ≥2 variants for same EN term in UA with suggestion
+- [x] User promotes variant to glossary preferred term
+- [x] Unit tests with fixture corpus
 
 ## Overlap with raw.md
 

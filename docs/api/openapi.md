@@ -393,6 +393,90 @@ Queues AI structure generation (requires worker + `GEMINI_API_KEY` or `OPENAI_AP
 
 ---
 
+---
+
+### Glossary terms
+
+#### GET `/api/v1/projects/{projectId}/glossary/terms`
+
+**Query:** `page`, `limit`, `search`
+
+**Response:** `{ success, data: { items: GlossaryTerm[], meta } }`
+
+#### POST `/api/v1/projects/{projectId}/glossary/terms`
+
+**Request:** `{ sourceTerm, targetTerm?, doNotTranslate?, note? }` — returns **409** if `sourceTerm` already exists.
+
+#### PUT `/api/v1/projects/{projectId}/glossary/terms/upsert`
+
+Create or update by `sourceTerm` (case-sensitive, trimmed).
+
+**Request:** `{ sourceTerm, targetTerm?, doNotTranslate?, note? }`
+
+**Response:** `{ success, data: { term: GlossaryTerm, created: boolean } }`
+
+#### POST `/api/v1/projects/{projectId}/glossary/terms/bulk-upsert`
+
+Merge up to 200 terms into the project glossary.
+
+**Request:** `{ terms: [{ sourceTerm, targetTerm?, doNotTranslate?, note? }, ...] }`
+
+**Response:** `{ success, data: { created, updated, total } }`
+
+#### PATCH `/api/v1/projects/{projectId}/glossary/terms/{termId}`
+
+#### DELETE `/api/v1/projects/{projectId}/glossary/terms/{termId}`
+
+---
+
+### Glossary sets
+
+#### GET `/api/v1/projects/{projectId}/glossaries`
+
+**Response:** `{ success, data: { items: GlossarySet[] } }` — each set includes `termCount`, `isActive`, `isDefault`.
+
+#### POST `/api/v1/projects/{projectId}/glossaries`
+
+**Request:** `{ name, cloneFromActive?: boolean }`
+
+#### POST `/api/v1/projects/{projectId}/glossaries/{glossaryId}/activate`
+
+Activates one set; deactivates others. Translation jobs use **active** terms only.
+
+---
+
+### Glossary presets
+
+#### GET `/api/v1/projects/{projectId}/glossary/presets`
+
+Built-in packs: `ui_common_en`, `ui_common_en_ru`, `do_not_translate`.
+
+#### POST `/api/v1/projects/{projectId}/glossary/apply-preset`
+
+**Request:** `{ presetId, mode?: "merge" | "replace_all_in_preset" }`
+
+**Response:** `{ created, updated, skipped, total }`
+
+---
+
+### Terminology drift
+
+#### POST `/api/v1/projects/{projectId}/terminology/scan`
+
+Enqueues `terminology.scan` worker job (deterministic clustering, no LLM).
+
+#### GET `/api/v1/projects/{projectId}/terminology/issues`
+
+**Query:** `status` — `open` (default), `resolved`, `dismissed`
+
+#### POST `/api/v1/projects/{projectId}/terminology/issues/{issueId}/resolve`
+
+**Request:** `{ canonicalValue, addToGlossary?: true, retranslate?: false }`
+
+#### POST `/api/v1/projects/{projectId}/terminology/issues/{issueId}/dismiss`
+
+---
+
 ### Glossary suggestions
 
 #### GET `/api/v1/projects/{projectId}/glossary/suggestions`

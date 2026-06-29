@@ -4,6 +4,24 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Glossary consistency platform (phases 1–4)
+
+- **API:** `PUT .../glossary/terms/upsert`, `POST .../glossary/terms/bulk-upsert`
+- **API:** Multi-glossary sets — `GET/POST .../glossaries`, `POST .../glossaries/:id/activate`
+- **API:** Presets — `GET .../glossary/presets`, `POST .../glossary/apply-preset`
+- **API:** Terminology drift — `POST .../terminology/scan`, `GET .../terminology/issues`, resolve/dismiss
+- **Queue:** `terminology.scan` worker job (deterministic drift detection, no LLM)
+- **Schema:** `Glossary.name/isDefault/isActive`, `terminology_issues` table
+- **ADR:** [0015-glossary-sets.md](./adr/0015-glossary-sets.md)
+- **UI:** Glossary set selector, preset apply, Drift tab with guided resolve
+- **Service:** `GlossaryService.upsertTerm` shared with suggestion approve flow; Add term uses upsert (no 409 on duplicate)
+
+### Added — Glossary consistency polish (phase 5)
+
+- **UI:** Project overview — terminology consistency widget (open drift count, active glossary)
+- **UI:** Translations toolbar + Glossary nav badge linking to Drift tab
+- **UI:** Empty glossary CTA — apply `ui_common_en_ru` preset; deep links `?tab=drift`, `?applyPreset=`
+
 ### Added — Localization objects polish (P3-12 follow-up)
 
 - **API:** `localizationObjectId` / `keyPrefix` filters on keys and translations list

@@ -13,10 +13,12 @@ import { Prisma } from '@prisma/client';
 import { ProjectAccessService } from '../../../project/infrastructure/project-access.service';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import {
+  BulkUpsertGlossaryTermsCommand,
   CreateGlossaryTermCommand,
   DeleteGlossaryTermCommand,
   ListGlossaryTermsQuery,
   UpdateGlossaryTermCommand,
+  UpsertGlossaryTermCommand,
 } from '../glossary.commands';
 import { GlossaryService } from '../glossary.service';
 
@@ -52,7 +54,7 @@ export class CreateGlossaryTermHandler implements ICommandHandler<CreateGlossary
       command.projectId,
     );
 
-    const glossary = await this.glossaryService.ensureGlossary(
+    const glossary = await this.glossaryService.getActiveGlossary(
       command.projectId,
     );
 
@@ -129,6 +131,50 @@ export class UpdateGlossaryTermHandler implements ICommandHandler<UpdateGlossary
 }
 
 @Injectable()
+@CommandHandler(UpsertGlossaryTermCommand)
+export class UpsertGlossaryTermHandler implements ICommandHandler<UpsertGlossaryTermCommand> {
+  constructor(
+    private readonly projectAccess: ProjectAccessService,
+    private readonly glossaryService: GlossaryService,
+  ) {}
+
+  async execute(command: UpsertGlossaryTermCommand) {
+    await this.projectAccess.getProjectForTenant(
+      command.tenantId,
+      command.projectId,
+    );
+
+    return this.glossaryService.upsertTerm(command.projectId, {
+      sourceTerm: command.sourceTerm,
+      targetTerm: command.targetTerm,
+      doNotTranslate: command.doNotTranslate,
+      note: command.note,
+    });
+  }
+}
+
+@Injectable()
+@CommandHandler(BulkUpsertGlossaryTermsCommand)
+export class BulkUpsertGlossaryTermsHandler implements ICommandHandler<BulkUpsertGlossaryTermsCommand> {
+  constructor(
+    private readonly projectAccess: ProjectAccessService,
+    private readonly glossaryService: GlossaryService,
+  ) {}
+
+  async execute(command: BulkUpsertGlossaryTermsCommand) {
+    await this.projectAccess.getProjectForTenant(
+      command.tenantId,
+      command.projectId,
+    );
+
+    return this.glossaryService.bulkUpsertTerms(
+      command.projectId,
+      command.terms,
+    );
+  }
+}
+
+@Injectable()
 @CommandHandler(DeleteGlossaryTermCommand)
 export class DeleteGlossaryTermHandler implements ICommandHandler<DeleteGlossaryTermCommand> {
   constructor(
@@ -161,6 +207,7 @@ export class ListGlossaryTermsHandler implements IQueryHandler<ListGlossaryTerms
   constructor(
     private readonly prisma: PrismaService,
     private readonly projectAccess: ProjectAccessService,
+    private readonly glossaryService: GlossaryService,
   ) {}
 
   async execute(query: ListGlossaryTermsQuery) {
@@ -169,8 +216,13 @@ export class ListGlossaryTermsHandler implements IQueryHandler<ListGlossaryTerms
       query.projectId,
     );
 
+    const glossary = await this.glossaryService.getGlossaryForProject(
+      query.projectId,
+      query.glossaryId,
+    );
+
     const where: Prisma.GlossaryTermWhereInput = {
-      glossary: { projectId: query.projectId },
+      glossaryId: glossary.id,
       ...(query.search
         ? {
             OR: [

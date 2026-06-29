@@ -23,6 +23,7 @@ import {
 import { ExportProcessor } from './processors/export.processor';
 import { GlossaryAnalyzeProcessor } from './processors/glossary.processor';
 import { LocalizationObjectGenerateProcessor } from './processors/localization-object.processor';
+import { TerminologyScanProcessor } from './processors/terminology.processor';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { LocalizationObjectGenerateProcessor } from './processors/localization-o
     WebhookSendProcessor,
     ExportProcessor,
     GlossaryAnalyzeProcessor,
+    TerminologyScanProcessor,
     LocalizationObjectGenerateProcessor,
   ],
 })

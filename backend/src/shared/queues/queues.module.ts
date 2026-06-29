@@ -12,6 +12,7 @@ import { QUEUES } from '../constants/queues';
       { name: QUEUES.TRANSLATION_REVIEW },
       { name: QUEUES.TRANSLATION_EXPORT },
       { name: QUEUES.GLOSSARY_ANALYZE },
+      { name: QUEUES.TERMINOLOGY_SCAN },
       { name: QUEUES.LOCALIZATION_OBJECT_GENERATE },
       { name: QUEUES.WEBHOOK_SEND },
     ),

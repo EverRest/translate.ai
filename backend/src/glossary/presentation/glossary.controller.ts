@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
@@ -18,14 +19,18 @@ import {
 } from '../../shared/presentation/api-response';
 import { parsePagination } from '../../shared/utils/string.utils';
 import {
+  BulkUpsertGlossaryTermsCommand,
   CreateGlossaryTermCommand,
   DeleteGlossaryTermCommand,
   ListGlossaryTermsQuery,
   UpdateGlossaryTermCommand,
+  UpsertGlossaryTermCommand,
 } from '../application/glossary.commands';
 import {
+  BulkUpsertGlossaryTermsDto,
   CreateGlossaryTermDto,
   UpdateGlossaryTermDto,
+  UpsertGlossaryTermDto,
 } from './dto/glossary.dto';
 
 @ApiTags('glossary')
@@ -42,7 +47,7 @@ export class GlossaryController {
   async list(
     @CurrentUser() user: AuthUser,
     @Param('projectId') projectId: string,
-    @Query() query: { page?: string; limit?: string; search?: string },
+    @Query() query: { page?: string; limit?: string; search?: string; glossaryId?: string },
   ) {
     const { page, limit } = parsePagination(query);
     const data = await this.queryBus.execute(
@@ -52,6 +57,7 @@ export class GlossaryController {
         page,
         limit,
         query.search,
+        query.glossaryId,
       ),
     );
     return paginatedResponse(data.items, page, limit, data.meta.total);
@@ -72,6 +78,43 @@ export class GlossaryController {
         dto.targetTerm,
         dto.doNotTranslate ?? false,
         dto.note,
+      ),
+    );
+    return successResponse(data);
+  }
+
+  @Put('upsert')
+  @ApiOperation({ summary: 'Create or update a glossary term by sourceTerm' })
+  async upsert(
+    @CurrentUser() user: AuthUser,
+    @Param('projectId') projectId: string,
+    @Body() dto: UpsertGlossaryTermDto,
+  ) {
+    const data = await this.commandBus.execute(
+      new UpsertGlossaryTermCommand(
+        user.tenantId,
+        projectId,
+        dto.sourceTerm,
+        dto.targetTerm,
+        dto.doNotTranslate,
+        dto.note,
+      ),
+    );
+    return successResponse(data);
+  }
+
+  @Post('bulk-upsert')
+  @ApiOperation({ summary: 'Bulk create or update glossary terms (max 200)' })
+  async bulkUpsert(
+    @CurrentUser() user: AuthUser,
+    @Param('projectId') projectId: string,
+    @Body() dto: BulkUpsertGlossaryTermsDto,
+  ) {
+    const data = await this.commandBus.execute(
+      new BulkUpsertGlossaryTermsCommand(
+        user.tenantId,
+        projectId,
+        dto.terms,
       ),
     );
     return successResponse(data);

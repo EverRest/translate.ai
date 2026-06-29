@@ -106,30 +106,17 @@ export class ApproveGlossarySuggestionHandler implements ICommandHandler<Approve
       throw new NotFoundException('Glossary suggestion not found');
     }
 
-    const glossary = await this.glossaryService.ensureGlossary(
-      command.projectId,
-    );
-
-    const term = await this.prisma.$transaction(async (tx) => {
-      const created = await tx.glossaryTerm.upsert({
-        where: {
-          glossaryId_sourceTerm: {
-            glossaryId: glossary.id,
-            sourceTerm: suggestion.sourceTerm,
-          },
-        },
-        create: {
-          glossaryId: glossary.id,
+    const { term } = await this.prisma.$transaction(async (tx) => {
+      const upserted = await this.glossaryService.upsertTerm(
+        command.projectId,
+        {
           sourceTerm: suggestion.sourceTerm,
           targetTerm: suggestion.doNotTranslate ? null : suggestion.targetTerm,
           doNotTranslate: suggestion.doNotTranslate,
           note: suggestion.reason ? `Suggested: ${suggestion.reason}` : null,
         },
-        update: {
-          targetTerm: suggestion.doNotTranslate ? null : suggestion.targetTerm,
-          doNotTranslate: suggestion.doNotTranslate,
-        },
-      });
+        tx,
+      );
 
       await tx.glossarySuggestion.update({
         where: { id: suggestion.id },
@@ -139,7 +126,7 @@ export class ApproveGlossarySuggestionHandler implements ICommandHandler<Approve
         },
       });
 
-      return created;
+      return upserted;
     });
 
     return {
@@ -148,13 +135,7 @@ export class ApproveGlossarySuggestionHandler implements ICommandHandler<Approve
         status: GlossarySuggestionStatus.approved,
         reviewedAt: new Date(),
       }),
-      term: {
-        id: term.id,
-        sourceTerm: term.sourceTerm,
-        targetTerm: term.targetTerm,
-        doNotTranslate: term.doNotTranslate,
-        note: term.note,
-      },
+      term,
     };
   }
 }
