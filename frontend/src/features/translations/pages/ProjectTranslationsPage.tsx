@@ -9,7 +9,7 @@ import type {
   GridFetchParams,
   GridRef,
 } from '../../../shared/ui/DataGrid';
-import { DataGrid, RowMenu } from '../../../shared/ui/DataGrid';
+import { DataGrid } from '../../../shared/ui/DataGrid';
 import { cancelJob, createJob } from '../../translation-jobs/api/jobs.api';
 import { useProjectLanguages } from '../../project-settings/hooks/useProjectSettings';
 import {
@@ -195,6 +195,92 @@ function TranslateModal({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── TranslationStats ─────────────────────────────────────────────────────────
+function pct(count: number, total: number) {
+  if (total === 0) return 0;
+  return Math.round((count / total) * 100);
+}
+
+function pctColor(p: number) {
+  if (p === 100) return 'bg-emerald-500';
+  if (p >= 70) return 'bg-sky-500';
+  if (p >= 30) return 'bg-amber-500';
+  return 'bg-red-500';
+}
+
+function pctTextColor(p: number) {
+  if (p === 100) return 'text-emerald-400';
+  if (p >= 70) return 'text-sky-400';
+  if (p >= 30) return 'text-amber-400';
+  return 'text-red-400';
+}
+
+function TranslationStats({
+  totalKeys,
+  languages,
+  byKey,
+}: {
+  totalKeys: number;
+  languages: { id: string; code: string; isDefault: boolean }[];
+  byKey: Map<string, Record<string, Translation>>;
+}) {
+  if (totalKeys === 0 || languages.length === 0) return null;
+
+  const langStats = languages.map((lang) => {
+    let count = 0;
+    byKey.forEach((langMap) => {
+      if (langMap[lang.code]) count++;
+    });
+    return { code: lang.code, count, pct: pct(count, totalKeys) };
+  });
+
+  const totalTranslated = langStats.reduce((s, l) => s + l.count, 0);
+  const totalPossible = totalKeys * languages.length;
+  const overallPct = pct(totalTranslated, totalPossible);
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 shrink-0">
+      {/* Overall badge */}
+      <div className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5">
+        <span className="text-xs text-slate-400">Overall</span>
+        <div className="h-1.5 w-20 overflow-hidden rounded-full bg-slate-700">
+          <div
+            className={`h-full rounded-full transition-all ${pctColor(overallPct)}`}
+            style={{ width: `${overallPct}%` }}
+          />
+        </div>
+        <span className={`text-xs font-semibold tabular-nums ${pctTextColor(overallPct)}`}>
+          {overallPct}%
+        </span>
+      </div>
+
+      <div className="h-4 w-px bg-slate-700" />
+
+      {/* Per-language badges */}
+      {langStats.map((l) => (
+        <div
+          key={l.code}
+          className="flex items-center gap-1.5 rounded-lg border border-slate-700/60 bg-slate-900 px-2.5 py-1.5"
+          title={`${l.count} / ${totalKeys} keys translated`}
+        >
+          <span className="text-[11px] font-medium uppercase text-slate-400">
+            {l.code}
+          </span>
+          <div className="h-1 w-12 overflow-hidden rounded-full bg-slate-700">
+            <div
+              className={`h-full rounded-full transition-all ${pctColor(l.pct)}`}
+              style={{ width: `${l.pct}%` }}
+            />
+          </div>
+          <span className={`text-[11px] font-semibold tabular-nums ${pctTextColor(l.pct)}`}>
+            {l.pct}%
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
@@ -765,35 +851,6 @@ export function ProjectTranslationsPage() {
           return <span className="text-xs text-slate-600">—</span>;
         },
       })),
-      {
-        key: '_actions',
-        header: '',
-        width: 32,
-        sortable: false,
-        noPadding: true,
-        overflow: 'visible',
-        sticky: 'right',
-        render: (row: KeyRow) => (
-          <RowMenu
-            items={[
-              {
-                label: 'Translate',
-                onClick: () =>
-                  void startJobRef.current(
-                    [row.key],
-                    [row.keyId],
-                    `Translating "${row.key}"…`,
-                  ),
-              },
-              {
-                label: 'Delete',
-                variant: 'danger',
-                onClick: () => void handleDeleteRowRef.current(row),
-              },
-            ]}
-          />
-        ),
-      },
     ];
   }, [defaultLang, languages, byKey, translatingKeys, activeJobId]);
 
@@ -1095,6 +1152,22 @@ export function ProjectTranslationsPage() {
           emptyMessage="No translation keys yet."
           gridRef={gridRef}
           gridId="translations"
+          rowContextMenu={(row) => [
+            {
+              label: 'Translate',
+              onClick: () =>
+                void startJobRef.current(
+                  [row.key],
+                  [row.keyId],
+                  `Translating "${row.key}"…`,
+                ),
+            },
+            {
+              label: 'Delete key',
+              variant: 'danger',
+              onClick: () => void handleDeleteRowRef.current(row),
+            },
+          ]}
         />
       </div>
     </section>

@@ -1,16 +1,28 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type {
   ColumnDef,
   DataGridProps,
   GridFetchParams,
   GridPage,
   GridSort,
+  RowContextMenuItem,
 } from './types';
 
 const DEFAULT_ROW_HEIGHT = 52;
 const OVERSCAN = 5;
 const DEFAULT_CHUNK = 50;
 const MIN_COL_WIDTH = 48;
+
+// ─── Display settings types ───────────────────────────────────────────────────
+type Density = 'compact' | 'default' | 'comfortable';
+type ViewMode = 'default' | 'zebra' | 'bordered';
+
+const DENSITY_HEIGHT: Record<Density, number> = {
+  compact: 36,
+  default: 44,
+  comfortable: 52,
+};
 
 // ─── Filter types ─────────────────────────────────────────────────────────────
 type FilterCondition =
@@ -133,65 +145,72 @@ function FilterPopup({
   );
 }
 
-// ─── RowMenu ──────────────────────────────────────────────────────────────────
-export type RowMenuItem = {
-  label: string;
-  variant?: 'default' | 'danger';
-  onClick: () => void;
-};
-
-export function RowMenu({ items }: { items: RowMenuItem[] }) {
-  const [open, setOpen] = useState(false);
+// ─── ContextMenu ─────────────────────────────────────────────────────────────
+function ContextMenu({
+  x,
+  y,
+  items,
+  onClose,
+}: {
+  x: number;
+  y: number;
+  items: RowContextMenuItem[];
+  onClose: () => void;
+}) {
   const ref = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    if (!open) return;
-    const h = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node))
-        setOpen(false);
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
     };
-    document.addEventListener('mousedown', h);
-    return () => document.removeEventListener('mousedown', h);
-  }, [open]);
-  return (
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [onClose]);
+
+  // Adjust so menu doesn't overflow viewport
+  const [pos, setPos] = useState({ x, y });
+  useEffect(() => {
+    if (!ref.current) return;
+    const { offsetWidth: w, offsetHeight: h } = ref.current;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    setPos({
+      x: x + w > vw ? Math.max(0, vw - w - 8) : x,
+      y: y + h > vh ? Math.max(0, vh - h - 8) : y,
+    });
+  }, [x, y]);
+
+  return createPortal(
     <div
       ref={ref}
-      className="relative flex items-center justify-center w-full h-full"
+      className="fixed z-[9998] min-w-[160px] overflow-hidden rounded-lg border border-slate-700 bg-slate-800 shadow-2xl"
+      style={{ left: pos.x, top: pos.y }}
     >
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen((v) => !v);
-        }}
-        className="flex h-6 w-6 items-center justify-center rounded text-slate-500 hover:bg-slate-700 hover:text-slate-200"
-      >
-        <svg viewBox="0 0 4 16" fill="currentColor" className="h-4 w-4">
-          <circle cx="2" cy="2" r="1.5" />
-          <circle cx="2" cy="8" r="1.5" />
-          <circle cx="2" cy="14" r="1.5" />
-        </svg>
-      </button>
-      {open && (
-        <div className="absolute right-0 top-full z-50 mt-1 min-w-[140px] overflow-hidden rounded-lg border border-slate-700 bg-slate-800 shadow-xl">
-          {items.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                item.onClick();
-              }}
-              className={[
-                'flex w-full items-center px-3 py-2 text-left text-sm hover:bg-slate-700',
-                item.variant === 'danger' ? 'text-red-400' : 'text-slate-200',
-              ].join(' ')}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+      {items.map((item, i) => (
+        <button
+          key={i}
+          type="button"
+          onClick={() => {
+            onClose();
+            item.onClick();
+          }}
+          className={[
+            'flex w-full items-center px-3 py-2 text-left text-sm hover:bg-slate-700',
+            item.variant === 'danger' ? 'text-red-400' : 'text-slate-200',
+          ].join(' ')}
+        >
+          {item.label}
+        </button>
+      ))}
+    </div>,
+    document.body,
   );
 }
 
@@ -251,7 +270,7 @@ export function DataGrid<T>({
   columns,
   fetchFn,
   rowKey,
-  rowHeight: ROW_HEIGHT = DEFAULT_ROW_HEIGHT,
+  rowHeight: _rowHeight = DEFAULT_ROW_HEIGHT,
   chunkSize = DEFAULT_CHUNK,
   searchPlaceholder = 'Search…',
   filterBar,
@@ -260,11 +279,50 @@ export function DataGrid<T>({
   emptyMessage = 'No items found.',
   gridRef,
   gridId,
+  rowContextMenu,
 }: DataGridProps<T>) {
   // ── Column widths (pixel values, persisted) ───────────────────────────────
   const [colWidths, setColWidths] = useState<Record<string, number>>(() =>
     gridId ? lsGet<Record<string, number>>(`dg:${gridId}:widths`, {}) : {},
   );
+
+  // ── Density & view mode (persisted) ──────────────────────────────────────
+  const [density, setDensity] = useState<Density>(() =>
+    gridId ? lsGet<Density>(`dg:${gridId}:density`, 'comfortable') : 'comfortable',
+  );
+  const [viewMode, setViewMode] = useState<ViewMode>(() =>
+    gridId ? lsGet<ViewMode>(`dg:${gridId}:viewMode`, 'default') : 'default',
+  );
+
+  const ROW_HEIGHT = DENSITY_HEIGHT[density];
+
+  useEffect(() => {
+    if (gridId) lsSet(`dg:${gridId}:density`, density);
+  }, [gridId, density]);
+  useEffect(() => {
+    if (gridId) lsSet(`dg:${gridId}:viewMode`, viewMode);
+  }, [gridId, viewMode]);
+
+  // After first paint, snapshot actual header cell widths so header and body
+  // cells always use identical explicit pixel values (prevents sub-pixel flex
+  // rounding misalignment on first load).
+  const initializedRef = useRef(false);
+  useLayoutEffect(() => {
+    if (initializedRef.current || !gridElRef.current) return;
+    const cells = gridElRef.current.querySelectorAll<HTMLElement>(
+      '.dg-header-row [data-col]',
+    );
+    if (!cells.length) return;
+    const measured: Record<string, number> = {};
+    cells.forEach((el) => {
+      const key = el.dataset.col;
+      if (key) measured[key] = el.getBoundingClientRect().width;
+    });
+    if (Object.keys(measured).length) {
+      initializedRef.current = true;
+      setColWidths((prev) => ({ ...measured, ...prev }));
+    }
+  });
 
   // Debounce localStorage writes — don't write on every resize frame
   const lsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -391,6 +449,19 @@ export function DataGrid<T>({
     document.addEventListener('mousedown', h);
     return () => document.removeEventListener('mousedown', h);
   }, [colPanelOpen]);
+
+  // ── Display panel ─────────────────────────────────────────────────────────
+  const [displayPanelOpen, setDisplayPanelOpen] = useState(false);
+  const displayPanelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!displayPanelOpen) return;
+    const h = (e: MouseEvent) => {
+      if (displayPanelRef.current && !displayPanelRef.current.contains(e.target as Node))
+        setDisplayPanelOpen(false);
+    };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, [displayPanelOpen]);
 
   // ── Data fetching with offset/limit chunks ────────────────────────────────
   const [items, setItems] = useState<T[]>([]);
@@ -627,6 +698,24 @@ export function DataGrid<T>({
   const hasCheckbox = Boolean(bulkActions?.length);
   const CHECKBOX_W = 32;
 
+  // ── Context menu ──────────────────────────────────────────────────────────
+  const [ctxMenu, setCtxMenu] = useState<{
+    x: number;
+    y: number;
+    items: RowContextMenuItem[];
+  } | null>(null);
+
+  const openCtxMenu = useCallback(
+    (e: React.MouseEvent, row: T) => {
+      if (!rowContextMenu) return;
+      const items = rowContextMenu(row);
+      if (!items.length) return;
+      e.preventDefault();
+      setCtxMenu({ x: e.clientX, y: e.clientY, items });
+    },
+    [rowContextMenu],
+  );
+
   // ── Total row width for horizontal scroll ─────────────────────────────────
   // minWidth of the scroll container — use saved pixel width or default col.width so columns never compress
   const totalRowWidth = useMemo(() => {
@@ -760,6 +849,83 @@ export function DataGrid<T>({
               <div className="h-4 w-px bg-slate-700" />
             </div>
           )}
+          {/* Display settings */}
+          <div ref={displayPanelRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setDisplayPanelOpen((v) => !v)}
+              className={[
+                'flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors',
+                displayPanelOpen
+                  ? 'border-sky-600 text-sky-300'
+                  : 'border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white',
+              ].join(' ')}
+            >
+              {/* rows icon */}
+              <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="1" y="1" width="14" height="14" rx="1" />
+                <line x1="1" y1="5.5" x2="15" y2="5.5" />
+                <line x1="1" y1="10" x2="15" y2="10" />
+              </svg>
+              View
+            </button>
+            {displayPanelOpen && (
+              <div className="absolute right-0 top-full z-50 mt-1 w-56 overflow-hidden rounded-lg border border-slate-700 bg-slate-800 shadow-xl">
+                {/* Density section */}
+                <div className="border-b border-slate-700 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  Row size
+                </div>
+                <div className="flex flex-col gap-0.5 p-2">
+                  {([['compact', 'Small'], ['default', 'Medium'], ['comfortable', 'Large']] as const).map(([d, label]) => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setDensity(d)}
+                      className={[
+                        'flex items-center justify-between rounded-md px-3 py-1.5 text-left text-sm transition-colors',
+                        density === d
+                          ? 'bg-sky-600/20 text-sky-300'
+                          : 'text-slate-300 hover:bg-slate-700',
+                      ].join(' ')}
+                    >
+                      {label}
+                      {density === d && (
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor">
+                          <path d="M13 4L6 11 3 8" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {/* View mode section */}
+                <div className="border-t border-slate-700 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  Style
+                </div>
+                <div className="flex flex-col gap-0.5 p-2">
+                  {([['default', 'Default'], ['zebra', 'Zebra'], ['bordered', 'Bordered']] as const).map(([m, label]) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setViewMode(m)}
+                      className={[
+                        'flex items-center justify-between rounded-md px-3 py-1.5 text-left text-sm transition-colors',
+                        viewMode === m
+                          ? 'bg-sky-600/20 text-sky-300'
+                          : 'text-slate-300 hover:bg-slate-700',
+                      ].join(' ')}
+                    >
+                      {label}
+                      {viewMode === m && (
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor">
+                          <path d="M13 4L6 11 3 8" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           {toggleableColumns.length > 0 && (
             <div ref={colPanelRef} className="relative">
               <button
@@ -836,7 +1002,10 @@ export function DataGrid<T>({
       {/* Grid */}
       <div
         ref={gridElRef}
-        className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-800"
+        className={[
+          'flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-800',
+          viewMode === 'bordered' ? 'dg-bordered' : '',
+        ].join(' ')}
       >
         {/* Scroll container — header is inside so it syncs horizontal scroll */}
         <div
@@ -845,11 +1014,11 @@ export function DataGrid<T>({
         >
           <div style={{ minWidth: totalRowWidth }}>
             {/* Sticky header */}
-            <div className="sticky top-0 z-20 flex border-b border-slate-800 bg-slate-900 select-none">
+            <div className="dg-header-row sticky top-0 z-20 flex border-b border-slate-800 bg-slate-900 select-none" style={{ height: ROW_HEIGHT }}>
               {hasCheckbox && (
                 <div
                   className="sticky left-0 z-30 flex shrink-0 items-center justify-center border-r border-slate-800 bg-slate-900 px-2"
-                  style={{ width: CHECKBOX_W }}
+                  style={{ width: CHECKBOX_W, height: ROW_HEIGHT }}
                 >
                   <input
                     type="checkbox"
@@ -868,8 +1037,9 @@ export function DataGrid<T>({
                     key={col.key}
                     data-col={col.key}
                     className={[
-                      'relative flex shrink-0 items-center gap-1 border-r border-slate-800 last:border-r-0',
-                      col.noPadding ? '' : 'px-3 py-3',
+                      'relative flex shrink-0 items-center gap-1 last:border-r-0',
+                      viewMode === 'bordered' ? 'border-r border-slate-700' : 'border-r border-slate-800',
+                      col.noPadding ? '' : 'px-3',
                       col.sticky === 'right' ? 'bg-slate-900' : '',
                     ].join(' ')}
                     style={cellStyle(col)}
@@ -976,17 +1146,27 @@ export function DataGrid<T>({
                     right: 0,
                   }}
                 >
-                  {visibleItems.map((row) => {
+                  {visibleItems.map((row, rowIdx) => {
                     const id = rowKey(row);
                     const isSelected = isAllSelected || selectedIds.has(id);
+                    const absoluteIdx = visibleStart + rowIdx;
                     return (
                       <div
                         key={id}
                         className={[
-                          'flex border-b border-slate-800 hover:bg-slate-800/30',
-                          isSelected ? 'bg-sky-950/20' : '',
+                          'flex border-b border-slate-800',
+                          viewMode === 'bordered' ? 'border-x border-slate-800' : '',
+                          viewMode === 'zebra' && !isSelected
+                            ? (absoluteIdx % 2 === 1 ? 'bg-slate-800/20' : '')
+                            : '',
+                          isSelected ? 'bg-sky-950/20' : 'hover:bg-slate-800/30',
                         ].join(' ')}
                         style={{ height: ROW_HEIGHT }}
+                        onContextMenu={
+                          rowContextMenu
+                            ? (e) => openCtxMenu(e, row)
+                            : undefined
+                        }
                       >
                         {hasCheckbox && (
                           <div
@@ -1006,7 +1186,8 @@ export function DataGrid<T>({
                             key={col.key}
                             data-col={col.key}
                             className={[
-                              'flex shrink-0 items-center border-r border-slate-800 last:border-r-0',
+                              'flex shrink-0 items-center last:border-r-0',
+                              viewMode === 'bordered' ? 'border-r border-slate-700' : 'border-r border-slate-800',
                               col.overflow === 'visible'
                                 ? 'overflow-visible'
                                 : 'overflow-hidden',
@@ -1015,13 +1196,7 @@ export function DataGrid<T>({
                             ].join(' ')}
                             style={{ ...cellStyle(col), height: ROW_HEIGHT }}
                           >
-                            <div
-                              className={
-                                col.overflow === 'visible'
-                                  ? 'w-full'
-                                  : 'w-full truncate'
-                              }
-                            >
+                            <div className="w-full min-w-0">
                               {col.render(row)}
                             </div>
                           </div>
@@ -1042,6 +1217,15 @@ export function DataGrid<T>({
           </div>
         )}
       </div>
+
+      {ctxMenu && (
+        <ContextMenu
+          x={ctxMenu.x}
+          y={ctxMenu.y}
+          items={ctxMenu.items}
+          onClose={() => setCtxMenu(null)}
+        />
+      )}
     </div>
   );
 }

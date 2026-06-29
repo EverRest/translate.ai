@@ -22,6 +22,10 @@ export class ListProjectsHandler implements IQueryHandler<ListProjectsQuery> {
         skip: (query.page - 1) * query.limit,
         take: query.limit,
         orderBy: { createdAt: 'desc' },
+        include: {
+          _count: { select: { translationKeys: true } },
+          languages: { select: { code: true, isDefault: true } },
+        },
       }),
       this.prisma.project.count({ where }),
     ]);

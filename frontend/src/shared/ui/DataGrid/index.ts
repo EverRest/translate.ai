@@ -1,5 +1,4 @@
-export { DataGrid, RowMenu } from './DataGrid';
-export type { RowMenuItem } from './DataGrid';
+export { DataGrid } from './DataGrid';
 export type {
   ColumnDef,
   BulkActionDef,
@@ -8,4 +7,5 @@ export type {
   GridSort,
   GridRef,
   DataGridProps,
+  RowContextMenuItem,
 } from './types';

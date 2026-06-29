@@ -4,6 +4,8 @@ export type Project = {
   description: string | null;
   status: string;
   createdAt: string;
+  keysCount: number;
+  languages: { code: string; isDefault: boolean }[];
 };
 
 export type CreateProjectInput = {
