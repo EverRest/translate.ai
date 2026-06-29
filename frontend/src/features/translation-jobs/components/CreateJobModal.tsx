@@ -40,7 +40,7 @@ export function CreateJobModal({
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [keySource, setKeySource] = useState<KeySource>('catalog');
   const [inlineKeys, setInlineKeys] = useState('');
-  const [provider, setProvider] = useState<string>('openai');
+  const [provider, setProvider] = useState<string>('gemini');
   const [formError, setFormError] = useState<string>();
 
   const { data: languagesData } = useProjectLanguages(projectId || undefined);
@@ -57,7 +57,7 @@ export function CreateJobModal({
       setSelectedKeys([]);
       setKeySource('catalog');
       setInlineKeys('');
-      setProvider('openai');
+      setProvider('gemini');
       setFormError(undefined);
     }
   }, [open, defaultProjectId, projects]);

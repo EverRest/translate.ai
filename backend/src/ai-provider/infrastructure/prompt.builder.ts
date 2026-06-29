@@ -137,6 +137,8 @@ export function estimateOpenAiCost(
   outputTokens: number,
 ): number {
   const rates: Record<string, { input: number; output: number }> = {
+    'gpt-4.1-mini': { input: 0.4 / 1_000_000, output: 1.6 / 1_000_000 },
+    'gpt-4.1': { input: 2.0 / 1_000_000, output: 8.0 / 1_000_000 },
     'gpt-4o-mini': { input: 0.15 / 1_000_000, output: 0.6 / 1_000_000 },
     'gpt-4o': { input: 2.5 / 1_000_000, output: 10 / 1_000_000 },
   };
@@ -150,6 +152,10 @@ export function estimateGeminiCost(
   outputTokens: number,
 ): number {
   const rates: Record<string, { input: number; output: number }> = {
+    'gemini-2.5-flash-lite': {
+      input: 0.075 / 1_000_000,
+      output: 0.3 / 1_000_000,
+    },
     'gemini-2.0-flash': { input: 0.1 / 1_000_000, output: 0.4 / 1_000_000 },
     'gemini-1.5-flash': { input: 0.075 / 1_000_000, output: 0.3 / 1_000_000 },
   };

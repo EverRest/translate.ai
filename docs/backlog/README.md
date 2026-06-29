@@ -30,6 +30,7 @@ Goal: paying teams — VCS sync, stronger QA, semantic memory, export UX.
 | [P1-01](./P1-01-semantic-translation-memory.md) | Semantic TM (pgvector) + cache metrics | High |
 | [P1-02](./P1-02-github-gitlab-integration.md) | GitHub / GitLab key sync + webhooks | High |
 | [P1-06](./P1-06-translation-pull-request.md) | PR workflow with translations | High |
+| [P1-07](./P1-07-gemini-primary-openai-fallback.md) | Gemini-primary cloud stack + OpenAI fallback | High |
 
 ---
 

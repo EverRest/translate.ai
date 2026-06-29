@@ -44,9 +44,11 @@ Load TranslationJobItem + TranslationKey + Project context
       → Check TranslationMemory (skipped on retry attempts)
           ├── HIT  → use cached translation
           └── MISS → AiProvider.translate()
-              → Gemini: retry transient HTTP 502/503/429 in-provider before fallback
+              → Gemini: retry transient HTTP 502/503/429 in-provider
                   → then optional GEMINI_MODEL_FALLBACK tier with same retry policy
-                  → then Ollama via AI_PROVIDER_FALLBACK
+                  → then OpenAI via AI_PROVIDER_FALLBACK (cloud: openai only)
+              → OpenAI (when primary or fallback): transient retry
+                  → then optional OPENAI_MODEL_FALLBACK tier
       → On attempt ≥ 2 or manual job retry: attach reference translations
           from sibling locales for the same key (published > approved > draft)
       → sanitizeTranslationOutput()

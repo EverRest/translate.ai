@@ -4,6 +4,17 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Gemini-primary cloud provider stack (P1-07)
+
+Per [backlog/P1-07-gemini-primary-openai-fallback.md](./backlog/P1-07-gemini-primary-openai-fallback.md) and [adr/0013-openai-model-fallback.md](./adr/0013-openai-model-fallback.md):
+
+- **Env:** `AI_PROVIDER=gemini` default job provider; `AI_PROVIDER_FALLBACK=openai` for cloud testing
+- **Models:** `GEMINI_MODEL=gemini-2.5-flash-lite`, `OPENAI_MODEL=gpt-4.1-mini`, `OPENAI_MODEL_FALLBACK=gpt-4.1`
+- **OpenAI:** model-tier fallback inside `OpenAiProvider` (mirrors ADR 0011 Gemini pattern)
+- **UI:** Create job modal defaults to `gemini` (matches backend)
+- **Cost:** analytics rates for `gpt-4.1-mini`, `gpt-4.1`, `gemini-2.5-flash-lite`
+- **Templates:** `.env.example`, `.env.dev.example`, `.env.docker` updated
+
 ### Added — Auto glossary suggestions (P1-03)
 
 Per [adr/0012-auto-glossary-suggestions.md](./adr/0012-auto-glossary-suggestions.md):
