@@ -3,12 +3,15 @@ import { useConfirm } from '../../../shared/ui/ConfirmDialog';
 import { useProject } from '../../projects/hooks/useProjects';
 import { JobStatusBadge } from '../components/JobStatusBadge';
 import { useCancelJob, useJob, useRetryJob } from '../hooks/useTranslationJobs';
+import { useAiConfig } from '../hooks/useAiConfig';
 
 export function JobDetailPage() {
   const confirm = useConfirm();
   const { jobId } = useParams<{ jobId: string }>();
   const { data: job, isLoading, error } = useJob(jobId);
   const { data: project } = useProject(job?.projectId);
+  const { data: aiConfig } = useAiConfig();
+  const defaultProvider = aiConfig?.defaultProvider ?? 'gemini';
   const retry = useRetryJob(jobId ?? '');
   const cancel = useCancelJob(jobId ?? '');
 
@@ -158,7 +161,7 @@ export function JobDetailPage() {
             <div>
               <dt className="text-slate-500">Provider</dt>
               <dd className="mt-1 capitalize text-white">
-                {job.provider ?? 'openai'}
+                {job.provider ?? defaultProvider}
               </dd>
             </div>
             <div>
@@ -193,7 +196,14 @@ export function JobDetailPage() {
             type="button"
             disabled={cancel.isPending}
             onClick={async () => {
-              if (await confirm({ title: 'Cancel this job?', description: 'The job will be stopped and cannot be resumed.', danger: true, confirmLabel: 'Cancel job' })) {
+              if (
+                await confirm({
+                  title: 'Cancel this job?',
+                  description: 'The job will be stopped and cannot be resumed.',
+                  danger: true,
+                  confirmLabel: 'Cancel job',
+                })
+              ) {
                 cancel.mutate();
               }
             }}

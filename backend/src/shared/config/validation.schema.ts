@@ -27,6 +27,7 @@ export const validationSchema = Joi.object({
   OLLAMA_POLISH_MODEL: Joi.string().default('llama3.1:8b'),
   OLLAMA_TIMEOUT_MS: Joi.number().integer().min(30_000).default(600_000),
   OPENAI_MODEL: Joi.string().default('gpt-4o-mini'),
+  OPENAI_MODEL_FALLBACK: Joi.string().allow('').default(''),
   GEMINI_MODEL: Joi.string().default('gemini-2.0-flash'),
   GEMINI_MODEL_FALLBACK: Joi.string().allow('').default(''),
   GEMINI_TRANSIENT_RETRIES: Joi.number().integer().min(0).max(5).default(2),
@@ -35,6 +36,9 @@ export const validationSchema = Joi.object({
     .min(0)
     .max(30_000)
     .default(1000),
+  AI_PROVIDER: Joi.string()
+    .valid('openai', 'gemini', 'ollama')
+    .default('gemini'),
   AI_PROVIDER_FALLBACK: Joi.string().default('gemini,ollama'),
   DEFAULT_SOURCE_LANGUAGE: Joi.string().default('en'),
   MOCK_TRANSLATIONS: Joi.boolean().default(false),

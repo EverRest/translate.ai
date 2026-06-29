@@ -54,3 +54,9 @@ export type ProjectLanguage = {
   code: string;
   projectId: string;
 };
+
+export type AiConfig = {
+  defaultProvider: string;
+  supportedProviders: string[];
+  providerFallback: string[];
+};

@@ -1,4 +1,10 @@
-import { Controller, Delete, HttpCode, HttpStatus, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Queue } from 'bullmq';
@@ -14,7 +20,8 @@ export class AdminController {
 
   constructor(
     @InjectQueue(QUEUES.TRANSLATION_CREATE) private readonly createQueue: Queue,
-    @InjectQueue(QUEUES.TRANSLATION_PROCESS) private readonly processQueue: Queue,
+    @InjectQueue(QUEUES.TRANSLATION_PROCESS)
+    private readonly processQueue: Queue,
     @InjectQueue(QUEUES.TRANSLATION_RETRY) private readonly retryQueue: Queue,
     @InjectQueue(QUEUES.TRANSLATION_REVIEW) private readonly reviewQueue: Queue,
     @InjectQueue(QUEUES.TRANSLATION_EXPORT) private readonly exportQueue: Queue,
@@ -22,7 +29,10 @@ export class AdminController {
 
   @Delete('queues/purge')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Purge all translation queues (waiting, delayed, failed, completed)' })
+  @ApiOperation({
+    summary:
+      'Purge all translation queues (waiting, delayed, failed, completed)',
+  })
   async purgeQueues() {
     const queues = [
       { name: QUEUES.TRANSLATION_CREATE, queue: this.createQueue },

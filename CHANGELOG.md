@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- **Gemini-primary cloud stack** — `AI_PROVIDER` default `gemini`, `AI_PROVIDER_FALLBACK=openai`, OpenAI model-tier fallback (ADR 0013), env templates and cost rates for `gemini-2.5-flash-lite` / `gpt-4.1-mini` / `gpt-4.1`
 - **Translations grid** — virtual scroll with infinite chunked loading (100 keys per page), fixes NaN height bug caused by scroll listener not attaching before data loaded
 - **SSE real-time updates** — per-cell translation progress via Server-Sent Events instead of polling; JWT passed as query param since EventSource doesn't support headers
 - **Import Excel** — bulk import from EW Main format (Field Id / Type / Field columns, only `title` rows)

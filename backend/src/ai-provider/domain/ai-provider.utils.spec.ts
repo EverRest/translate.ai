@@ -21,6 +21,11 @@ describe('ai-provider.utils', () => {
     it('maps unknown values to fallback', () => {
       expect(resolveJobAiProvider('unknown', 'openai')).toBe('openai');
     });
+
+    it('uses configured fallback when provider omitted', () => {
+      expect(resolveJobAiProvider(undefined, 'openai')).toBe('openai');
+      expect(resolveJobAiProvider(null, 'openai')).toBe('openai');
+    });
   });
 
   describe('resolveStoredTranslationProvider', () => {

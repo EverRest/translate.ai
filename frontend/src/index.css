@@ -44,4 +44,6 @@ body {
 }
 
 /* Keep datagrid-scroll class for backwards compat */
-.datagrid-scroll { scrollbar-width: thin; }
+.datagrid-scroll {
+  scrollbar-width: thin;
+}

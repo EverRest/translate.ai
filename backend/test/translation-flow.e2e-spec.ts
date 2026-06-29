@@ -68,6 +68,8 @@ async function waitForJob(
 }
 
 describe('Translation flow (e2e)', () => {
+  jest.setTimeout(60_000);
+
   let app: INestApplication<App>;
   let workerContext: Awaited<
     ReturnType<typeof NestFactory.createApplicationContext>

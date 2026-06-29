@@ -112,8 +112,21 @@ describe('prompt.builder', () => {
       expect(cost).toBeGreaterThan(0);
     });
 
+    it('computes gpt-4.1-mini cost from token counts', () => {
+      const cost = estimateOpenAiCost('gpt-4.1-mini', 1000, 500);
+      expect(cost).toBeGreaterThan(0);
+      expect(cost).toBeGreaterThan(
+        estimateOpenAiCost('gpt-4o-mini', 1000, 500),
+      );
+    });
+
     it('computes Gemini cost from token counts', () => {
       const cost = estimateGeminiCost('gemini-2.0-flash', 1000, 500);
+      expect(cost).toBeGreaterThan(0);
+    });
+
+    it('computes gemini-2.5-flash-lite cost from token counts', () => {
+      const cost = estimateGeminiCost('gemini-2.5-flash-lite', 1000, 500);
       expect(cost).toBeGreaterThan(0);
     });
   });

@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JobItemStatus, JobStatus, TranslationKey } from '@prisma/client';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { isValidLanguageCode } from '../../../shared/utils/string.utils';
@@ -26,6 +27,7 @@ export class CreateTranslationJobHandler implements ICommandHandler<CreateTransl
     private readonly projectAccess: ProjectAccessService,
     private readonly queue: TranslationQueueService,
     private readonly jobRunner: TranslationJobRunnerService,
+    private readonly config: ConfigService,
   ) {}
 
   async execute(command: CreateTranslationJobCommand) {
@@ -49,7 +51,10 @@ export class CreateTranslationJobHandler implements ICommandHandler<CreateTransl
       command.keyItems,
     );
 
-    const provider = resolveJobAiProvider(command.provider);
+    const provider = resolveJobAiProvider(
+      command.provider,
+      this.config.get<string>('AI_PROVIDER', 'gemini'),
+    );
 
     const job = await this.prisma.translationJob.create({
       data: {
