@@ -75,6 +75,7 @@ export class MaterializeLocalizationObjectCommand {
     public readonly tenantId: string,
     public readonly projectId: string,
     public readonly objectId: string,
+    public readonly prune = false,
   ) {}
 }
 

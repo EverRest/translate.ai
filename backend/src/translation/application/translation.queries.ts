@@ -9,6 +9,8 @@ export class ListTranslationsQuery {
     public readonly language?: string,
     public readonly status?: TranslationStatus,
     public readonly keys?: string[],
+    public readonly localizationObjectId?: string,
+    public readonly keyPrefix?: string,
   ) {}
 }
 

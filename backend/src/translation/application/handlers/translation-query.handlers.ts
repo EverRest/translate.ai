@@ -7,6 +7,7 @@ import {
   ListTranslationsQuery,
   LookupTranslationsQuery,
 } from '../translation.queries';
+import { buildTranslationKeyListFilter } from '../utils/translation-key-filter.utils';
 
 function mapTranslation(translation: {
   id: string;
@@ -43,9 +44,18 @@ export class ListTranslationsHandler implements IQueryHandler<ListTranslationsQu
       query.projectId,
     );
 
+    const keyFilter = buildTranslationKeyListFilter(
+      query.projectId,
+      undefined,
+      {
+        localizationObjectId: query.localizationObjectId,
+        keyPrefix: query.keyPrefix,
+      },
+    );
+
     const where = {
       translationKey: {
-        projectId: query.projectId,
+        ...keyFilter,
         ...(query.keys?.length ? { key: { in: query.keys } } : {}),
       },
       ...(query.language ? { language: query.language } : {}),

@@ -12,7 +12,11 @@ import { resolveNodeContentType } from '../../domain/node-content-type.utils';
 export class MaterializeObjectService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async materialize(projectId: string, objectId: string) {
+  async materialize(
+    projectId: string,
+    objectId: string,
+    options?: { prune?: boolean },
+  ) {
     const object = await this.prisma.localizationObject.findFirst({
       where: { id: objectId, projectId },
     });
@@ -42,6 +46,8 @@ export class MaterializeObjectService {
 
     let created = 0;
     let updated = 0;
+    let pruned = 0;
+    const expectedPaths = leaves.map((leaf) => leaf.path);
 
     await this.prisma.$transaction(async (tx) => {
       for (const leaf of leaves) {
@@ -100,13 +106,31 @@ export class MaterializeObjectService {
         created += 1;
       }
 
+      if (options?.prune) {
+        const orphans = await tx.translationKey.findMany({
+          where: {
+            projectId,
+            localizationObjectId: objectId,
+            key: { notIn: expectedPaths },
+          },
+          select: { id: true },
+        });
+
+        if (orphans.length > 0) {
+          await tx.translationKey.deleteMany({
+            where: { id: { in: orphans.map((item) => item.id) } },
+          });
+          pruned = orphans.length;
+        }
+      }
+
       await tx.localizationObject.update({
         where: { id: objectId },
         data: { status: 'materialized' },
       });
     });
 
-    return { created, updated, total: leaves.length };
+    return { created, updated, pruned, total: leaves.length };
   }
 }
 

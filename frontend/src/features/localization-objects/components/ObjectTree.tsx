@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import type { LocalizationNode } from '../types';
+import { NodeTypeIcon } from './nodeTypeIcons';
 
 type ObjectTreeProps = {
   objectSlug: string;
   nodes: LocalizationNode[];
   depth?: number;
+  selectedNodeId?: string;
+  onSelectNode: (nodeId: string) => void;
   onAddChild: (parentId: string, parentSlug: string) => void;
   onUpdateSourceText: (nodeId: string, sourceText: string) => void;
   onDelete: (nodeId: string) => void;
@@ -24,6 +27,8 @@ function TreeNode({
   objectSlug,
   node,
   depth,
+  selectedNodeId,
+  onSelectNode,
   onAddChild,
   onUpdateSourceText,
   onDelete,
@@ -33,6 +38,8 @@ function TreeNode({
   objectSlug: string;
   node: LocalizationNode;
   depth: number;
+  selectedNodeId?: string;
+  onSelectNode: (nodeId: string) => void;
   onAddChild: (parentId: string, parentSlug: string) => void;
   onUpdateSourceText: (nodeId: string, sourceText: string) => void;
   onDelete: (nodeId: string) => void;
@@ -43,21 +50,40 @@ function TreeNode({
   const [draftText, setDraftText] = useState(node.sourceText ?? '');
   const hasChildren = (node.children?.length ?? 0) > 0;
   const path = `${objectSlug}.${node.slug}`;
+  const isSelected = selectedNodeId === node.id;
 
   return (
     <div>
       <div
-        className="group flex items-start gap-2 rounded-lg border border-transparent px-2 py-1.5 hover:border-slate-800 hover:bg-slate-900/60"
+        role="button"
+        tabIndex={0}
+        onClick={() => onSelectNode(node.id)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onSelectNode(node.id);
+          }
+        }}
+        className={`group flex items-start gap-2 rounded-lg border px-2 py-1.5 ${
+          isSelected
+            ? 'border-sky-800/60 bg-sky-950/20'
+            : 'border-transparent hover:border-slate-800 hover:bg-slate-900/60'
+        }`}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
       >
         <button
           type="button"
-          onClick={() => setExpanded((value) => !value)}
+          onClick={(event) => {
+            event.stopPropagation();
+            setExpanded((value) => !value);
+          }}
           className="mt-0.5 w-4 shrink-0 text-slate-500 hover:text-white"
           aria-label={expanded ? 'Collapse' : 'Expand'}
         >
           {hasChildren ? (expanded ? '▾' : '▸') : '·'}
         </button>
+
+        <NodeTypeIcon type={node.nodeType} />
 
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -75,6 +101,7 @@ function TreeNode({
           {node.sourceText !== null && node.sourceText !== undefined ? (
             <input
               value={draftText}
+              onClick={(event) => event.stopPropagation()}
               onChange={(event) => setDraftText(event.target.value)}
               onBlur={() => {
                 if (draftText !== (node.sourceText ?? '')) {
@@ -93,14 +120,20 @@ function TreeNode({
         <div className="flex shrink-0 gap-1 opacity-0 transition-opacity group-hover:opacity-100">
           <button
             type="button"
-            onClick={() => onAddChild(node.id, node.slug)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onAddChild(node.id, node.slug);
+            }}
             className="rounded px-2 py-1 text-xs text-sky-400 hover:bg-slate-800"
           >
             + child
           </button>
           <button
             type="button"
-            onClick={() => onDelete(node.id)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onDelete(node.id);
+            }}
             disabled={deletingNodeId === node.id}
             className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-950/30 disabled:opacity-50"
           >
@@ -116,6 +149,8 @@ function TreeNode({
             objectSlug={objectSlug}
             node={child}
             depth={depth + 1}
+            selectedNodeId={selectedNodeId}
+            onSelectNode={onSelectNode}
             onAddChild={onAddChild}
             onUpdateSourceText={onUpdateSourceText}
             onDelete={onDelete}
@@ -131,6 +166,8 @@ export function ObjectTree({
   objectSlug,
   nodes,
   depth = 0,
+  selectedNodeId,
+  onSelectNode,
   onAddChild,
   onUpdateSourceText,
   onDelete,
@@ -154,6 +191,8 @@ export function ObjectTree({
           objectSlug={objectSlug}
           node={node}
           depth={depth}
+          selectedNodeId={selectedNodeId}
+          onSelectNode={onSelectNode}
           onAddChild={onAddChild}
           onUpdateSourceText={onUpdateSourceText}
           onDelete={onDelete}

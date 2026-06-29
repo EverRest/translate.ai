@@ -17,6 +17,8 @@ describe('MaterializeObjectService', () => {
       findFirst: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+      findMany: jest.fn(),
+      deleteMany: jest.fn(),
     },
     $transaction: jest.fn(),
   };
@@ -83,6 +85,7 @@ describe('MaterializeObjectService', () => {
     expect(result).toEqual({
       created: 2,
       updated: 0,
+      pruned: 0,
       total: 2,
     });
     expect(prisma.translationKey.create).toHaveBeenCalledWith({
@@ -131,6 +134,7 @@ describe('MaterializeObjectService', () => {
     expect(result).toEqual({
       created: 0,
       updated: 1,
+      pruned: 0,
       total: 1,
     });
     expect(prisma.translationKey.update).toHaveBeenCalledWith({
@@ -139,6 +143,36 @@ describe('MaterializeObjectService', () => {
         sourceText: 'Updated title',
         contentType: 'ui',
       }),
+    });
+  });
+
+  it('prunes orphan keys when prune option is enabled', async () => {
+    prisma.localizationObject.findFirst.mockResolvedValue({
+      id: 'obj-1',
+      projectId: 'proj-1',
+      slug: 'registration_form',
+      status: 'materialized',
+    });
+    prisma.localizationNode.findMany.mockResolvedValue([nodes[0]]);
+    prisma.translationKey.findFirst.mockResolvedValue(null);
+    prisma.translationKey.create.mockResolvedValue({ id: 'key-1' });
+    prisma.localizationNode.update.mockResolvedValue({});
+    prisma.localizationObject.update.mockResolvedValue({});
+    prisma.translationKey.findMany.mockResolvedValue([{ id: 'orphan-key' }]);
+    prisma.translationKey.deleteMany.mockResolvedValue({ count: 1 });
+
+    const result = await service.materialize('proj-1', 'obj-1', {
+      prune: true,
+    });
+
+    expect(result).toEqual({
+      created: 1,
+      updated: 0,
+      pruned: 1,
+      total: 1,
+    });
+    expect(prisma.translationKey.deleteMany).toHaveBeenCalledWith({
+      where: { id: { in: ['orphan-key'] } },
     });
   });
 

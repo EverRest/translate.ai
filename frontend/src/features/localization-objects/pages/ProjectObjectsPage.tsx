@@ -9,6 +9,10 @@ import { useConfirm } from '../../../shared/ui/ConfirmDialog';
 import type { Project } from '../../projects/types';
 import { CreateObjectModal } from '../components/CreateObjectModal';
 import {
+  formatObjectProgress,
+  formatRelativeTime,
+} from '../utils/object-display.utils';
+import {
   useCreateLocalizationObject,
   useDeleteLocalizationObject,
   useLocalizationObjects,
@@ -105,64 +109,82 @@ export function ProjectObjectsPage() {
       )}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {items.map((object) => (
-          <article
-            key={object.id}
-            className="flex flex-col rounded-xl border border-slate-800 bg-slate-900/40 p-4"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <h3 className="font-medium text-white">{object.name}</h3>
-                <p className="mt-1 font-mono text-xs text-slate-500">
-                  {object.slug}
+        {items.map((object) => {
+          const progress = formatObjectProgress(
+            object.materializedCount,
+            object.nodeCount,
+          );
+
+          return (
+            <article
+              key={object.id}
+              className="flex flex-col rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <h3 className="font-medium text-white">{object.name}</h3>
+                  <p className="mt-1 font-mono text-xs text-slate-500">
+                    {object.slug}
+                  </p>
+                </div>
+                <div className="flex flex-wrap justify-end gap-1">
+                  <TemplateBadge type={object.templateType} />
+                  <StatusBadge status={object.status} />
+                </div>
+              </div>
+
+              {object.description && (
+                <p className="mt-3 line-clamp-2 text-sm text-slate-400">
+                  {object.description}
+                </p>
+              )}
+
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center justify-between text-xs text-slate-500">
+                  <span>{progress.label}</span>
+                  <span>{progress.percent}%</span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-slate-800">
+                  <div
+                    className="h-full rounded-full bg-emerald-500/80 transition-all"
+                    style={{ width: `${progress.percent}%` }}
+                  />
+                </div>
+                <p className="text-xs text-slate-600">
+                  Updated {formatRelativeTime(object.updatedAt)}
                 </p>
               </div>
-              <div className="flex flex-wrap justify-end gap-1">
-                <TemplateBadge type={object.templateType} />
-                <StatusBadge status={object.status} />
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Link
+                  to={`/projects/${projectId}/objects/${object.id}`}
+                  className="rounded-lg bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700"
+                >
+                  Open tree
+                </Link>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (
+                      await confirm({
+                        title: `Delete "${object.name}"?`,
+                        description:
+                          'The tree is removed. Materialized translation keys remain in the project.',
+                        danger: true,
+                        confirmLabel: 'Delete',
+                      })
+                    ) {
+                      await remove.mutateAsync(object.id);
+                    }
+                  }}
+                  className="rounded-lg px-3 py-1.5 text-sm text-red-400 hover:bg-red-950/30"
+                >
+                  Delete
+                </button>
               </div>
-            </div>
-
-            {object.description && (
-              <p className="mt-3 line-clamp-2 text-sm text-slate-400">
-                {object.description}
-              </p>
-            )}
-
-            <p className="mt-3 text-xs text-slate-500">
-              {object.nodeCount} node{object.nodeCount === 1 ? '' : 's'} ·{' '}
-              {object.materializedCount} materialized
-            </p>
-
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Link
-                to={`/projects/${projectId}/objects/${object.id}`}
-                className="rounded-lg bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700"
-              >
-                Open tree
-              </Link>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (
-                    await confirm({
-                      title: `Delete "${object.name}"?`,
-                      description:
-                        'The tree is removed. Materialized translation keys remain in the project.',
-                      danger: true,
-                      confirmLabel: 'Delete',
-                    })
-                  ) {
-                    await remove.mutateAsync(object.id);
-                  }
-                }}
-                className="rounded-lg px-3 py-1.5 text-sm text-red-400 hover:bg-red-950/30"
-              >
-                Delete
-              </button>
-            </div>
-          </article>
-        ))}
+            </article>
+          );
+        })}
       </div>
 
       <CreateObjectModal

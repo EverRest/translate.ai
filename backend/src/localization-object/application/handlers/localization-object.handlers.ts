@@ -365,7 +365,9 @@ export class MaterializeLocalizationObjectHandler implements ICommandHandler<Mat
       command.tenantId,
       command.projectId,
     );
-    return this.materialize.materialize(command.projectId, command.objectId);
+    return this.materialize.materialize(command.projectId, command.objectId, {
+      prune: command.prune,
+    });
   }
 }
 

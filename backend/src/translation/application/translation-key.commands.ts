@@ -36,5 +36,7 @@ export class ListTranslationKeysQuery {
     public readonly page: number,
     public readonly limit: number,
     public readonly search?: string,
+    public readonly localizationObjectId?: string,
+    public readonly keyPrefix?: string,
   ) {}
 }

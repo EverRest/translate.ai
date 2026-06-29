@@ -12,11 +12,17 @@ import type {
   UpdateTranslationKeyInput,
 } from '../types';
 
+export type ListTranslationKeysFilter = {
+  localizationObjectId?: string;
+  keyPrefix?: string;
+};
+
 export async function listTranslationKeys(
   projectId: string,
   page = 1,
   limit = 20,
   search?: string,
+  filter?: ListTranslationKeysFilter,
 ) {
   const params = new URLSearchParams({
     page: String(page),
@@ -24,6 +30,12 @@ export async function listTranslationKeys(
   });
   if (search?.trim()) {
     params.set('search', search.trim());
+  }
+  if (filter?.localizationObjectId) {
+    params.set('localizationObjectId', filter.localizationObjectId);
+  }
+  if (filter?.keyPrefix) {
+    params.set('keyPrefix', filter.keyPrefix);
   }
 
   const response = await apiGet<ApiSuccess<PaginatedData<TranslationKey>>>(
