@@ -9,7 +9,7 @@ import type {
   ColumnDef,
 } from '../../../shared/ui/DataGrid';
 import { useConfirm } from '../../../shared/ui/ConfirmDialog';
-import { DataGrid, RowMenu } from '../../../shared/ui/DataGrid';
+import { DataGrid } from '../../../shared/ui/DataGrid';
 import type { Project } from '../../projects/types';
 import {
   deleteAllTranslationKeys,
@@ -151,42 +151,8 @@ export function ProjectKeysPage() {
           </span>
         ),
       },
-      {
-        key: '_actions',
-        header: '',
-        width: 32,
-        noPadding: true,
-        overflow: 'visible',
-        sticky: 'right',
-        render: (row) => (
-          <RowMenu
-            items={[
-              { label: 'Edit', onClick: () => setEditingKey(row) },
-              {
-                label: 'Delete',
-                variant: 'danger',
-                onClick: async () => {
-                  if (
-                    await confirm({
-                      title: `Delete key "${row.key}"?`,
-                      description:
-                        'All existing translations for this key will be removed.',
-                      danger: true,
-                      confirmLabel: 'Delete',
-                    })
-                  ) {
-                    remove.mutate(row.id, {
-                      onSuccess: () => gridRef.current?.refetch(),
-                    });
-                  }
-                },
-              },
-            ]}
-          />
-        ),
-      },
     ],
-    [confirm, remove],
+    [],
   );
 
   // ── Bulk actions ───────────────────────────────────────────────────────────
@@ -281,6 +247,26 @@ export function ProjectKeysPage() {
           emptyMessage="No translation keys yet."
           gridRef={gridRef}
           gridId="keys"
+          rowContextMenu={(row) => [
+            { label: 'Edit', onClick: () => setEditingKey(row) },
+            {
+              label: 'Delete',
+              variant: 'danger',
+              onClick: () =>
+                void confirm({
+                  title: `Delete key "${row.key}"?`,
+                  description:
+                    'All existing translations for this key will be removed.',
+                  danger: true,
+                  confirmLabel: 'Delete',
+                }).then((ok) => {
+                  if (ok)
+                    remove.mutate(row.id, {
+                      onSuccess: () => gridRef.current?.refetch(),
+                    });
+                }),
+            },
+          ]}
         />
       </div>
 

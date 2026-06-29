@@ -48,6 +48,12 @@ export type GridRef = {
   clearSelection: () => void;
 };
 
+export type RowContextMenuItem = {
+  label: string;
+  variant?: 'default' | 'danger';
+  onClick: () => void;
+};
+
 export type DataGridProps<T> = {
   columns: ColumnDef<T>[];
   fetchFn: (params: GridFetchParams) => Promise<GridPage<T>>;
@@ -62,4 +68,6 @@ export type DataGridProps<T> = {
   gridRef?: React.MutableRefObject<GridRef | null>;
   /** Namespace for persisting column widths and visibility to localStorage */
   gridId?: string;
+  /** Right-click context menu items per row */
+  rowContextMenu?: (row: T) => RowContextMenuItem[];
 };
