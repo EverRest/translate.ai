@@ -337,6 +337,60 @@ Pending translations for review.
 
 ---
 
+### Localization objects
+
+Tree authoring for forms/pages; materializes to flat keys. See [domain/localization-object.md](../domain/localization-object.md).
+
+#### GET `/api/v1/projects/{projectId}/objects`
+
+**Query:** `page`, `limit`, `search`
+
+#### POST `/api/v1/projects/{projectId}/objects`
+
+**Request:** `{ name, slug, description?, templateType? }` — `templateType`: `form` | `page` | `modal` | `email` | `api` | `custom`
+
+#### GET `/api/v1/projects/{projectId}/objects/{objectId}`
+
+Returns object metadata + nested `tree`.
+
+#### PATCH `/api/v1/projects/{projectId}/objects/{objectId}`
+
+Update `name`, `description`, `templateType`.
+
+#### DELETE `/api/v1/projects/{projectId}/objects/{objectId}`
+
+Deletes tree; materialized translation keys remain.
+
+#### POST `/api/v1/projects/{projectId}/objects/{objectId}/nodes`
+
+**Request:** `{ slug, nodeType, parentId?, sortOrder?, label?, sourceText?, description?, context?, contentType? }`
+
+#### PATCH `/api/v1/projects/{projectId}/objects/{objectId}/nodes/{nodeId}`
+
+#### DELETE `/api/v1/projects/{projectId}/objects/{objectId}/nodes/{nodeId}`
+
+#### POST `/api/v1/projects/{projectId}/objects/{objectId}/materialize`
+
+**Response:** `{ created, updated, total }`
+
+#### POST `/api/v1/projects/{projectId}/objects/{objectId}/translate`
+
+**Request:** `{ languages: ["de", "fr"] }` — materializes then creates translation job.
+
+#### GET `/api/v1/projects/{projectId}/objects/templates`
+
+Built-in templates: `login_form`, `registration_form`.
+
+#### POST `/api/v1/projects/{projectId}/objects/{objectId}/generate-structure`
+
+Queues AI structure generation (requires worker + `GEMINI_API_KEY` or `OPENAI_API_KEY`).
+
+#### POST `/api/v1/projects/{projectId}/objects/{objectId}/apply-template`
+
+**Request:** `{ templateId: "login_form" }` — replaces tree with built-in template.
+
+---
+
 ### Glossary suggestions
 
 #### GET `/api/v1/projects/{projectId}/glossary/suggestions`

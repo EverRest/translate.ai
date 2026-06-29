@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AiConfigService } from './application/ai-config.service';
+import { AiCompletionService } from './application/ai-completion.service';
 import { ContentClassifierService } from './application/content-classifier.service';
 import { OllamaModelRouterService } from './application/ollama-model-router.service';
 import { ProviderRegistryService } from './application/provider-registry.service';
@@ -14,6 +15,7 @@ import { AiConfigController } from './presentation/ai-config.controller';
   controllers: [AiConfigController],
   providers: [
     AiConfigService,
+    AiCompletionService,
     OpenAiProvider,
     GeminiProvider,
     OllamaClient,
@@ -23,6 +25,6 @@ import { AiConfigController } from './presentation/ai-config.controller';
     OllamaProvider,
     ProviderRegistryService,
   ],
-  exports: [ProviderRegistryService, AiConfigService],
+  exports: [ProviderRegistryService, AiConfigService, AiCompletionService],
 })
 export class AiProviderModule {}

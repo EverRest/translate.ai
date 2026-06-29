@@ -16,6 +16,8 @@ import { JobDetailPage } from '../../features/translation-jobs/pages/JobDetailPa
 import { JobsPage } from '../../features/translation-jobs/pages/JobsPage';
 import { ProjectBranchesPage } from '../../features/branches/pages/ProjectBranchesPage';
 import { ProjectGlossaryPage } from '../../features/glossary/pages/ProjectGlossaryPage';
+import { ProjectObjectsPage } from '../../features/localization-objects/pages/ProjectObjectsPage';
+import { ProjectObjectDetailPage } from '../../features/localization-objects/pages/ProjectObjectDetailPage';
 import { ProjectJobsPage } from '../../features/translation-jobs/pages/ProjectJobsPage';
 import { ProjectTranslationsPage } from '../../features/translations/pages/ProjectTranslationsPage';
 import { SettingsPage } from '../../features/settings/pages/SettingsPage';
@@ -37,6 +39,11 @@ export function AppRouter() {
             <Route index element={<ProjectOverviewTab />} />
             <Route path="keys" element={<ProjectKeysPage />} />
             <Route path="translations" element={<ProjectTranslationsPage />} />
+            <Route path="objects" element={<ProjectObjectsPage />} />
+            <Route
+              path="objects/:objectId"
+              element={<ProjectObjectDetailPage />}
+            />
             <Route path="glossary" element={<ProjectGlossaryPage />} />
             <Route path="branches" element={<ProjectBranchesPage />} />
             <Route path="jobs" element={<ProjectJobsPage />} />
