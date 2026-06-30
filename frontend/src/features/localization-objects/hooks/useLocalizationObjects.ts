@@ -26,10 +26,12 @@ export function useLocalizationObjects(
   page = 1,
   limit = 20,
   search?: string,
+  collectionId?: string,
 ) {
   return useQuery({
-    queryKey: ['localization-objects', projectId, page, limit, search],
-    queryFn: () => listLocalizationObjects(projectId!, page, limit, search),
+    queryKey: ['localization-objects', projectId, page, limit, search, collectionId],
+    queryFn: () =>
+      listLocalizationObjects(projectId!, page, limit, search, collectionId),
     enabled: Boolean(projectId),
   });
 }

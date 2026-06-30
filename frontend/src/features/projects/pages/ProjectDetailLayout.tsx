@@ -5,7 +5,8 @@ import { useArchiveProject, useProject } from '../hooks/useProjects';
 const TAB_LABELS: Record<string, string> = {
   keys: 'Keys',
   translations: 'Translations',
-  objects: 'Objects',
+  entities: 'Entities',
+  objects: 'Entities',
   glossary: 'Glossary',
   branches: 'Branches',
   jobs: 'Jobs',

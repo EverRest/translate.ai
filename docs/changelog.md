@@ -4,6 +4,16 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Entities, collections, OpenAPI import
+
+Per [ADR 0017](./adr/0017-entity-collections.md):
+
+- **Schema:** `EntityCollection`, `LocalizationObject.collectionId`
+- **API:** `/projects/:id/collections` CRUD; filter objects by `collectionId`
+- **API:** OpenAPI preview + import into collection (`integration.openapi.import` queue for large specs)
+- **UI:** Tab renamed **Entities** (`/entities` routes; `/objects` redirects); collection sidebar; import wizard
+- **Parser:** `openapi-to-structure.parser.ts` — one entity per OpenAPI tag
+
 ### Added — Localization objects polish (P3-12 follow-up)
 
 - **API:** `localizationObjectId` / `keyPrefix` filters on keys and translations list

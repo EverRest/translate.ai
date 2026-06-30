@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import { AppLayout } from '../layout/AppLayout';
 import { LoginPage } from '../../features/auth/pages/LoginPage';
 import { RegisterPage } from '../../features/auth/pages/RegisterPage';
@@ -23,6 +23,19 @@ import { ProjectTranslationsPage } from '../../features/translations/pages/Proje
 import { SettingsPage } from '../../features/settings/pages/SettingsPage';
 import { ProtectedRoute, PublicOnlyRoute } from './ProtectedRoute';
 
+function EntityObjectRedirect() {
+  const { projectId, objectId } = useParams<{
+    projectId: string;
+    objectId: string;
+  }>();
+  return (
+    <Navigate
+      to={`/projects/${projectId}/entities/${objectId}`}
+      replace
+    />
+  );
+}
+
 export function AppRouter() {
   return (
     <Routes>
@@ -39,10 +52,15 @@ export function AppRouter() {
             <Route index element={<ProjectOverviewTab />} />
             <Route path="keys" element={<ProjectKeysPage />} />
             <Route path="translations" element={<ProjectTranslationsPage />} />
-            <Route path="objects" element={<ProjectObjectsPage />} />
+            <Route path="entities" element={<ProjectObjectsPage />} />
+            <Route
+              path="entities/:objectId"
+              element={<ProjectObjectDetailPage />}
+            />
+            <Route path="objects" element={<Navigate to="entities" replace />} />
             <Route
               path="objects/:objectId"
-              element={<ProjectObjectDetailPage />}
+              element={<EntityObjectRedirect />}
             />
             <Route path="glossary" element={<ProjectGlossaryPage />} />
             <Route path="branches" element={<ProjectBranchesPage />} />

@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Modal } from '../../../shared/ui/Modal';
 import { TEMPLATE_TYPE_OPTIONS } from '../types';
-import type { CreateLocalizationObjectInput } from '../types';
+import type { CreateLocalizationObjectInput, EntityCollectionSummary } from '../types';
 
 type CreateObjectModalProps = {
   open: boolean;
   loading?: boolean;
   error?: string;
+  collections?: EntityCollectionSummary[];
+  defaultCollectionId?: string;
   onClose: () => void;
   onSubmit: (values: CreateLocalizationObjectInput) => void;
 };
@@ -24,6 +26,8 @@ export function CreateObjectModal({
   open,
   loading,
   error,
+  collections = [],
+  defaultCollectionId,
   onClose,
   onSubmit,
 }: CreateObjectModalProps) {
@@ -31,6 +35,7 @@ export function CreateObjectModal({
   const [slug, setSlug] = useState('');
   const [slugTouched, setSlugTouched] = useState(false);
   const [description, setDescription] = useState('');
+  const [collectionId, setCollectionId] = useState<string | undefined>();
   const [templateType, setTemplateType] =
     useState<CreateLocalizationObjectInput['templateType']>('form');
 
@@ -41,8 +46,9 @@ export function CreateObjectModal({
       setSlugTouched(false);
       setDescription('');
       setTemplateType('form');
+      setCollectionId(defaultCollectionId ?? collections[0]?.id);
     }
-  }, [open]);
+  }, [open, defaultCollectionId, collections]);
 
   useEffect(() => {
     if (!slugTouched && name) {
@@ -51,7 +57,7 @@ export function CreateObjectModal({
   }, [name, slugTouched]);
 
   return (
-    <Modal open={open} title="Create object" onClose={onClose}>
+    <Modal open={open} title="Create entity" onClose={onClose}>
       <form
         className="space-y-4"
         onSubmit={(event) => {
@@ -61,6 +67,7 @@ export function CreateObjectModal({
             slug: slug.trim(),
             description: description.trim() || undefined,
             templateType,
+            collectionId,
           });
         }}
       >
@@ -91,6 +98,23 @@ export function CreateObjectModal({
             required
           />
         </label>
+
+        {collections.length > 0 && (
+          <label className="block space-y-1">
+            <span className="text-sm text-slate-400">Collection</span>
+            <select
+              value={collectionId ?? ''}
+              onChange={(event) => setCollectionId(event.target.value)}
+              className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"
+            >
+              {collections.map((collection) => (
+                <option key={collection.id} value={collection.id}>
+                  {collection.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
 
         <label className="block space-y-1">
           <span className="text-sm text-slate-400">Type</span>

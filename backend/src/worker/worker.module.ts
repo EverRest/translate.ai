@@ -23,6 +23,7 @@ import {
 import { ExportProcessor } from './processors/export.processor';
 import { GlossaryAnalyzeProcessor } from './processors/glossary.processor';
 import { LocalizationObjectGenerateProcessor } from './processors/localization-object.processor';
+import { OpenApiImportProcessor } from './processors/openapi-import.processor';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { LocalizationObjectGenerateProcessor } from './processors/localization-o
     ExportProcessor,
     GlossaryAnalyzeProcessor,
     LocalizationObjectGenerateProcessor,
+    OpenApiImportProcessor,
   ],
 })
 export class WorkerModule {}

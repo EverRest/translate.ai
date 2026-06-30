@@ -56,6 +56,10 @@ export class CreateLocalizationObjectDto {
   @IsOptional()
   @IsIn(TEMPLATE_TYPES)
   templateType?: (typeof TEMPLATE_TYPES)[number];
+
+  @IsOptional()
+  @IsUUID()
+  collectionId?: string;
 }
 
 export class UpdateLocalizationObjectDto {
@@ -73,6 +77,10 @@ export class UpdateLocalizationObjectDto {
   @IsOptional()
   @IsIn(TEMPLATE_TYPES)
   templateType?: (typeof TEMPLATE_TYPES)[number];
+
+  @IsOptional()
+  @IsUUID()
+  collectionId?: string | null;
 }
 
 export class CreateLocalizationNodeDto {

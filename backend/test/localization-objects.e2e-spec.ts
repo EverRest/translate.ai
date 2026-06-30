@@ -161,6 +161,78 @@ describe('Localization objects (e2e)', () => {
 
     expect(pruneResponse.body.data.pruned).toBeGreaterThanOrEqual(1);
   });
+
+  it('lists collections with General default and filters entities', async () => {
+    const collectionsResponse = await request(app.getHttpServer())
+      .get(`/api/v1/projects/${projectId}/collections`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    const collections = collectionsResponse.body.data.items as Array<{
+      slug: string;
+      id: string;
+    }>;
+    expect(collections.some((item) => item.slug === 'general')).toBe(true);
+
+    const general = collections.find((item) => item.slug === 'general')!;
+
+    const filtered = await request(app.getHttpServer())
+      .get(
+        `/api/v1/projects/${projectId}/objects?collectionId=${general.id}`,
+      )
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    expect(filtered.body.data.items.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('previews and imports entities from OpenAPI JSON', async () => {
+    const collectionsResponse = await request(app.getHttpServer())
+      .get(`/api/v1/projects/${projectId}/collections`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    const collectionId = (
+      collectionsResponse.body.data.items as Array<{ id: string }>
+    )[0].id;
+
+    const spec = JSON.stringify({
+      openapi: '3.0.0',
+      info: { title: 'E2E', version: '1.0.0' },
+      tags: [{ name: 'Pets', description: 'Pet store' }],
+      paths: {
+        '/pets': {
+          get: {
+            tags: ['Pets'],
+            summary: 'List pets',
+            responses: { '200': { description: 'OK' } },
+          },
+        },
+      },
+    });
+
+    const preview = await request(app.getHttpServer())
+      .post(
+        `/api/v1/projects/${projectId}/collections/${collectionId}/import/openapi/preview`,
+      )
+      .set('Authorization', `Bearer ${token}`)
+      .send({ spec })
+      .expect(201);
+
+    expect(preview.body.data.entities).toHaveLength(1);
+    expect(preview.body.data.entities[0].slug).toBe('pets');
+
+    const imported = await request(app.getHttpServer())
+      .post(
+        `/api/v1/projects/${projectId}/collections/${collectionId}/import/openapi`,
+      )
+      .set('Authorization', `Bearer ${token}`)
+      .send({ spec, materialize: true })
+      .expect(201);
+
+    expect(imported.body.data.entityCount).toBe(1);
+    expect(imported.body.data.queued).toBe(false);
+  });
 });
 
 function findFirstLeaf(

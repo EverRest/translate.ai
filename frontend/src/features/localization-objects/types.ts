@@ -40,6 +40,9 @@ export type LocalizationObjectSummary = {
   status: LocalizationObjectStatus;
   generationStatus: LocalizationObjectGenerationStatus;
   generationError: string | null;
+  collectionId: string | null;
+  collectionName: string | null;
+  collectionSlug: string | null;
   nodeCount: number;
   materializedCount: number;
   createdAt: string;
@@ -70,6 +73,7 @@ export type CreateLocalizationObjectInput = {
   slug: string;
   description?: string;
   templateType?: LocalizationTemplateType;
+  collectionId?: string;
 };
 
 export type CreateLocalizationNodeInput = {
@@ -105,6 +109,36 @@ export type UpdateLocalizationObjectInput = {
   name?: string;
   description?: string | null;
   templateType?: LocalizationTemplateType;
+  collectionId?: string | null;
+};
+
+export type EntityCollectionSummary = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  entityCount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type OpenApiPreviewEntity = {
+  name: string;
+  slug: string;
+  tag: string;
+  nodeCount: number;
+};
+
+export type OpenApiPreviewResult = {
+  entities: OpenApiPreviewEntity[];
+  warnings: string[];
+  availableTags: string[];
+};
+
+export type OpenApiImportResult = {
+  queued: boolean;
+  entityCount: number;
+  entityIds?: string[];
 };
 
 export type ObjectTemplateSummary = {

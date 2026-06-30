@@ -86,7 +86,7 @@ export function ProjectObjectDetailPage() {
   }
 
   if (isLoading) {
-    return <p className="text-slate-400">Loading object…</p>;
+    return <p className="text-slate-400">Loading entity…</p>;
   }
 
   if (error || !object) {
@@ -118,10 +118,10 @@ export function ProjectObjectDetailPage() {
         <div>
           <p className="text-sm text-slate-500">
             <Link
-              to={`/projects/${projectId}/objects`}
+              to={`/projects/${projectId}/entities`}
               className="hover:text-slate-300"
             >
-              Objects
+              Entities
             </Link>{' '}
             / {object.name}
           </p>
@@ -135,6 +135,11 @@ export function ProjectObjectDetailPage() {
               Edit
             </button>
           </div>
+          {object.collectionName && (
+            <p className="mt-1 text-xs text-slate-500">
+              Collection: {object.collectionName}
+            </p>
+          )}
           <p className="mt-1 font-mono text-xs text-slate-500">{object.slug}</p>
           {object.description && (
             <p className="mt-2 max-w-2xl text-sm text-slate-400">
@@ -209,7 +214,7 @@ export function ProjectObjectDetailPage() {
                 (await confirm({
                   title: 'Remove stale keys?',
                   description:
-                    'Keys linked to this object but no longer in the tree will be deleted with their translations.',
+                    'Keys linked to this entity but no longer in the tree will be deleted with their translations.',
                   danger: true,
                   confirmLabel: 'Materialize and prune',
                 }));
