@@ -41,6 +41,7 @@ import {
   buildTreeFromNodes,
   type LocalizationNodeTree,
 } from '../../domain/build-tree.utils';
+import { ensureDefaultCollection } from '../../domain/ensure-default-collection';
 
 function mapObjectSummary(
   object: {
@@ -52,9 +53,11 @@ function mapObjectSummary(
     status: string;
     generationStatus: string;
     generationError: string | null;
+    collectionId: string | null;
     createdAt: Date;
     updatedAt: Date;
     _count?: { nodes: number };
+    collection?: { id: string; name: string; slug: string } | null;
   },
   materializedCount?: number,
 ) {
@@ -67,6 +70,9 @@ function mapObjectSummary(
     status: object.status,
     generationStatus: object.generationStatus,
     generationError: object.generationError,
+    collectionId: object.collectionId,
+    collectionName: object.collection?.name ?? null,
+    collectionSlug: object.collection?.slug ?? null,
     nodeCount: object._count?.nodes ?? 0,
     materializedCount: materializedCount ?? 0,
     createdAt: object.createdAt,
@@ -151,16 +157,28 @@ export class CreateLocalizationObjectHandler implements ICommandHandler<CreateLo
     );
 
     try {
+      let collectionId = command.collectionId;
+      if (!collectionId) {
+        collectionId = await ensureDefaultCollection(
+          this.prisma,
+          command.projectId,
+        );
+      }
+
       const object = await this.prisma.localizationObject.create({
         data: {
           projectId: command.projectId,
+          collectionId,
           slug: command.slug,
           name: command.name,
           description: command.description,
           templateType:
             (command.templateType as LocalizationTemplateType) ?? 'custom',
         },
-        include: { _count: { select: { nodes: true } } },
+        include: {
+          _count: { select: { nodes: true } },
+          collection: { select: { id: true, name: true, slug: true } },
+        },
       });
       return mapObjectSummary(object);
     } catch {
@@ -196,8 +214,14 @@ export class UpdateLocalizationObjectHandler implements ICommandHandler<UpdateLo
               templateType: command.templateType as LocalizationTemplateType,
             }
           : {}),
+        ...(command.collectionId !== undefined
+          ? { collectionId: command.collectionId }
+          : {}),
       },
-      include: { _count: { select: { nodes: true } } },
+      include: {
+        _count: { select: { nodes: true } },
+        collection: { select: { id: true, name: true, slug: true } },
+      },
     });
 
     return mapObjectSummary(object);
@@ -506,6 +530,7 @@ export class ListLocalizationObjectsHandler implements IQueryHandler<ListLocaliz
 
     const where = {
       projectId: query.projectId,
+      ...(query.collectionId ? { collectionId: query.collectionId } : {}),
       ...(query.search
         ? {
             OR: [
@@ -528,6 +553,7 @@ export class ListLocalizationObjectsHandler implements IQueryHandler<ListLocaliz
         orderBy: { updatedAt: 'desc' },
         include: {
           _count: { select: { nodes: true } },
+          collection: { select: { id: true, name: true, slug: true } },
           nodes: {
             where: { translationKeyId: { not: null } },
             select: { id: true },
@@ -562,7 +588,10 @@ export class GetLocalizationObjectHandler implements IQueryHandler<GetLocalizati
 
     const object = await this.prisma.localizationObject.findFirst({
       where: { id: query.objectId, projectId: query.projectId },
-      include: { _count: { select: { nodes: true } } },
+      include: {
+        _count: { select: { nodes: true } },
+        collection: { select: { id: true, name: true, slug: true } },
+      },
     });
     if (!object) {
       throw new NotFoundException('Localization object not found');

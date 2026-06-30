@@ -23,6 +23,7 @@ export async function listLocalizationObjects(
   page = 1,
   limit = 20,
   search?: string,
+  collectionId?: string,
 ) {
   const params = new URLSearchParams({
     page: String(page),
@@ -30,6 +31,9 @@ export async function listLocalizationObjects(
   });
   if (search?.trim()) {
     params.set('search', search.trim());
+  }
+  if (collectionId) {
+    params.set('collectionId', collectionId);
   }
 
   const response = await apiGet<

@@ -57,7 +57,7 @@ export class LocalizationObjectsController {
   async list(
     @CurrentUser() user: AuthUser,
     @Param('projectId') projectId: string,
-    @Query() query: { page?: string; limit?: string; search?: string },
+    @Query() query: { page?: string; limit?: string; search?: string; collectionId?: string },
   ) {
     const { page, limit } = parsePagination(query);
     const data = await this.queryBus.execute(
@@ -67,6 +67,7 @@ export class LocalizationObjectsController {
         page,
         limit,
         query.search,
+        query.collectionId,
       ),
     );
     return paginatedResponse(data.items, page, limit, data.meta.total);
@@ -96,6 +97,7 @@ export class LocalizationObjectsController {
         dto.name,
         dto.description,
         dto.templateType,
+        dto.collectionId,
       ),
     );
     return successResponse(data);
@@ -130,6 +132,7 @@ export class LocalizationObjectsController {
         dto.name,
         dto.description,
         dto.templateType,
+        dto.collectionId,
       ),
     );
     return successResponse(data);

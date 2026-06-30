@@ -1,55 +1,60 @@
 import { useEffect, useState } from 'react';
 import { Modal } from '../../../shared/ui/Modal';
-import { TEMPLATE_TYPE_OPTIONS } from '../types';
-import type {
-  LocalizationObjectDetail,
-  UpdateLocalizationObjectInput,
-} from '../types';
 
-type EditObjectModalProps = {
+type CreateCollectionModalProps = {
   open: boolean;
-  object: LocalizationObjectDetail | null;
   loading?: boolean;
   error?: string;
   onClose: () => void;
-  onSubmit: (values: UpdateLocalizationObjectInput) => void;
+  onSubmit: (values: { name: string; slug: string; description?: string }) => void;
 };
 
-export function EditObjectModal({
+function slugify(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .replace(/^[0-9]+/, '');
+}
+
+export function CreateCollectionModal({
   open,
-  object,
   loading,
   error,
   onClose,
   onSubmit,
-}: EditObjectModalProps) {
+}: CreateCollectionModalProps) {
   const [name, setName] = useState('');
+  const [slug, setSlug] = useState('');
+  const [slugTouched, setSlugTouched] = useState(false);
   const [description, setDescription] = useState('');
-  const [templateType, setTemplateType] =
-    useState<LocalizationObjectDetail['templateType']>('form');
 
   useEffect(() => {
-    if (open && object) {
-      setName(object.name);
-      setDescription(object.description ?? '');
-      setTemplateType(object.templateType);
+    if (open) {
+      setName('');
+      setSlug('');
+      setSlugTouched(false);
+      setDescription('');
     }
-  }, [open, object]);
+  }, [open]);
 
-  if (!object) {
-    return null;
-  }
+  useEffect(() => {
+    if (!slugTouched && name) {
+      setSlug(slugify(name));
+    }
+  }, [name, slugTouched]);
 
   return (
-    <Modal open={open} title="Edit entity" onClose={onClose}>
+    <Modal open={open} title="Create collection" onClose={onClose}>
       <form
         className="space-y-4"
         onSubmit={(event) => {
           event.preventDefault();
           onSubmit({
             name: name.trim(),
-            description: description.trim() || null,
-            templateType,
+            slug: slug.trim(),
+            description: description.trim() || undefined,
           });
         }}
       >
@@ -61,6 +66,7 @@ export function EditObjectModal({
             value={name}
             onChange={(event) => setName(event.target.value)}
             className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"
+            placeholder="Accreditation"
             required
           />
         </label>
@@ -68,40 +74,23 @@ export function EditObjectModal({
         <label className="block space-y-1">
           <span className="text-sm text-slate-400">Slug</span>
           <input
-            value={object.slug}
-            disabled
-            className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-500"
+            value={slug}
+            onChange={(event) => {
+              setSlugTouched(true);
+              setSlug(event.target.value);
+            }}
+            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm text-white"
+            pattern="[a-z][a-z0-9_]*"
+            required
           />
-          <span className="text-xs text-slate-600">
-            Slug is fixed after creation to keep key paths stable.
-          </span>
         </label>
 
         <label className="block space-y-1">
-          <span className="text-sm text-slate-400">Type</span>
-          <select
-            value={templateType}
-            onChange={(event) =>
-              setTemplateType(
-                event.target.value as LocalizationObjectDetail['templateType'],
-              )
-            }
-            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"
-          >
-            {TEMPLATE_TYPE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="block space-y-1">
-          <span className="text-sm text-slate-400">Description</span>
+          <span className="text-sm text-slate-400">Description (optional)</span>
           <textarea
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            rows={3}
+            rows={2}
             className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"
           />
         </label>
@@ -119,7 +108,7 @@ export function EditObjectModal({
             disabled={loading}
             className="rounded-lg bg-sky-600 px-4 py-2 text-sm text-white hover:bg-sky-500 disabled:opacity-50"
           >
-            {loading ? 'Saving…' : 'Save'}
+            {loading ? 'Creating…' : 'Create'}
           </button>
         </div>
       </form>

@@ -6,6 +6,7 @@ export class CreateLocalizationObjectCommand {
     public readonly name: string,
     public readonly description?: string,
     public readonly templateType?: string,
+    public readonly collectionId?: string,
   ) {}
 }
 
@@ -17,6 +18,7 @@ export class UpdateLocalizationObjectCommand {
     public readonly name?: string,
     public readonly description?: string | null,
     public readonly templateType?: string,
+    public readonly collectionId?: string | null,
   ) {}
 }
 
@@ -113,6 +115,7 @@ export class ListLocalizationObjectsQuery {
     public readonly page: number,
     public readonly limit: number,
     public readonly search?: string,
+    public readonly collectionId?: string,
   ) {}
 }
 

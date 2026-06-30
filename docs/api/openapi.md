@@ -343,19 +343,19 @@ Tree authoring for forms/pages; materializes to flat keys. See [domain/localizat
 
 #### GET `/api/v1/projects/{projectId}/objects`
 
-**Query:** `page`, `limit`, `search`
+**Query:** `page`, `limit`, `search`, `collectionId`
 
 #### POST `/api/v1/projects/{projectId}/objects`
 
-**Request:** `{ name, slug, description?, templateType? }` — `templateType`: `form` | `page` | `modal` | `email` | `api` | `custom`
+**Request:** `{ name, slug, description?, templateType?, collectionId? }` — `templateType`: `form` | `page` | `modal` | `email` | `api` | `custom`. Assigns **General** collection when `collectionId` omitted.
 
 #### GET `/api/v1/projects/{projectId}/objects/{objectId}`
 
-Returns object metadata + nested `tree`.
+Returns entity metadata + nested `tree` (includes `collectionId`, `collectionName`).
 
 #### PATCH `/api/v1/projects/{projectId}/objects/{objectId}`
 
-Update `name`, `description`, `templateType`.
+Update `name`, `description`, `templateType`, `collectionId`.
 
 #### DELETE `/api/v1/projects/{projectId}/objects/{objectId}`
 
@@ -390,6 +390,34 @@ Queues AI structure generation (requires worker + `GEMINI_API_KEY` or `OPENAI_AP
 #### POST `/api/v1/projects/{projectId}/objects/{objectId}/apply-template`
 
 **Request:** `{ templateId: "login_form" }` — replaces tree with built-in template.
+
+---
+
+### Entity collections
+
+Group localization entities (objects) per project. See [ADR 0017](../adr/0017-entity-collections.md).
+
+#### GET `/api/v1/projects/{projectId}/collections`
+
+Returns `{ items: EntityCollection[] }` with `entityCount`. Ensures **General** collection exists.
+
+#### POST `/api/v1/projects/{projectId}/collections`
+
+**Request:** `{ name, slug, description? }`
+
+#### PATCH `/api/v1/projects/{projectId}/collections/{collectionId}`
+
+#### DELETE `/api/v1/projects/{projectId}/collections/{collectionId}`
+
+Cannot delete `general` slug; entities reassigned to General.
+
+#### POST `/api/v1/projects/{projectId}/collections/{collectionId}/import/openapi/preview`
+
+**Request:** `{ spec: string (JSON), selectedTags?: string[] }`
+
+#### POST `/api/v1/projects/{projectId}/collections/{collectionId}/import/openapi`
+
+**Request:** `{ spec, selectedTags?, materialize?: boolean }` — creates one `api` entity per tag; large specs queued on `integration.openapi.import`.
 
 ---
 
