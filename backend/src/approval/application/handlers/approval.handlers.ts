@@ -461,9 +461,7 @@ export class RetranslateTranslationHandler implements ICommandHandler<Retranslat
       translation.language,
     );
 
-    const provider = resolveJobAiProvider(
-      command.provider ?? translation.provider,
-    );
+    const provider = command.provider ?? translation.provider ?? 'openai';
 
     const job = await this.commandBus.execute(
       new CreateTranslationJobCommand(

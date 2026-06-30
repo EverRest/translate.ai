@@ -65,6 +65,7 @@ export function AppRouter() {
             <Route path="glossary" element={<ProjectGlossaryPage />} />
             <Route path="branches" element={<ProjectBranchesPage />} />
             <Route path="jobs" element={<ProjectJobsPage />} />
+            <Route path="translations" element={<ProjectTranslationsPage />} />
             <Route path="approvals" element={<ProjectApprovalsPage />} />
             <Route path="export" element={<ProjectExportPage />} />
             <Route path="settings" element={<ProjectSettingsPage />} />

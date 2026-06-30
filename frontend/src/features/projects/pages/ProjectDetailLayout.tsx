@@ -2,18 +2,16 @@ import { NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
 import { useConfirm } from '../../../shared/ui/ConfirmDialog';
 import { useArchiveProject, useProject } from '../hooks/useProjects';
 
-const TAB_LABELS: Record<string, string> = {
-  keys: 'Keys',
-  translations: 'Translations',
-  entities: 'Entities',
-  objects: 'Entities',
-  glossary: 'Glossary',
-  branches: 'Branches',
-  jobs: 'Jobs',
-  approvals: 'Approvals',
-  export: 'Export',
-  settings: 'Settings',
-};
+const tabs = [
+  { to: '.', label: 'Overview', end: true },
+  { to: 'keys', label: 'Keys' },
+  { to: 'translations', label: 'Translations' },
+  { to: 'glossary', label: 'Glossary' },
+  { to: 'branches', label: 'Branches' },
+  { to: 'jobs', label: 'Jobs' },
+  { to: 'approvals', label: 'Approvals' },
+  { to: 'settings', label: 'Settings' },
+];
 
 export function ProjectDetailLayout() {
   const confirm = useConfirm();
