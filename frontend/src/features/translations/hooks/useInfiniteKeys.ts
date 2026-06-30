@@ -69,5 +69,12 @@ export function useInfiniteKeys(projectId: string | undefined, search: string) {
     });
   }, []);
 
-  return { keys, total, isLoading, hasMore: hasMoreRef.current, loadMore, refetch };
+  return {
+    keys,
+    total,
+    isLoading,
+    hasMore: hasMoreRef.current,
+    loadMore,
+    refetch,
+  };
 }

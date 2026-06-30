@@ -44,8 +44,8 @@ Thumbs.db
 *~
 
 # Local tooling / agent notes (not for version control)
-AGENTS.MD
 .cursor/
+docs/backlog/raw.md
 
 # Keep lockfiles — required for npm ci in Docker and CI
 # (do not ignore package-lock.json)

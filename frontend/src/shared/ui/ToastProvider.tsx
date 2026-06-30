@@ -1,26 +1,11 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useRef,
-  useState,
-} from 'react';
-
-type ToastType = 'success' | 'error' | 'loading' | 'info';
+import { useCallback, useRef, useState } from 'react';
+import { ToastContext, type ToastType } from './toast-context';
 
 type Toast = {
   id: string;
   message: string;
   type: ToastType;
 };
-
-type ToastContextValue = {
-  show: (message: string, type: ToastType, autoDismissMs?: number) => string;
-  update: (id: string, message: string, type: ToastType) => void;
-  dismiss: (id: string) => void;
-};
-
-const ToastContext = createContext<ToastContextValue | null>(null);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -132,18 +117,4 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       </div>
     </ToastContext.Provider>
   );
-}
-
-export function useToast() {
-  const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error('useToast must be used within ToastProvider');
-
-  return {
-    success: (msg: string) => ctx.show(msg, 'success'),
-    error: (msg: string) => ctx.show(msg, 'error'),
-    info: (msg: string) => ctx.show(msg, 'info'),
-    loading: (msg: string) => ctx.show(msg, 'loading', 0),
-    update: ctx.update,
-    dismiss: ctx.dismiss,
-  };
 }

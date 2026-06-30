@@ -118,9 +118,9 @@ One page:
 
 ## Agent rules
 
-See [../AGENTS.md](../AGENTS.md) in the project root. That file is the canonical agent instruction set for this project (NestJS + React stack).
+See [../AGENTS.md](../AGENTS.md) in the project root. That file is the canonical agent instruction set (system prompt, TDD workflow, CQRS/DDD rules, full docs map).
 
-When updating architecture or patterns, update `AGENTS.md` and relevant ADRs together.
+When updating architecture or patterns, update `AGENTS.md`, relevant ADRs, and [changelog.md](./changelog.md) together.
 
 ---
 

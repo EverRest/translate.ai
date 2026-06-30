@@ -49,7 +49,14 @@ export class TranslationKeysController {
   async list(
     @CurrentUser() user: AuthUser,
     @Param('projectId') projectId: string,
-    @Query() query: { page?: string; limit?: string; search?: string },
+    @Query()
+    query: {
+      page?: string;
+      limit?: string;
+      search?: string;
+      localizationObjectId?: string;
+      keyPrefix?: string;
+    },
   ) {
     const { page, limit } = parsePagination(query);
     const data = await this.queryBus.execute(
@@ -59,6 +66,8 @@ export class TranslationKeysController {
         page,
         limit,
         query.search,
+        query.localizationObjectId,
+        query.keyPrefix,
       ),
     );
     return paginatedResponse(data.items, page, limit, data.meta.total);
@@ -79,6 +88,7 @@ export class TranslationKeysController {
         dto.sourceText,
         dto.description,
         dto.context,
+        dto.contentType,
       ),
     );
     return successResponse(data);
@@ -130,6 +140,7 @@ export class TranslationKeysController {
         keyId,
         dto.description,
         dto.context,
+        dto.contentType,
       ),
     );
     return successResponse(data);

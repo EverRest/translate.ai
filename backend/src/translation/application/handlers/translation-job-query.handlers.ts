@@ -65,7 +65,11 @@ export class GetJobStatusHandler implements IQueryHandler<GetJobStatusQuery> {
         },
       },
       include: {
-        items: true,
+        items: {
+          include: {
+            translationKey: { select: { key: true } },
+          },
+        },
         project: { select: { id: true } },
       },
     });
@@ -89,6 +93,12 @@ export class GetJobStatusHandler implements IQueryHandler<GetJobStatusQuery> {
       job.provider,
     );
 
+    const failedItemDetails = failedItems.map((item) => ({
+      key: item.translationKey.key,
+      language: item.language,
+      errorMessage: item.errorMessage,
+    }));
+
     return {
       id: job.id,
       projectId: job.projectId,
@@ -96,6 +106,7 @@ export class GetJobStatusHandler implements IQueryHandler<GetJobStatusQuery> {
       provider: job.provider,
       progress: { total, completed, failed },
       failures,
+      failedItems: failedItemDetails,
       createdAt: job.createdAt,
     };
   }

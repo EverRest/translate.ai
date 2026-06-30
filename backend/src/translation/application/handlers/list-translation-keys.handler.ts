@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { ProjectAccessService } from '../../../project/infrastructure/project-access.service';
 import { ListTranslationKeysQuery } from '../translation-key.commands';
+import { buildTranslationKeyListFilter } from '../utils/translation-key-filter.utils';
 
 @Injectable()
 @QueryHandler(ListTranslationKeysQuery)
@@ -19,17 +20,11 @@ export class ListTranslationKeysHandler implements IQueryHandler<ListTranslation
       query.projectId,
     );
 
-    const where: Prisma.TranslationKeyWhereInput = {
-      projectId: query.projectId,
-      ...(query.search
-        ? {
-            OR: [
-              { key: { contains: query.search, mode: 'insensitive' } },
-              { description: { contains: query.search, mode: 'insensitive' } },
-            ],
-          }
-        : {}),
-    };
+    const where: Prisma.TranslationKeyWhereInput =
+      buildTranslationKeyListFilter(query.projectId, query.search, {
+        localizationObjectId: query.localizationObjectId,
+        keyPrefix: query.keyPrefix,
+      });
 
     const [items, total] = await Promise.all([
       this.prisma.translationKey.findMany({

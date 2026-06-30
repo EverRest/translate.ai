@@ -2,11 +2,14 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsIn,
   IsOptional,
   IsString,
   MinLength,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
+import { VALID_CONTENT_TYPES } from '../../application/utils/translation-context.utils';
 
 export class CreateTranslationKeyDto {
   @ApiProperty({ example: 'cart.checkout' })
@@ -28,6 +31,12 @@ export class CreateTranslationKeyDto {
   @IsOptional()
   @IsString()
   context?: string;
+
+  @ApiPropertyOptional({ enum: VALID_CONTENT_TYPES, example: 'ui' })
+  @IsOptional()
+  @IsString()
+  @IsIn(VALID_CONTENT_TYPES)
+  contentType?: string;
 }
 
 export class BulkImportKeyItemDto {
@@ -60,4 +69,11 @@ export class UpdateTranslationKeyDto {
   @IsOptional()
   @IsString()
   context?: string;
+
+  @ApiPropertyOptional({ enum: VALID_CONTENT_TYPES, example: 'ui' })
+  @IsOptional()
+  @ValidateIf((_, value) => value != null)
+  @IsString()
+  @IsIn(VALID_CONTENT_TYPES)
+  contentType?: string | null;
 }

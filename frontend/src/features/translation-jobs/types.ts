@@ -14,6 +14,12 @@ export type JobFailureSummary = {
   sampleErrors: string[];
 };
 
+export type FailedJobItem = {
+  key: string;
+  language: string;
+  errorMessage: string | null;
+};
+
 export type JobDetail = {
   id: string;
   projectId: string;
@@ -25,6 +31,7 @@ export type JobDetail = {
     failed: number;
   };
   failures: JobFailureSummary | null;
+  failedItems?: FailedJobItem[];
   createdAt: string;
 };
 
@@ -46,4 +53,10 @@ export type ProjectLanguage = {
   id: string;
   code: string;
   projectId: string;
+};
+
+export type AiConfig = {
+  defaultProvider: string;
+  supportedProviders: string[];
+  providerFallback: string[];
 };

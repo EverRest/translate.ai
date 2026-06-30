@@ -34,6 +34,7 @@ export class CreateTranslationKeyHandler implements ICommandHandler<CreateTransl
           sourceText: command.sourceText,
           description: command.description,
           context: command.context,
+          contentType: command.contentType,
         },
       });
     } catch {
@@ -68,6 +69,9 @@ export class UpdateTranslationKeyHandler implements ICommandHandler<UpdateTransl
       data: {
         description: command.description,
         context: command.context,
+        ...(command.contentType !== undefined
+          ? { contentType: command.contentType }
+          : {}),
       },
     });
   }

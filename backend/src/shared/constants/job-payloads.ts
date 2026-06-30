@@ -11,6 +11,7 @@ export interface TranslationProcessJobPayload {
   jobId: string;
   tenantId: string;
   correlationId?: string;
+  includeReferenceTranslations?: boolean;
 }
 
 export interface TranslationRetryJobPayload {
@@ -26,4 +27,20 @@ export interface WebhookSendJobPayload {
   eventId: string;
   data: Record<string, unknown>;
   correlationId?: string;
+}
+
+export interface TranslationExportJobPayload {
+  exportJobId: string;
+  tenantId: string;
+}
+
+export interface GlossaryAnalyzeJobPayload {
+  projectId: string;
+  tenantId: string;
+}
+
+export interface LocalizationObjectGenerateJobPayload {
+  projectId: string;
+  objectId: string;
+  tenantId: string;
 }

@@ -12,5 +12,8 @@ coverage/
 # Prisma local artifacts
 /generated/prisma
 
+# Export job files (async worker)
+.exports/
+
 # Logs
 *.log

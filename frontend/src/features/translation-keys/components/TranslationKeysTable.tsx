@@ -1,4 +1,5 @@
 import type { TranslationKey } from '../types';
+import { contentTypeLabel } from '../contentTypes';
 
 type TranslationKeysTableProps = {
   keys: TranslationKey[];
@@ -25,6 +26,9 @@ export function TranslationKeysTable({
               Source text
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400">
+              Type
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400">
               Context
             </th>
             <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-slate-400">
@@ -45,6 +49,11 @@ export function TranslationKeysTable({
               </td>
               <td className="px-4 py-4 text-sm text-slate-200">
                 {item.sourceText}
+              </td>
+              <td className="px-4 py-4">
+                <span className="rounded-full bg-slate-700/60 px-2 py-0.5 text-xs text-slate-300">
+                  {contentTypeLabel(item.contentType)}
+                </span>
               </td>
               <td className="px-4 py-4 text-sm text-slate-400">
                 {item.context ?? '—'}

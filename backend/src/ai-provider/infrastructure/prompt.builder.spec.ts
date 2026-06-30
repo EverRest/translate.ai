@@ -8,6 +8,31 @@ import {
 
 describe('prompt.builder', () => {
   describe('buildTranslationPrompts', () => {
+    it('includes project name, description, and context in user prompt', () => {
+      const { systemPrompt, userPrompt } = buildTranslationPrompts(
+        'Hello',
+        'en',
+        'de',
+        {
+          projectName: 'Shop',
+          projectDescription: 'E-commerce storefront',
+          keyDescription: 'Checkout button label',
+          context: 'Cart page footer',
+          contentType: 'ui',
+        },
+      );
+
+      expect(systemPrompt).toContain('Content type: ui');
+      expect(systemPrompt).toContain('short form field label');
+      expect(userPrompt).toContain('Project: Shop');
+      expect(userPrompt).toContain(
+        'Project description: E-commerce storefront',
+      );
+      expect(userPrompt).toContain('Description: Checkout button label');
+      expect(userPrompt).toContain('Context: Cart page footer');
+      expect(userPrompt).toContain('Hello');
+    });
+
     it('includes tone and context in prompts', () => {
       const { systemPrompt, userPrompt } = buildTranslationPrompts(
         'Hello',
@@ -46,6 +71,26 @@ describe('prompt.builder', () => {
       expect(systemPrompt).toContain('Keep "Checkout" unchanged');
       expect(systemPrompt).toContain('Translate "Cart" as "Warenkorb"');
     });
+
+    it('includes quote instruction in system prompt', () => {
+      const { systemPrompt } = buildTranslationPrompts('Hello', 'en', 'de');
+      expect(systemPrompt).toContain(
+        'without explanations or surrounding quotation marks',
+      );
+    });
+
+    it('includes reference translations in user prompt', () => {
+      const { userPrompt } = buildTranslationPrompts('Turbo', 'en', 'es', {
+        referenceTranslations: [
+          { language: 'de', value: 'Turbo' },
+          { language: 'fr', value: 'Turbo' },
+        ],
+      });
+
+      expect(userPrompt).toContain('Reference translations for the same key');
+      expect(userPrompt).toContain('- de: Turbo');
+      expect(userPrompt).toContain('Text:\nTurbo');
+    });
   });
 
   describe('formatGlossaryPrompt', () => {
@@ -67,8 +112,21 @@ describe('prompt.builder', () => {
       expect(cost).toBeGreaterThan(0);
     });
 
+    it('computes gpt-4.1-mini cost from token counts', () => {
+      const cost = estimateOpenAiCost('gpt-4.1-mini', 1000, 500);
+      expect(cost).toBeGreaterThan(0);
+      expect(cost).toBeGreaterThan(
+        estimateOpenAiCost('gpt-4o-mini', 1000, 500),
+      );
+    });
+
     it('computes Gemini cost from token counts', () => {
       const cost = estimateGeminiCost('gemini-2.0-flash', 1000, 500);
+      expect(cost).toBeGreaterThan(0);
+    });
+
+    it('computes gemini-2.5-flash-lite cost from token counts', () => {
+      const cost = estimateGeminiCost('gemini-2.5-flash-lite', 1000, 500);
       expect(cost).toBeGreaterThan(0);
     });
   });

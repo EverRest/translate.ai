@@ -17,6 +17,7 @@ export type ContentType =
   | 'article'
   | 'chat'
   | 'technical'
+  | 'placeholder'
   | 'general';
 
 export interface GlossaryTermOption {
@@ -25,11 +26,21 @@ export interface GlossaryTermOption {
   doNotTranslate: boolean;
 }
 
+export interface ReferenceTranslationOption {
+  language: string;
+  value: string;
+}
+
 export interface TranslateOptions {
   context?: string;
+  keyDescription?: string;
+  projectName?: string;
+  projectDescription?: string;
   tone?: 'formal' | 'friendly' | 'technical';
   glossary?: GlossaryTermOption[];
   contentType?: ContentType;
+  referenceTranslations?: ReferenceTranslationOption[];
+  retryHint?: string;
 }
 
 export const AI_PROVIDER = Symbol('AI_PROVIDER');

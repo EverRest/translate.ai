@@ -68,6 +68,8 @@ export class TranslationsController {
       language?: string;
       status?: TranslationStatus;
       keys?: string;
+      localizationObjectId?: string;
+      keyPrefix?: string;
     },
   ) {
     const { page, limit } = parsePagination(query);
@@ -87,6 +89,8 @@ export class TranslationsController {
         query.language,
         query.status,
         keys,
+        query.localizationObjectId,
+        query.keyPrefix,
       ),
     );
 

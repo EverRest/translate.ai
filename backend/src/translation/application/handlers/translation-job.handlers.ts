@@ -4,9 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JobItemStatus, JobStatus, TranslationKey } from '@prisma/client';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { isValidLanguageCode } from '../../../shared/utils/string.utils';
+import { resolveJobAiProvider } from '../../../ai-provider/domain/ai-provider.utils';
 import { ProjectAccessService } from '../../../project/infrastructure/project-access.service';
 import { TranslationQueueService } from '../../infrastructure/translation-queue.service';
 import { TranslationJobRunnerService } from '../services/translation-job-runner.service';
@@ -25,6 +27,7 @@ export class CreateTranslationJobHandler implements ICommandHandler<CreateTransl
     private readonly projectAccess: ProjectAccessService,
     private readonly queue: TranslationQueueService,
     private readonly jobRunner: TranslationJobRunnerService,
+    private readonly config: ConfigService,
   ) {}
 
   async execute(command: CreateTranslationJobCommand) {
@@ -48,7 +51,10 @@ export class CreateTranslationJobHandler implements ICommandHandler<CreateTransl
       command.keyItems,
     );
 
-    const provider = command.provider ?? 'gemini';
+    const provider = resolveJobAiProvider(
+      command.provider,
+      this.config.get<string>('AI_PROVIDER', 'gemini'),
+    );
 
     const job = await this.prisma.translationJob.create({
       data: {
@@ -150,6 +156,7 @@ export class CreateTranslationJobHandler implements ICommandHandler<CreateTransl
           sourceText: item.sourceText,
           description: item.description,
           context: item.context,
+          contentType: item.contentType,
         },
       });
       found.set(keyName, created);

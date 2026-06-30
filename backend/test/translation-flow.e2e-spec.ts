@@ -1,10 +1,9 @@
-process.env.MOCK_TRANSLATIONS = 'true';
-
 import {
   INestApplication,
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
@@ -51,6 +50,11 @@ async function waitForJob(
     const job = response.body.data as {
       status: string;
       progress: { total: number; completed: number; failed: number };
+      failedItems?: Array<{
+        key: string;
+        language: string;
+        errorMessage: string | null;
+      }>;
     };
 
     if (job.status === 'completed') {
@@ -58,7 +62,14 @@ async function waitForJob(
     }
 
     if (job.status === 'failed' || job.status === 'cancelled') {
-      throw new Error(`Job ended with status ${job.status}`);
+      const details =
+        job.failedItems
+          ?.map(
+            (item) =>
+              `${item.key} (${item.language}): ${item.errorMessage ?? 'unknown'}`,
+          )
+          .join('; ') ?? 'no item details';
+      throw new Error(`Job ended with status ${job.status}: ${details}`);
     }
 
     await new Promise((resolve) => setTimeout(resolve, 300));
@@ -68,6 +79,8 @@ async function waitForJob(
 }
 
 describe('Translation flow (e2e)', () => {
+  jest.setTimeout(60_000);
+
   let app: INestApplication<App>;
   let workerContext: Awaited<
     ReturnType<typeof NestFactory.createApplicationContext>
@@ -76,14 +89,16 @@ describe('Translation flow (e2e)', () => {
   let projectId: string;
 
   beforeAll(async () => {
+    process.env.MOCK_TRANSLATIONS = 'true';
     app = await createTestApp();
+    app.get(ConfigService).set('MOCK_TRANSLATIONS', true);
     workerContext = await NestFactory.createApplicationContext(WorkerModule);
+    workerContext.get(ConfigService).set('MOCK_TRANSLATIONS', true);
   });
 
   afterAll(async () => {
     await workerContext.close();
     await app.close();
-    delete process.env.MOCK_TRANSLATIONS;
   });
 
   it('registers tenant and obtains token', async () => {
@@ -142,7 +157,6 @@ describe('Translation flow (e2e)', () => {
             sourceText: 'Welcome aboard',
           },
         ],
-        provider: 'openai',
       })
       .expect(201);
 
@@ -157,9 +171,10 @@ describe('Translation flow (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
-    expect(
-      languagesResponse.body.data.map((item: { code: string }) => item.code),
-    ).toContain('fr');
+    const languageItems = languagesResponse.body.data.items as {
+      code: string;
+    }[];
+    expect(languageItems.map((item) => item.code)).toContain('fr');
 
     const keysResponse = await request(app.getHttpServer())
       .get(`/api/v1/projects/${inlineProjectId}/keys`)
@@ -190,7 +205,6 @@ describe('Translation flow (e2e)', () => {
             sourceText: 'API key flow works',
           },
         ],
-        provider: 'openai',
       })
       .expect(201);
 
@@ -232,7 +246,6 @@ describe('Translation flow (e2e)', () => {
         projectId,
         languages: ['de'],
         keys: ['greeting.hello'],
-        provider: 'openai',
       })
       .expect(201);
 

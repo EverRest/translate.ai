@@ -3,8 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { TranslateOptions } from '../../../ai-provider/domain/ai-provider.interface';
 import { TranslateContext } from '../../../ai-provider/domain/ai-provider.types';
 import { ProviderRegistryService } from '../../../ai-provider/application/provider-registry.service';
+import { resolveJobAiProvider } from '../../../ai-provider/domain/ai-provider.utils';
 import { AiUsageService } from '../../../billing/application/ai-usage.service';
-import { stripWrappingQuotes } from '../../../shared/utils/string.utils';
+import { sanitizeTranslationOutput } from '../../../shared/utils/translation-sanitize.utils';
 import { TranslationMemoryService } from './translation-memory.service';
 
 export interface TranslateResult {
@@ -19,6 +20,7 @@ export interface TranslateRequest extends TranslateContext {
   providerName: string;
   options?: TranslateOptions;
   sourceLang?: string;
+  skipMemory?: boolean;
 }
 
 @Injectable()
@@ -31,7 +33,7 @@ export class TranslateTextService {
   ) {}
 
   async translate(request: TranslateRequest): Promise<TranslateResult> {
-    if (this.config.get<boolean>('MOCK_TRANSLATIONS')) {
+    if (this.isMockTranslationsEnabled()) {
       return {
         text: `[${request.targetLang}] ${request.text}`,
         provider: 'mock',
@@ -43,18 +45,20 @@ export class TranslateTextService {
       request.sourceLang ??
       this.config.get<string>('DEFAULT_SOURCE_LANGUAGE', 'en');
 
-    const cached = await this.memory.lookup(
-      request.tenantId,
-      request.text,
-      source,
-      request.targetLang,
-    );
+    const cached = request.skipMemory
+      ? null
+      : await this.memory.lookup(
+          request.tenantId,
+          request.text,
+          source,
+          request.targetLang,
+        );
     if (cached) {
       return { text: cached, provider: 'memory', usedFallback: false };
     }
 
     const result = await this.providers.translateWithFallback(
-      request.providerName,
+      resolveJobAiProvider(request.providerName),
       request.text,
       source,
       request.targetLang,
@@ -67,7 +71,7 @@ export class TranslateTextService {
       },
     );
 
-    const translatedText = stripWrappingQuotes(result.text);
+    const translatedText = sanitizeTranslationOutput(result.text, request.text);
 
     await this.memory.store(
       request.tenantId,
@@ -94,5 +98,19 @@ export class TranslateTextService {
       provider: result.provider,
       usedFallback: result.usedFallback,
     };
+  }
+
+  private isMockTranslationsEnabled(): boolean {
+    const fromConfig = this.config.get<string | boolean>('MOCK_TRANSLATIONS');
+    if (fromConfig === true || fromConfig === 'true') {
+      return true;
+    }
+
+    if (process.env.NODE_ENV === 'test') {
+      const fromEnv = process.env.MOCK_TRANSLATIONS;
+      return fromEnv === 'true' || fromEnv === '1';
+    }
+
+    return false;
   }
 }

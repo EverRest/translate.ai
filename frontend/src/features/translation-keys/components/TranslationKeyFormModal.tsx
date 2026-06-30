@@ -1,24 +1,59 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type UseFormRegister } from 'react-hook-form';
 import { z } from 'zod';
 import { Modal } from '../../../shared/ui/Modal';
+import { CONTENT_TYPE_OPTIONS } from '../contentTypes';
 import type { TranslationKey } from '../types';
+
+const contentTypeSchema = z.string().optional();
 
 const createSchema = z.object({
   key: z.string().min(1, 'Key is required'),
   sourceText: z.string().min(1, 'Source text is required'),
   description: z.string().optional(),
   context: z.string().optional(),
+  contentType: contentTypeSchema,
 });
 
 const editSchema = z.object({
   description: z.string().optional(),
   context: z.string().optional(),
+  contentType: contentTypeSchema,
 });
 
 export type CreateKeyFormValues = z.infer<typeof createSchema>;
 export type EditKeyFormValues = z.infer<typeof editSchema>;
+
+function ContentTypeSelect({
+  id,
+  register,
+}: {
+  id: string;
+  register: UseFormRegister<{ contentType?: string }>;
+}) {
+  return (
+    <div>
+      <label className="block text-sm text-slate-300" htmlFor={id}>
+        Content type
+      </label>
+      <select
+        id={id}
+        className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-sky-500"
+        {...register('contentType')}
+      >
+        {CONTENT_TYPE_OPTIONS.map((option) => (
+          <option key={option.value || 'auto'} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <p className="mt-1 text-xs text-slate-500">
+        Guides AI tone and length. Auto uses keywords from context/description.
+      </p>
+    </div>
+  );
+}
 
 type CreateModalProps = {
   open: boolean;
@@ -42,12 +77,24 @@ export function CreateTranslationKeyModal({
     formState: { errors },
   } = useForm<CreateKeyFormValues>({
     resolver: zodResolver(createSchema),
-    defaultValues: { key: '', sourceText: '', description: '', context: '' },
+    defaultValues: {
+      key: '',
+      sourceText: '',
+      description: '',
+      context: '',
+      contentType: '',
+    },
   });
 
   useEffect(() => {
     if (open) {
-      reset({ key: '', sourceText: '', description: '', context: '' });
+      reset({
+        key: '',
+        sourceText: '',
+        description: '',
+        context: '',
+        contentType: '',
+      });
     }
   }, [open, reset]);
 
@@ -85,6 +132,8 @@ export function CreateTranslationKeyModal({
           )}
         </div>
 
+        <ContentTypeSelect id="contentType" register={register} />
+
         <div>
           <label className="block text-sm text-slate-300" htmlFor="description">
             Description
@@ -93,6 +142,7 @@ export function CreateTranslationKeyModal({
             id="description"
             rows={2}
             className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-sky-500"
+            placeholder="What this string is (e.g. checkout button label)"
             {...register('description')}
           />
         </div>
@@ -105,7 +155,7 @@ export function CreateTranslationKeyModal({
             id="context"
             rows={2}
             className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-sky-500"
-            placeholder="Checkout button label"
+            placeholder="Where it appears (e.g. cart page footer)"
             {...register('context')}
           />
         </div>
@@ -152,7 +202,7 @@ export function EditTranslationKeyModal({
 }: EditModalProps) {
   const { register, handleSubmit, reset } = useForm<EditKeyFormValues>({
     resolver: zodResolver(editSchema),
-    defaultValues: { description: '', context: '' },
+    defaultValues: { description: '', context: '', contentType: '' },
   });
 
   useEffect(() => {
@@ -160,6 +210,7 @@ export function EditTranslationKeyModal({
       reset({
         description: translationKey.description ?? '',
         context: translationKey.context ?? '',
+        contentType: translationKey.contentType ?? '',
       });
     }
   }, [open, translationKey, reset]);
@@ -178,6 +229,8 @@ export function EditTranslationKeyModal({
             Key and source text cannot be changed after creation.
           </p>
         </div>
+
+        <ContentTypeSelect id="edit-contentType" register={register} />
 
         <div>
           <label

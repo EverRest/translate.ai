@@ -12,11 +12,17 @@ import type {
   UpdateTranslationKeyInput,
 } from '../types';
 
+export type ListTranslationKeysFilter = {
+  localizationObjectId?: string;
+  keyPrefix?: string;
+};
+
 export async function listTranslationKeys(
   projectId: string,
   page = 1,
   limit = 20,
   search?: string,
+  filter?: ListTranslationKeysFilter,
 ) {
   const params = new URLSearchParams({
     page: String(page),
@@ -24,6 +30,12 @@ export async function listTranslationKeys(
   });
   if (search?.trim()) {
     params.set('search', search.trim());
+  }
+  if (filter?.localizationObjectId) {
+    params.set('localizationObjectId', filter.localizationObjectId);
+  }
+  if (filter?.keyPrefix) {
+    params.set('keyPrefix', filter.keyPrefix);
   }
 
   const response = await apiGet<ApiSuccess<PaginatedData<TranslationKey>>>(
@@ -67,6 +79,26 @@ export async function deleteAllTranslationKeys(projectId: string) {
     `/projects/${projectId}/keys`,
   );
   return response.data;
+}
+
+export async function listAllTranslationKeyNames(
+  projectId: string,
+): Promise<string[]> {
+  const PAGE_SIZE = 2000;
+  const first = await listTranslationKeys(projectId, 1, PAGE_SIZE);
+  const total = first.meta.total;
+  const names = first.items.map((k) => k.key);
+  if (total <= PAGE_SIZE) return names;
+
+  const pages = Math.ceil(total / PAGE_SIZE);
+  const rest = await Promise.all(
+    Array.from({ length: pages - 1 }, (_, i) =>
+      listTranslationKeys(projectId, i + 2, PAGE_SIZE).then((r) =>
+        r.items.map((k) => k.key),
+      ),
+    ),
+  );
+  return [...names, ...rest.flat()];
 }
 
 export async function bulkImportKeys(

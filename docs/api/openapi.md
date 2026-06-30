@@ -195,7 +195,7 @@ Archive project (soft delete).
 
 #### GET `/api/v1/projects/{projectId}/keys`
 
-**Query:** `page`, `limit`, `search`
+**Query:** `page`, `limit`, `search`, `localizationObjectId`, `keyPrefix`
 
 #### POST `/api/v1/projects/{projectId}/keys`
 
@@ -219,9 +219,30 @@ Archive project (soft delete).
 
 #### GET `/api/v1/projects/{projectId}/translations`
 
-**Query:** `language`, `status`, `key`
+**Query:** `language`, `status`, `keys`, `localizationObjectId`, `keyPrefix`
 
 #### GET `/api/v1/projects/{projectId}/translations/{translationId}`
+
+---
+
+### AI config
+
+#### GET `/api/v1/config/ai`
+
+Authenticated (JWT or project API key). Returns server AI provider defaults — no API keys or model secrets.
+
+**Response `200`:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "defaultProvider": "gemini",
+    "supportedProviders": ["openai", "gemini", "ollama"],
+    "providerFallback": ["openai"]
+  }
+}
+```
 
 ---
 
@@ -238,10 +259,12 @@ Create async translation job. Returns immediately; processing via BullMQ.
   "projectId": "550e8400-e29b-41d4-a716-446655440000",
   "languages": ["de", "fr", "es"],
   "keys": ["cart.checkout", "cart.total"],
-  "provider": "openai",
+  "provider": "gemini",
   "clientRequestId": "optional-idempotency-key"
 }
 ```
+
+`provider` is **optional**. When omitted, the server uses `AI_PROVIDER` env (default `gemini`). The dashboard does not send `provider`; set it only for explicit API overrides.
 
 **Response `201`:**
 
@@ -314,19 +337,157 @@ Pending translations for review.
 
 ---
 
+### Localization objects
+
+Tree authoring for forms/pages; materializes to flat keys. See [domain/localization-object.md](../domain/localization-object.md).
+
+#### GET `/api/v1/projects/{projectId}/objects`
+
+**Query:** `page`, `limit`, `search`, `collectionId`
+
+#### POST `/api/v1/projects/{projectId}/objects`
+
+**Request:** `{ name, slug, description?, templateType?, collectionId? }` — `templateType`: `form` | `page` | `modal` | `email` | `api` | `custom`. Assigns **General** collection when `collectionId` omitted.
+
+#### GET `/api/v1/projects/{projectId}/objects/{objectId}`
+
+Returns entity metadata + nested `tree` (includes `collectionId`, `collectionName`).
+
+#### PATCH `/api/v1/projects/{projectId}/objects/{objectId}`
+
+Update `name`, `description`, `templateType`, `collectionId`.
+
+#### DELETE `/api/v1/projects/{projectId}/objects/{objectId}`
+
+Deletes tree; materialized translation keys remain.
+
+#### POST `/api/v1/projects/{projectId}/objects/{objectId}/nodes`
+
+**Request:** `{ slug, nodeType, parentId?, sortOrder?, label?, sourceText?, description?, context?, contentType? }`
+
+#### PATCH `/api/v1/projects/{projectId}/objects/{objectId}/nodes/{nodeId}`
+
+#### DELETE `/api/v1/projects/{projectId}/objects/{objectId}/nodes/{nodeId}`
+
+#### POST `/api/v1/projects/{projectId}/objects/{objectId}/materialize`
+
+**Query:** `prune` — `true` to delete materialized keys no longer present in the tree (default `false`).
+
+**Response:** `{ created, updated, pruned, total }`
+
+#### POST `/api/v1/projects/{projectId}/objects/{objectId}/translate`
+
+**Request:** `{ languages: ["de", "fr"] }` — materializes then creates translation job.
+
+#### GET `/api/v1/projects/{projectId}/objects/templates`
+
+Built-in templates: `login_form`, `registration_form`.
+
+#### POST `/api/v1/projects/{projectId}/objects/{objectId}/generate-structure`
+
+Queues AI structure generation (requires worker + `GEMINI_API_KEY` or `OPENAI_API_KEY`).
+
+#### POST `/api/v1/projects/{projectId}/objects/{objectId}/apply-template`
+
+**Request:** `{ templateId: "login_form" }` — replaces tree with built-in template.
+
+---
+
+### Entity collections
+
+Group localization entities (objects) per project. See [ADR 0017](../adr/0017-entity-collections.md).
+
+#### GET `/api/v1/projects/{projectId}/collections`
+
+Returns `{ items: EntityCollection[] }` with `entityCount`. Ensures **General** collection exists.
+
+#### POST `/api/v1/projects/{projectId}/collections`
+
+**Request:** `{ name, slug, description? }`
+
+#### PATCH `/api/v1/projects/{projectId}/collections/{collectionId}`
+
+#### DELETE `/api/v1/projects/{projectId}/collections/{collectionId}`
+
+Cannot delete `general` slug; entities reassigned to General.
+
+#### POST `/api/v1/projects/{projectId}/collections/{collectionId}/import/openapi/preview`
+
+**Request:** `{ spec: string (JSON), selectedTags?: string[] }`
+
+#### POST `/api/v1/projects/{projectId}/collections/{collectionId}/import/openapi`
+
+**Request:** `{ spec, selectedTags?, materialize?: boolean }` — creates one `api` entity per tag; large specs queued on `integration.openapi.import`.
+
+---
+
+### Glossary suggestions
+
+#### GET `/api/v1/projects/{projectId}/glossary/suggestions`
+
+**Query:** `status` — `pending` (default), `approved`, `rejected`
+
+**Response:** `{ success, data: { items: GlossarySuggestion[] } }`
+
+#### POST `/api/v1/projects/{projectId}/glossary/suggestions/analyze`
+
+Requires at least `GLOSSARY_ANALYZE_MIN_TRANSLATIONS` (default 100) translations. Enqueues `glossary.analyze` worker job.
+
+**Response:** `{ success, data: { queued: true, translationCount: number } }`
+
+#### POST `/api/v1/projects/{projectId}/glossary/suggestions/{suggestionId}/approve`
+
+Creates or updates `GlossaryTerm`; marks suggestion `approved`.
+
+**Response:** `{ success, data: { suggestion, term } }`
+
+#### POST `/api/v1/projects/{projectId}/glossary/suggestions/{suggestionId}/reject`
+
+**Response:** `{ success, data: { rejected: true } }`
+
+**Dashboard:** Project → **Glossary** tab — **Suggest terms**, review pending table.
+
+---
+
 ### Export
 
 #### GET `/api/v1/projects/{projectId}/export`
 
-**Query:**
+Synchronous download (same filters as below). Audit log recorded.
+
+**Response:** File download (`Content-Disposition: attachment`).
+
+#### POST `/api/v1/projects/{projectId}/exports`
+
+**Body:**
+
+| Field | Values |
+|-------|--------|
+| `format` | json, yaml, csv, android-xml, ios-strings, po |
+| `language` | Optional filter (e.g. `de`) |
+| `status` | draft, review, approved, published (default: published) |
+
+**Behavior:** If matching row count ≤ `EXPORT_ASYNC_THRESHOLD` (default 1000), completes inline and returns `exportStatus: completed` with `downloadUrl`. Otherwise enqueues `translation.export` and returns `exportStatus: pending`.
+
+**Response:** `{ success, data: ExportJob }`
+
+#### GET `/api/v1/exports/{exportJobId}`
+
+Poll export job status. **Response:** `{ success, data: ExportJob }`
+
+#### GET `/api/v1/exports/{exportJobId}/download`
+
+Download completed export file. **Response:** File download.
+
+**Dashboard:** Project → **Export** tab uses POST + poll + download.
+
+**Query (GET sync only):**
 
 | Param | Values |
 |-------|--------|
-| `format` | json, yaml, csv, xlsx, android-xml, ios-strings, po |
+| `format` | json, yaml, csv, android-xml, ios-strings, po |
 | `language` | Optional filter (e.g. `de`) |
-| `status` | draft, approved, published (default: published) |
-
-**Response:** File download (`Content-Disposition: attachment`).
+| `status` | draft, review, approved, published (default: published) |
 
 ---
 

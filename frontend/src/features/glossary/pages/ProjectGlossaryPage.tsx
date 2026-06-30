@@ -1,20 +1,27 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
+import { useConfirm } from '../../../shared/ui/ConfirmDialog';
 import type { Project } from '../../projects/types';
 import {
   CreateGlossaryTermModal,
   EditGlossaryTermModal,
 } from '../components/GlossaryTermFormModal';
 import { GlossaryTermsTable } from '../components/GlossaryTermsTable';
+import { GlossarySuggestionsTable } from '../components/GlossarySuggestionsTable';
 import {
+  useAnalyzeGlossary,
+  useApproveGlossarySuggestion,
   useCreateGlossaryTerm,
   useDeleteGlossaryTerm,
+  useGlossarySuggestions,
   useGlossaryTerms,
+  useRejectGlossarySuggestion,
   useUpdateGlossaryTerm,
 } from '../hooks/useGlossary';
 import type { GlossaryTerm } from '../types';
 
 export function ProjectGlossaryPage() {
+  const confirm = useConfirm();
   const { projectId } = useParams<{ projectId: string }>();
   useOutletContext<{ project: Project }>();
 
@@ -22,6 +29,7 @@ export function ProjectGlossaryPage() {
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [editingTerm, setEditingTerm] = useState<GlossaryTerm | null>(null);
+  const [pollSuggestions, setPollSuggestions] = useState(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setSearch(searchInput), 300);
@@ -32,9 +40,25 @@ export function ProjectGlossaryPage() {
   const create = useCreateGlossaryTerm(projectId ?? '');
   const update = useUpdateGlossaryTerm(projectId ?? '');
   const remove = useDeleteGlossaryTerm(projectId ?? '');
+  const analyze = useAnalyzeGlossary(projectId ?? '');
+  const suggestions = useGlossarySuggestions(projectId, pollSuggestions);
+  const approve = useApproveGlossarySuggestion(projectId ?? '');
+  const reject = useRejectGlossarySuggestion(projectId ?? '');
 
   const items = data?.items ?? [];
   const total = data?.meta.total ?? 0;
+  const pendingSuggestions = suggestions.data ?? [];
+  const suggestionActionId = approve.isPending
+    ? approve.variables
+    : reject.isPending
+      ? reject.variables
+      : undefined;
+
+  useEffect(() => {
+    if (pendingSuggestions.length > 0) {
+      setPollSuggestions(false);
+    }
+  }, [pendingSuggestions.length]);
 
   if (!projectId) {
     return null;
@@ -52,12 +76,64 @@ export function ProjectGlossaryPage() {
         </div>
         <button
           type="button"
+          onClick={() => {
+            setPollSuggestions(true);
+            analyze.mutate();
+          }}
+          disabled={analyze.isPending}
+          className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800 disabled:opacity-50"
+        >
+          {analyze.isPending ? 'Analyzing…' : 'Suggest terms'}
+        </button>
+        <button
+          type="button"
           onClick={() => setCreateOpen(true)}
           className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500"
         >
           Add term
         </button>
       </div>
+
+      {(analyze.isSuccess || analyze.error) && (
+        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-sm">
+          {analyze.error instanceof Error ? (
+            <p className="text-red-400">{analyze.error.message}</p>
+          ) : analyze.data?.queued ? (
+            <p className="text-slate-300">
+              Analysis queued for {analyze.data.translationCount} translations.
+              Pending suggestions appear below when the worker finishes.
+            </p>
+          ) : null}
+        </div>
+      )}
+
+      <div>
+        <h3 className="text-base font-medium text-white">Suggested terms</h3>
+        <p className="mt-1 text-sm text-slate-400">
+          Ranked heuristics from existing translations. Approve to add them to
+          the glossary used in the next translation job.
+        </p>
+      </div>
+
+      {suggestions.isLoading && (
+        <p className="text-slate-400">Loading suggestions…</p>
+      )}
+
+      {!suggestions.isLoading && pendingSuggestions.length === 0 && (
+        <div className="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-400">
+          No pending suggestions. Run analysis after you have at least 100
+          translations.
+        </div>
+      )}
+
+      {pendingSuggestions.length > 0 && (
+        <GlossarySuggestionsTable
+          suggestions={pendingSuggestions}
+          pendingId={suggestionActionId}
+          onApprove={(suggestion) => approve.mutate(suggestion.id)}
+          onReject={(suggestion) => reject.mutate(suggestion.id)}
+        />
+      )}
 
       <div>
         <input
@@ -97,8 +173,15 @@ export function ProjectGlossaryPage() {
         <GlossaryTermsTable
           terms={items}
           onEdit={setEditingTerm}
-          onDelete={(term) => {
-            if (window.confirm(`Delete glossary term "${term.sourceTerm}"?`)) {
+          onDelete={async (term) => {
+            if (
+              await confirm({
+                title: `Delete "${term.sourceTerm}"?`,
+                description: 'This glossary term will be permanently deleted.',
+                danger: true,
+                confirmLabel: 'Delete',
+              })
+            ) {
               remove.mutate(term.id);
             }
           }}

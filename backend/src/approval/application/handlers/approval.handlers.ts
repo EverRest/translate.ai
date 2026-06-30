@@ -19,6 +19,7 @@ import { AuditService } from '../../../audit/application/audit.service';
 import { TranslationQualityService } from '../../../billing/application/translation-quality.service';
 import { ProjectAccessService } from '../../../project/infrastructure/project-access.service';
 import { CreateTranslationJobCommand } from '../../../translation/application/job.commands';
+import { resolveJobAiProvider } from '../../../ai-provider/domain/ai-provider.utils';
 import { TranslationMemoryService } from '../../../translation/application/services/translation-memory.service';
 import { TranslationAccessService } from '../../infrastructure/translation-access.service';
 import {

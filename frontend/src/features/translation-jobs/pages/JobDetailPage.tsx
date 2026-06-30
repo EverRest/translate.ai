@@ -1,12 +1,17 @@
 import { Link, useParams } from 'react-router-dom';
+import { useConfirm } from '../../../shared/ui/ConfirmDialog';
 import { useProject } from '../../projects/hooks/useProjects';
 import { JobStatusBadge } from '../components/JobStatusBadge';
 import { useCancelJob, useJob, useRetryJob } from '../hooks/useTranslationJobs';
+import { useAiConfig } from '../hooks/useAiConfig';
 
 export function JobDetailPage() {
+  const confirm = useConfirm();
   const { jobId } = useParams<{ jobId: string }>();
   const { data: job, isLoading, error } = useJob(jobId);
   const { data: project } = useProject(job?.projectId);
+  const { data: aiConfig } = useAiConfig();
+  const defaultProvider = aiConfig?.defaultProvider ?? 'gemini';
   const retry = useRetryJob(jobId ?? '');
   const cancel = useCancelJob(jobId ?? '');
 
@@ -117,6 +122,34 @@ export function JobDetailPage() {
                     </ul>
                   </details>
                 )}
+                {(job.failedItems?.length ?? 0) > 0 && (
+                  <div className="mt-3 overflow-x-auto">
+                    <table className="min-w-full text-left text-xs">
+                      <thead>
+                        <tr className="text-red-200/60">
+                          <th className="pb-2 pr-4 font-medium">Key</th>
+                          <th className="pb-2 pr-4 font-medium">Lang</th>
+                          <th className="pb-2 font-medium">Reason</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {job.failedItems?.map((item) => (
+                          <tr key={`${item.key}-${item.language}`}>
+                            <td className="py-1 pr-4 font-mono text-red-100">
+                              {item.key}
+                            </td>
+                            <td className="py-1 pr-4 uppercase text-red-100">
+                              {item.language}
+                            </td>
+                            <td className="py-1 text-red-200/80">
+                              {item.errorMessage ?? 'Unknown error'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -128,7 +161,7 @@ export function JobDetailPage() {
             <div>
               <dt className="text-slate-500">Provider</dt>
               <dd className="mt-1 capitalize text-white">
-                {job.provider ?? 'openai'}
+                {job.provider ?? defaultProvider}
               </dd>
             </div>
             <div>
@@ -162,8 +195,15 @@ export function JobDetailPage() {
           <button
             type="button"
             disabled={cancel.isPending}
-            onClick={() => {
-              if (window.confirm('Cancel this job?')) {
+            onClick={async () => {
+              if (
+                await confirm({
+                  title: 'Cancel this job?',
+                  description: 'The job will be stopped and cannot be resumed.',
+                  danger: true,
+                  confirmLabel: 'Cancel job',
+                })
+              ) {
                 cancel.mutate();
               }
             }}

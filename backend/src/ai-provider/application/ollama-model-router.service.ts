@@ -15,7 +15,12 @@ export class OllamaModelRouterService {
       return literal;
     }
 
-    if (contentType === 'ui' || contentType === 'chat' || textLength < 200) {
+    if (
+      contentType === 'ui' ||
+      contentType === 'placeholder' ||
+      contentType === 'chat' ||
+      textLength < 200
+    ) {
       return fast;
     }
 

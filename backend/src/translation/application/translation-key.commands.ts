@@ -6,6 +6,7 @@ export class CreateTranslationKeyCommand {
     public readonly sourceText: string,
     public readonly description?: string,
     public readonly context?: string,
+    public readonly contentType?: string,
   ) {}
 }
 
@@ -16,6 +17,7 @@ export class UpdateTranslationKeyCommand {
     public readonly keyId: string,
     public readonly description?: string,
     public readonly context?: string,
+    public readonly contentType?: string | null,
   ) {}
 }
 
@@ -34,5 +36,7 @@ export class ListTranslationKeysQuery {
     public readonly page: number,
     public readonly limit: number,
     public readonly search?: string,
+    public readonly localizationObjectId?: string,
+    public readonly keyPrefix?: string,
   ) {}
 }

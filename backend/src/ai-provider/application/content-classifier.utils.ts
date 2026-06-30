@@ -8,6 +8,7 @@ const CONTENT_TYPES: ContentType[] = [
   'article',
   'chat',
   'technical',
+  'placeholder',
   'general',
 ];
 
@@ -19,6 +20,10 @@ const KEYWORD_MAP: Array<{ keywords: string[]; type: ContentType }> = [
   {
     keywords: ['ui', 'button', 'label', 'form', 'tooltip', 'menu'],
     type: 'ui',
+  },
+  {
+    keywords: ['placeholder', 'hint', 'input', 'field', 'placeholder text'],
+    type: 'placeholder',
   },
   { keywords: ['chat', 'message', 'conversation'], type: 'chat' },
   {
@@ -84,7 +89,7 @@ export function buildClassifierPrompt(text: string, context?: string): string {
   const contextHint = context ? `\nContext: ${context}` : '';
   return `Classify the following text for translation routing.
 
-Return only one label: ui, email, legal, marketing, article, chat, technical, general
+Return only one label: ui, email, legal, marketing, article, chat, technical, placeholder, general
 ${contextHint}
 
 Text:

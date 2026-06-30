@@ -1,11 +1,13 @@
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import { Injectable, Logger } from '@nestjs/common';
+import { JobItemStatus } from '@prisma/client';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import {
   TranslationJobCompletedEvent,
   TranslationJobCreatedEvent,
   TranslationJobFailedEvent,
 } from '../../../translation/domain/events/translation-job.events';
+import { buildJobFailureSummary } from '../../../translation/application/utils/job-failure-summary';
 import { WebhookQueueService } from '../../infrastructure/webhook-queue.service';
 
 @Injectable()
@@ -92,6 +94,32 @@ export class TranslationJobFailedWebhookHandler implements IEventHandler<Transla
   ) {}
 
   async handle(event: TranslationJobFailedEvent): Promise<void> {
+    const job = await this.prisma.translationJob.findUnique({
+      where: { id: event.jobId },
+      include: {
+        items: {
+          where: { status: JobItemStatus.failed },
+          include: {
+            translationKey: { select: { key: true } },
+          },
+        },
+      },
+    });
+
+    const failedItems =
+      job?.items.map((item) => ({
+        key: item.translationKey.key,
+        language: item.language,
+        errorMessage: item.errorMessage,
+      })) ?? [];
+
+    const failures = buildJobFailureSummary(
+      failedItems
+        .map((item) => item.errorMessage)
+        .filter((message): message is string => Boolean(message)),
+      job?.provider ?? null,
+    );
+
     const webhooks = await this.prisma.webhook.findMany({
       where: { projectId: event.projectId, enabled: true },
     });
@@ -106,6 +134,8 @@ export class TranslationJobFailedWebhookHandler implements IEventHandler<Transla
           jobId: event.jobId,
           projectId: event.projectId,
           status: 'failed',
+          failures,
+          failedItems,
         },
       });
     }

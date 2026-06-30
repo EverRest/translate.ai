@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useConfirm } from '../../../shared/ui/ConfirmDialog';
 import { Modal } from '../../../shared/ui/Modal';
 import {
   useApiKeys,
@@ -12,6 +13,7 @@ type ApiKeysPanelProps = {
 };
 
 export function ApiKeysPanel({ projectId, projectName }: ApiKeysPanelProps) {
+  const confirm = useConfirm();
   const [name, setName] = useState('');
   const [createdSecret, setCreatedSecret] = useState<string | null>(null);
   const { data: keys, isLoading, error } = useApiKeys(projectId);
@@ -26,9 +28,9 @@ export function ApiKeysPanel({ projectId, projectName }: ApiKeysPanelProps) {
     "languages": ["de"],
     "keyItems": [
       { "key": "greeting.hello", "sourceText": "Hello world" }
-    ],
-    "provider": "ollama"
-  }'`
+    ]
+  }'
+# provider is optional — defaults to server AI_PROVIDER (e.g. gemini)`
     : '';
 
   return (
@@ -99,8 +101,16 @@ export function ApiKeysPanel({ projectId, projectName }: ApiKeysPanelProps) {
             <button
               type="button"
               disabled={revoke.isPending}
-              onClick={() => {
-                if (window.confirm(`Revoke API key "${key.name}"?`)) {
+              onClick={async () => {
+                if (
+                  await confirm({
+                    title: `Revoke API key "${key.name}"?`,
+                    description:
+                      'This key will stop working immediately. This action cannot be undone.',
+                    danger: true,
+                    confirmLabel: 'Revoke',
+                  })
+                ) {
                   revoke.mutate(key.id);
                 }
               }}

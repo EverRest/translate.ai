@@ -58,10 +58,31 @@ export function buildJobFailureSummary(
     };
   }
 
+  if (combined.includes('memory') && combined.includes('unknown provider')) {
+    return {
+      summary: 'Job tried to use translation memory as an AI provider.',
+      hint: 'Retry the job — memory hits are now stored with the real provider. Retranslate also works after restarting the worker.',
+      sampleErrors,
+    };
+  }
+
+  if (
+    combined.includes('http 503') ||
+    combined.includes('http 502') ||
+    combined.includes('http 429')
+  ) {
+    return {
+      summary:
+        'AI provider returned a temporary error (overloaded or unavailable).',
+      hint: 'Wait a minute and Retry. Set AI_PROVIDER_FALLBACK=gemini,ollama in backend `.env` so Ollama is used when Gemini is down.',
+      sampleErrors,
+    };
+  }
+
   if (
     combined.includes('econnrefused') ||
     combined.includes('fetch failed') ||
-    combined.includes('providerunavailable') ||
+    combined.includes('provider unavailable') ||
     combined.includes('http 404') ||
     combined.includes('empty response')
   ) {
@@ -88,6 +109,18 @@ export function buildJobFailureSummary(
     return {
       summary: 'AI provider authentication failed.',
       hint: 'Set the provider API key in backend `.env` and restart API/worker.',
+      sampleErrors,
+    };
+  }
+
+  if (
+    combined.includes('validation failed') ||
+    combined.includes('refusal') ||
+    combined.includes('identical to source')
+  ) {
+    return {
+      summary: 'AI translation output failed quality checks.',
+      hint: 'Review key context/content type, try Retranslate from Approvals, or Retry the job after fixing prompts.',
       sampleErrors,
     };
   }

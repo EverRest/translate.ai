@@ -17,7 +17,11 @@ describe('ProviderRegistryService', () => {
     translate: jest.fn(),
   } as unknown as OllamaProvider;
   const config = {
-    get: jest.fn().mockReturnValue('gemini,ollama'),
+    get: jest
+      .fn()
+      .mockImplementation((key: string) =>
+        key === 'AI_PROVIDER_FALLBACK' ? 'gemini,ollama' : undefined,
+      ),
   } as unknown as ConfigService;
   const audit = {
     log: jest.fn().mockResolvedValue(undefined),
@@ -27,6 +31,9 @@ describe('ProviderRegistryService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (config.get as jest.Mock).mockImplementation((key: string) =>
+      key === 'AI_PROVIDER_FALLBACK' ? 'gemini,ollama' : undefined,
+    );
     service = new ProviderRegistryService(
       openAi,
       gemini,
@@ -42,6 +49,13 @@ describe('ProviderRegistryService', () => {
       'gemini',
       'ollama',
     ]);
+  });
+
+  it('builds gemini → openai chain when AI_PROVIDER_FALLBACK=openai', () => {
+    (config.get as jest.Mock).mockImplementation((key: string) =>
+      key === 'AI_PROVIDER_FALLBACK' ? 'openai' : 'gemini,ollama',
+    );
+    expect(service.buildFallbackChain('gemini')).toEqual(['gemini', 'openai']);
   });
 
   it('falls back to the next provider when primary fails', async () => {
@@ -83,8 +97,13 @@ describe('ProviderRegistryService', () => {
     ).rejects.toThrow('ollama down');
   });
 
-  it('rejects unknown providers', () => {
-    expect(() => service.buildFallbackChain('unknown')).toThrow(
+  it('maps pseudo providers to gemini in fallback chain', () => {
+    expect(service.buildFallbackChain('memory')).toEqual(['gemini', 'ollama']);
+    expect(service.buildFallbackChain('unknown')).toEqual(['gemini', 'ollama']);
+  });
+
+  it('rejects unsupported providers at resolve time', () => {
+    expect(() => service.resolve('unknown')).toThrow(
       ProviderUnavailableException,
     );
   });
