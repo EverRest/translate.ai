@@ -22,6 +22,7 @@ import {
 import {
   useDeleteTranslationKey,
   useRefetchTranslationKeys,
+  useTranslationKeys,
 } from '../../translation-keys/hooks/useTranslationKeys';
 import type { Project } from '../../projects/types';
 import { deleteAllTranslations } from '../api/translations.api';
@@ -474,6 +475,7 @@ export function ProjectTranslationsPage() {
 
   const { data: langData } = useProjectLanguages(projectId);
   const { data: translationsData } = useTranslations(projectId);
+  const { data: keysCountData } = useTranslationKeys(projectId, 1, 1);
   const deleteKey = useDeleteTranslationKey(projectId ?? '');
 
   const languages = useMemo(
@@ -1110,7 +1112,7 @@ export function ProjectTranslationsPage() {
         onDeleteAll={() => void handleDeleteAll()}
         isImporting={isImporting}
         isTranslating={isTranslating}
-        hasRows={(translationsData?.items.length ?? 0) > 0}
+        hasRows={(keysCountData?.meta.total ?? 0) > 0}
       />
     </>
   );
