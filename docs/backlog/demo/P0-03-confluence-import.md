@@ -1,4 +1,4 @@
-# P0-03 — Confluence import
+  # P0-03 — Confluence import
 
 **Phase:** FIFA/WIZ P0 · **Importance:** Critical · **Difficulty:** Medium–High · **Status:** Backlog
 
@@ -55,3 +55,41 @@ Hints containing "%%…%% must be kept" → flag key context for QA
 ## Notes
 
 Start with file import to unblock demo without Atlassian app review; live API is phase 2.
+
+---
+
+## Agent review
+
+**Verdict:** Agree — killer feature; **phase 1 file import should be Wave 2 priority #1** (before Excel if Confluence is primary source of truth for Wiz).
+
+### Architecture
+
+- **Shared parser interface** with P0-02:
+  ```text
+  ImportParser.parse(buffer) → { rows: ImportRow[], warnings[], stats }
+  ImportRow: { scope, key, sourceText, hints?, externalId? }
+  ```
+- Confluence HTML export is messy (merged cells, macros). Phase 1: support **Confluence “Export to Word/HTML” table** + **CSV export** if Wiz uses it — get **one real page sample** from client before coding parser.
+- Map `scope` → key prefix `{scope}.{key}` **or** store `scope` tag on key (`TranslationKey.context` prefix line `scope:Interface Elements`) — explicit tag beats fragile prefix index ([P0-06](./P0-06-translation-coverage-heatmap.md) depends on this).
+- Hints column → `TranslationKey.context`; regex-detect `%%…%%` and append `strictPlaceholders: true` hint for QA.
+- Phase 2 OAuth: store tokens encrypted in tenant settings; `integration.confluence.sync` queue — never call Confluence from HTTP handler.
+
+### Technical
+
+- HTML parser: `cheerio` + table row normalizer; unit tests with **sanitized fixture HTML** (no live Confluence in CI).
+- Idempotent upsert: `(projectId, key)` unique — update `sourceText` only if changed → triggers P0-04 stale flow.
+- Rate limits on live API: batch page fetch, respect Atlassian 429 with BullMQ backoff.
+
+### UI
+
+- Phase 1: **Import → Confluence export file** in same wizard shell as Excel (shared step 1 upload component).
+- Phase 2: **Project Settings → Integrations → Confluence** — connect, pick pages/spaces, “Sync now”, last sync diff summary (`+12 keys, ~3 source changed`).
+- Key detail / grid: show **Hints** column (truncated) — translators must see Confluence rules.
+
+### Disagreements
+
+| Backlog claim | Issue |
+|---------------|-------|
+| Difficulty Medium–High | Phase 1 file-only is **Medium**; live OAuth + webhooks is **High** — split AC by phase |
+| `Key path: {scope}.{key}` | Confirm with Wiz — their Evo import may use flat keys with scope in separate column; wrong guess breaks round-trip |
+| Separate ADR 0016 only for Confluence | One ADR for external import (Excel + Confluence + future) |

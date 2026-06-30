@@ -35,3 +35,31 @@
 ## Notes
 
 Core requirement met. Demo metric (“134 placeholders preserved”) needs job summary counter — small follow-up if sales wants exact hook.
+
+---
+
+## Agent review
+
+**Verdict:** Agree — shipped. Demo hook metric is **Wave 1 quick win** — implement placeholder counter in job completion summary.
+
+### Architecture
+
+- Counter: increment in `PlaceholderValidator` or aggregate during job runner when validator passes — store on `TranslationJob` summary JSON or job completion event payload.
+- Email/GDPR edge cases: extend validator with HTML-aware token extraction only after **real Wiz email fixtures** — do not guess merge-field syntax.
+
+### Technical
+
+- Job summary API: `{ placeholdersPreserved: 134, placeholdersTotal: 134 }` — computed from source texts in job scope.
+- E2e: Wiz fixture strings with `%%USER_NAME%%` in HTML email template.
+
+### UI
+
+- Job completion modal: **“134 placeholders preserved”** green check — sales demo hook.
+- Confluence Hints integration (P0-03): auto-set strict mode when hint matches regex — links import to QA.
+
+### Disagreements
+
+| Backlog claim | Issue |
+|---------------|-------|
+| “Nice-to-have” counter | **Promote to Wave 1** — explicit EverRest demo hook; ~half-day backend work |
+| Open questions on email/GDPR | Valid — need Wiz sample before changing validator; current %%/{{}} logic may miss `{variable}` styles |

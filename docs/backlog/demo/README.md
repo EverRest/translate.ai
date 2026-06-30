@@ -1,8 +1,37 @@
 # FIFA / WIZ Client Backlog
 
-Prioritized from [client-ideas-fifa-wiz.md](../demo) with EverRest review comments (Jun 2026).
+Prioritized from [client-ideas-fifa-wiz.md](../demo.md) with EverRest review comments (Jun 2026).
 
 **Goal:** zero-friction adoption for BMA/PMA/SEQ teams (Confluence + Excel today) → AI-assisted localization before runtime API.
+
+---
+
+## Agent review — prioritisation (Jun 2026)
+
+Cross-cutting review against [AGENTS.md](../../../AGENTS.md), existing modules, and CQRS/worker constraints.
+
+### Agree with overall ordering
+
+P0-01 → P0-02 → P0-03 is the right **adoption** sequence. EverRest’s deferrals (runtime API, multi-model, standalone consistency AI) match platform reality.
+
+### Suggested wave changes (disagree partially with README waves)
+
+| Current wave | Issue | Suggested change |
+|--------------|-------|------------------|
+| Wave 1: P0-02 Excel | Excel round-trip is **Medium–High** if byte-identical output is required; parsing must run on **backend + queue**, not browser only | Keep P0-01 + P0-07 in Wave 1; add **Confluence file import (P0-03 phase 1)** before live OAuth — killer demo without Atlassian app review |
+| Wave 3: P0-05 objects | Client #1 is “must have” but **P3-12 already covers 60% of demo** (tree + translate all) | Demo can show objects in Wave 2; full object-batch AI (single prompt per field) stays Wave 3 |
+| Wave 3: P0-10 extension | Marked same wave as debt dashboard but difficulty **High** and needs client DOM cooperation | POC only after P0-03 key naming is stable; consider **export preview page** as interim demo (no extension) |
+| P0-11 in P0 list | EverRest: conditional on static bundle model | **Demote to P1** until Wiz confirms import path; do not build snapshots in parallel with P0-02/03 |
+
+### Shared architecture (apply to all import/report tasks)
+
+1. **New bounded context `integration`** (or sub-module under `project`) — parsers for Excel + Confluence HTML share `ImportParser` interface; one ADR `0016-external-import.md` covers P0-02 + P0-03 (do not duplicate ADRs).
+2. **All file ingest/export via BullMQ** — never parse 800+ rows or call AI in HTTP handlers ([ADR 0002](../../../adr/0002-bullmq-queues.md)).
+3. **Reporting read model** — P0-06 heatmap + P0-09 debt share `project` query handlers or materialized view; avoid three separate SQL aggregations.
+4. **Post-job reactions** — P0-07 auto-scan should use `TranslationJobCompletedEvent` handler (same pattern as webhooks), not poll from frontend.
+5. **Status enum** — use existing `TranslationStatus.review`, not a new `needs_review` / `stale` enum unless product insists (see P0-04 review).
+
+Each task file below has per-feature **Agent review** (architecture · technical · UI).
 
 ---
 
@@ -34,18 +63,19 @@ Each file follows the standard backlog template: **Goal**, **Current state**, **
 | [P0-08](./P0-08-translation-inheritance.md) | Translation inheritance between events | High | Medium–High | #13 | Reuse MC26 → WWC27 |
 | [P0-09](./P0-09-translation-debt-dashboard.md) | Translation debt dashboard | Medium | Medium | #28 | Good for demo |
 | [P0-10](./P0-10-live-browser-injection.md) | Live browser injection (extension) | High | High | #29 | Killer demo feature |
-| [P0-11](./P0-11-new-keys-alert.md) | New keys alert (post-release diff) | Medium | Medium | #8 | Only with static UI integration |
+| [P0-11](./P0-11-new-keys-alert.md) | New keys alert (post-release diff) | Medium | Medium | #8 | **Conditional** — demote to Wave 4; see agent review |
 
 ### Suggested implementation waves
 
 ```text
 Wave 1 (demo-ready, ≤2 weeks)
-  P0-01 Sport context
-  P0-02 Excel delta import (MVP column mapping)
-  P0-07 Auto-scan after translate job (consistency UX)
+  P0-01 Sport context (+ FIFA glossary preset)
+  P0-07 Auto-scan after translate job (event handler)
+  P0-S02 Placeholder count in job summary (demo metric)
 
 Wave 2 (client onboarding, 2–4 weeks)
-  P0-03 Confluence file import → live API
+  P0-03 Confluence file import (phase 1) — killer demo, no OAuth
+  P0-02 Excel delta import (Wiz Classic preset)
   P0-04 Stale detection
   P0-06 Coverage heatmap
 
@@ -53,8 +83,14 @@ Wave 3 (differentiation, 4–8 weeks)
   P0-05 Object-batch translation + progress by object
   P0-08 Event inheritance
   P0-09 Debt dashboard
-  P0-10 Browser extension POC
+  P0-10 Browser extension POC (or interim preview page)
+
+Wave 4 / conditional
+  P0-11 New keys alert — only after Wiz confirms static bundle workflow
+  P0-03 Confluence live API (OAuth)
 ```
+
+> **Note:** Revised from original README per agent review — Confluence file import moved earlier; P0-11 demoted.
 
 ---
 
@@ -104,6 +140,7 @@ See [P0-S01](./P0-S01-glossary-platform.md) · [P0-S02](./P0-S02-placeholder-pro
 
 ## Source
 
-- Raw ideas: [client-ideas-fifa-wiz.md](../demo)
+- Raw ideas: [client-ideas-fifa-wiz.md](../demo.md)
 - EverRest inline comments (Jun 29–30, 2026)
 - Platform baseline: [shipped-baseline.md](../shipped-baseline.md)
+- Agent rules: [AGENTS.md](../../../AGENTS.md)

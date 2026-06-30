@@ -34,3 +34,30 @@ AI respects max character count per UI element (e.g. German button label must fi
 ## Notes
 
 German +30% length vs EN is common FIFA pain on mobile accreditation flows.
+
+---
+
+## Agent review
+
+**Verdict:** Agree — defer for MVP, but **consider promoting after P0-05** if mobile label overflow is demo feedback — cheaper than vision (P0-D03).
+
+### Architecture
+
+- Add `maxLength` on `LocalizationNode` (authoring source) → materializes to `TranslationKey` — keeps limit with field in P3-12 model.
+- New `MaxLengthValidator` in validator chain ([ADR 0008](../../../adr/0008-translation-output-validation.md)) — same retry pattern as placeholders.
+
+### Technical
+
+- Prompt: hard limit + validator double-check — models often exceed limits; validator is source of truth.
+- Retry prompt: “Shorten to ≤N chars preserving meaning” — max 1 retry to control cost.
+
+### UI
+
+- Node inspector: numeric **Max length** input with helper “German often +30% vs EN”.
+- Grid: optional column with char count / limit indicator when limit set.
+
+### Disagreements
+
+| Backlog claim | Issue |
+|---------------|-------|
+| Difficulty Medium | **Low–Medium** — schema + validator + prompt tweak; no new infrastructure |

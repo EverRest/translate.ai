@@ -31,3 +31,29 @@ Attach UI screenshot to a key; AI uses visual context (button width, mobile head
 ## Notes
 
 Overlap with [P3-06](../P3-06-screenshot-regression.md) and [P0-D04](./P0-D04-character-limit-enforcement.md).
+
+---
+
+## Agent review
+
+**Verdict:** Agree — defer. Vision translate-time is expensive; P0-D04 (char limit) solves 80% of mobile button pain without screenshots.
+
+### Architecture
+
+- Consolidate with [P3-06](../P3-06-screenshot-regression.md) — one attachment model on `LocalizationNode`, two use cases (translate-time vs post-QA overflow).
+- Vision calls must go through `ai-provider` module with new multimodal interface — ADR required before code.
+
+### Technical
+
+- Store images outside DB (S3); key holds URL + hash only.
+- GDPR: accreditation screenshots may contain PII — tenant retention policy required before FIFA uses this.
+
+### UI
+
+- Attach screenshot on **Object node inspector** (P3-12 UI), not flat Keys grid — context belongs to field structure.
+
+### Disagreements
+
+| Backlog claim | Issue |
+|---------------|-------|
+| Difficulty High | **High** for translate-time vision + storage + GDPR; keep deferred until P0-05 object UX stable |

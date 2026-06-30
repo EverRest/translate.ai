@@ -34,3 +34,29 @@ Support regional locales: FR-FR vs FR-CA vs FR-BE; ES-ES vs ES-MX vs ES-AR — n
 ## Notes
 
 FIFA international audience eventually needs this; not blocking first Wiz demo.
+
+---
+
+## Agent review
+
+**Verdict:** Agree with EverRest — defer. **Partial workaround in P0-01:** `localeNotes.fr` / `localeNotes.es` in domain context covers MC26 demo for FR/ES without full BCP-47 split.
+
+### Architecture
+
+- Migration: `ProjectLanguage.code` from `VarChar(5)` to BCP-47 (`fr-CA`) — breaking change for exports/API; needs ADR + migration path.
+- Glossary terms need optional `locale` column — filter in `getTermsForProject`.
+- “Controller” EverRest mentions = prompt router in `ai-provider`, not HTTP controller — extend `TranslateOptions.targetLocale`.
+
+### Technical
+
+- Do not duplicate language rows as `fr` + `fr-CA` without clear UX — translators confuse columns.
+
+### UI
+
+- Language setup wizard: “Add regional variant” advanced section — hidden until tenant enables locales feature flag.
+
+### Disagreements
+
+| Backlog claim | Issue |
+|---------------|-------|
+| Difficulty High | **High** for full split; **Low** for P0-01 locale notes as interim |

@@ -49,3 +49,39 @@ Show badge “Preview: FR (draft)” in corner
 ## Notes
 
 High demo impact; requires client cooperation on DOM key exposure. POC before production runtime API.
+
+---
+
+## Agent review
+
+**Verdict:** Agree — killer demo. **Disagree** with starting Chrome extension before lighter interim options and stable key contract.
+
+### Architecture
+
+- **Preview API** (subset of P0-D01, not full runtime):
+  - `POST /projects/:id/preview-tokens` → short-lived JWT, scopes: `read:translations`, `projectId`, `language`, optional `statuses: [draft, approved]`
+  - `GET /preview/bundle?token=` — gzip JSON map `{ [key]: value }` + ETag
+- Extension MV3: service worker + content script; **domain allowlist** in token claims.
+- **Interim demo without extension:** translate.ai **Preview page** — iframe staging URL + injected overlay script served from translate.ai (bookmarklet) — validates API before store listing.
+- Injection priority: (1) `[data-i18n-key]` (2) Wiz-specific adapter config JSON per project (3) text match fallback **disabled by default** (fragile).
+
+### Technical
+
+- CORS: preview bundle endpoint allows extension origin only; tokens 15 min TTL.
+- Cache: extension `chrome.storage` + `If-None-Match`; poll 30s not WebSocket for v1.
+- Never inject on production domains — token `allowedOrigins[]` enforced server-side.
+- Separate repo folder `extension/` or `packages/preview-extension` — not inside frontend bundle.
+
+### UI
+
+- translate.ai: **Project → Preview** — generate token, QR/link for extension setup, language picker, “includes draft translations” toggle.
+- Extension popup: project picker, language, on/off toggle, connection status.
+- On-page badge: **“translate.ai preview · FR · draft”** — draggable, does not cover FIFA branding.
+
+### Disagreements
+
+| Backlog claim | Issue |
+|---------------|-------|
+| Wave 3 POC alongside debt dashboard | Extension is **highest risk** item — schedule after key naming from P0-03 confirmed with Wiz |
+| WebSocket delta stream | Overkill for v1; ETag polling sufficient for demo |
+| Full extension before bookmarklet | Ship bookmarklet/interim preview page first (1–2 days) to unblock PM demos |

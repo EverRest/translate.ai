@@ -32,3 +32,28 @@ Per translation confidence score (e.g. “Cancel” → “Annuler” 99%) — a
 ## Notes
 
 Useful for high-volume UI strings after FIFA glossary stabilizes terminology.
+
+---
+
+## Agent review
+
+**Verdict:** Agree — defer until glossary + drift stable; auto-approve without terminology enforcement risks publishing inconsistent FIFA terms.
+
+### Architecture
+
+- Implement as part of [P2-03](../P2-03-analytics-v2.md) — confidence from `TranslationQualityMetric` or provider logprobs where available.
+- Auto-approve must **never** bypass `PlaceholderValidator` failures or open terminology drift issues — gate logic in job post-processor.
+
+### Technical
+
+- Ollama/local models may not expose logprobs — fallback to heuristic score or skip auto-approve for those providers.
+
+### UI
+
+- Confidence badge in translation detail + bulk filter “low confidence” — grid column optional.
+
+### Disagreements
+
+| Backlog claim | Issue |
+|---------------|-------|
+| Auto-approve for simple UI strings | Only safe after P0-07 auto-scan + glossary preset applied — order dependency |

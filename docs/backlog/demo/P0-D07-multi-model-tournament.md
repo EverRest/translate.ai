@@ -31,3 +31,29 @@ For high-stakes strings (email subject, legal), run Gemini + GPT-4o + Claude in 
 ## Notes
 
 3× cost per key — reserve for email/legal content types only.
+
+---
+
+## Agent review
+
+**Verdict:** Agree with EverRest — defer. **Disagree** with “difficulty low” in EverRest comment — parallel 3-provider orchestration + variant UI + learning loop is **Medium–High**, not low.
+
+### Architecture
+
+- Implement under [P2-02](../P2-02-cross-provider-cost-router.md) as job mode — not FIFA-specific.
+- RAG few-shot from approved translations requires P1-01 — without RAG, tournament is just expensive A/B with no memory.
+
+### Technical
+
+- Store variants in job item metadata JSON; winner promoted to `Translation.value`.
+- Learning “preferred model first” = router weight update — persistent in tenant settings.
+
+### UI
+
+- Review UI: side-by-side 3 columns for high-stakes keys only — do not default for UI labels.
+
+### Disagreements
+
+| Backlog claim | Issue |
+|---------------|-------|
+| EverRest “difficulty is low” | Orchestration is straightforward; **product UX + cost governance** make it Medium–High |

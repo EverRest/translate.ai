@@ -34,3 +34,30 @@ Shareable link for FIFA official translator: scoped to language + scope, read-on
 ## Notes
 
 Common enterprise TMS feature; not blocking Wiz Excel/Confluence path.
+
+---
+
+## Agent review
+
+**Verdict:** Agree — defer post-MVP. FIFA may ask for this in review phase — design now, build later.
+
+### Architecture
+
+- **`ReviewInvite`** token table — scoped claims: `{ projectId, language, scope?, expiresAt, permissions: ['read','approve'] }`.
+- Public routes under `/api/v1/guest/review/:token` — separate guard from JWT; rate limited.
+- Reuse `approval` module commands for approve/reject — guest handler wraps same commands with token scope check.
+- Audit log mandatory for FIFA compliance.
+
+### Technical
+
+- Tokens: crypto-random, single-use optional for approve actions vs read-only multi-use.
+- No full project enumeration — token binds to filter query.
+
+### UI
+
+- Minimal guest SPA or SSR page: source | translation | comment | approve/reject buttons.
+- Branded “FIFA FR review” header; no sidebar navigation to main app.
+
+### Disagreements
+
+None on deferral — correct for current Wiz file-based workflow.

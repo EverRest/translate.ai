@@ -24,3 +24,22 @@ See [P1-02](../P1-02-github-gitlab-integration.md) + [P1-06](../P1-06-translatio
 ## Notes
 
 Same vision as client #26; implement via existing roadmap IDs when MVP client onboarding is done.
+
+---
+
+## Agent review
+
+**Verdict:** Strongly agree — not FIFA demo scope. Wiz uses Confluence/Excel, not git keys.
+
+### Architecture
+
+- No FIFA-specific work — track only under [P1-02](../P1-02-github-gitlab-integration.md) / [P3-07](../P3-07-localization-pipeline-as-code.md).
+- Webhook inbound endpoint belongs in `integration` module when built — same as Confluence phase 2.
+
+### Technical / UI
+
+- N/A for FIFA track — remove from demo planning entirely.
+
+### Disagreements
+
+None — deferral is correct.

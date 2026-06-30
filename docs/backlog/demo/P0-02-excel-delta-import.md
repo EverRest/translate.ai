@@ -54,3 +54,40 @@ Fill: only blank target-language cells
 ## Notes
 
 #10 and #17 are the same workflow from the client perspective — one backlog item.
+
+---
+
+## Agent review
+
+**Verdict:** Agree on goal and merge of #10/#17. **Disagree** with difficulty **Medium** — byte-identical Excel round-trip is **Medium–High**; MVP “fill empties + download” without full DB sync can stay Medium.
+
+### Architecture
+
+- **New `integration` module** (ADR 0016 shared with P0-03): `ExcelImportProfile`, `ParseExcelCommand`, `ExportExcelCommand` — not a subfolder buried in `translation-key` (keeps import/export symmetric with existing `export` module).
+- **Two-phase pipeline** (required by AGENTS.md — no AI in HTTP):
+  1. `integration.excel.parse` — validate file, store original blob (local disk dev / S3 prod), return preview stats
+  2. `integration.excel.delta-translate` → creates normal `translation.process` items for empty cells only
+  3. `integration.excel.compose` — merge AI results back into **stored original workbook** (preserve styles, extra sheets, formulas)
+- **Do not require full key materialization** for round-trip demo: row-level `externalId` (Field ID) maps to job items; optional “also import keys to project” checkbox for ongoing editing in UI.
+- Reuse `PlaceholderValidator` on every filled cell; failed rows stay empty in output + error column (Wiz can re-import).
+
+### Technical
+
+- Parse with **`exceljs`** on backend (preserve formatting better than sheetjs); frontend `xlsx` only for small preview if needed.
+- Wiz Classic preset: versioned JSON fixture in `backend/test/fixtures/wiz-classic-export.xlsx` — e2e must assert column order + untouched Field IDs.
+- Idempotency: same file hash + profile → skip re-translate unless `force=true`.
+- Job metadata: `{ importProfileId, sourceFileId, mode: 'delta-import' }` on `TranslationJob` — may need nullable JSON column or link table (plan in ADR).
+
+### UI
+
+- **Import wizard** (modal or `/projects/:id/import`): Steps — Upload → Preset (Wiz Classic) → Preview table (first 20 rows + “847 empty cells in FR”) → Languages → Start → Progress → Download.
+- Show **before/after diff** for sample rows in preview — demo gold.
+- Do not use Translations grid as primary UX for this flow; grid is for ongoing work after optional import.
+
+### Disagreements
+
+| Backlog claim | Issue |
+|---------------|-------|
+| `GET .../import/excel/:jobId/download` sync | Large files must be async; poll job status then download link |
+| Reuse `translation.job` with mode only | Need compose step queue job; translation job alone cannot rebuild xlsx |
+| Wave 1 item | Move to Wave 2 after P0-03 file import unless Wiz sends Excel before Confluence export sample |

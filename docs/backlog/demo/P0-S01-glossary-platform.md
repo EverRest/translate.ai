@@ -39,3 +39,30 @@ Terms like “Accreditation”, “Venue”, “Privilege”, “Registration Gr
 ## Notes
 
 Client #4 consistency check is **partially addressed** via glossary + drift — see [P0-07](./P0-07-consistency-check.md).
+
+---
+
+## Agent review
+
+**Verdict:** Agree — shipped for MVP. Remaining items are polish, not new platform work.
+
+### Architecture
+
+- **Tenant-level shared glossary** (remaining item): extend `Glossary` with optional `tenantId` scope or “shared set” copy-on-activate to event projects — ADR before schema change.
+- Auto-scan after job: implement in P0-07 via event handler, not glossary module.
+
+### Technical
+
+- FIFA preset: add `fifa_sports_en_fr_es` to `glossary-presets.ts` — content work, not code architecture.
+- CSV import: reuse bulk-upsert endpoint with CSV parser in `integration` module.
+
+### UI
+
+- Cross-project glossary: **Tenant Settings → Shared terminology** (future) — for MC26/WWC27 reuse.
+- Translations page: ensure drift badge visible without manual scan after P0-07 ships.
+
+### Disagreements
+
+| Backlog claim | Issue |
+|---------------|-------|
+| Listed as “no new P0 work” | P0-01 FIFA preset + P0-07 auto-scan are **content/UX extensions** of this platform — still schedule them in Wave 1 |

@@ -40,3 +40,37 @@ After translation, ensure the same English term maps to one target everywhere (e
 ## Notes
 
 EverRest explicitly deferred a dedicated consistency AI in favor of glossary + validation. This P0 item tracks **UX completion** of that strategy, not a new AI product surface.
+
+---
+
+## Agent review
+
+**Verdict:** Strongly agree with EverRest — **do not build standalone “consistency AI”** for FIFA. Glossary + drift scan is the correct architecture.
+
+### Architecture
+
+- Wave 1 only: **`TerminologyScanOnJobCompletedHandler`** listening to `TranslationJobCompletedEvent` (same bus as `TranslationJobCompletedWebhookHandler`).
+- Project setting: `autoTerminologyScan: boolean` default `true` for new FIFA template projects.
+- Wave 2 LLM reviewer: **defer** unless drift scan false-negative rate is measured — second model doubles cost and overlaps P2-05 algorithmic detection.
+- Workflow order: glossary preset (P0-01) → translate → auto drift scan → resolve in Glossary Drift tab.
+
+### Technical
+
+- Enqueue existing `terminology.scan` queue — no new worker processor logic.
+- Debounce: if multiple jobs complete within 5 min, coalesce to one scan per project (BullMQ jobId dedup).
+- API: extend job status response with `terminologyScanJobId` link when complete.
+- Translations list API: optional `includeTerminologyIssues: true` batch-fetch open issues for visible keys (avoid N+1).
+
+### UI
+
+- Post-job toast: **“Translation complete — 3 terminology issues”** → link to `?tab=drift`.
+- Translations grid: reuse `TerminologyDriftBadge` pattern — show per-row icon when key appears in open issues (requires scan first — make auto-scan default so demo always works).
+- Remove manual “Scan” as required step from demo script once auto-scan ships.
+- Do **not** add new “Consistency” top-level feature — stays under Glossary.
+
+### Disagreements
+
+| Backlog claim | Issue |
+|---------------|-------|
+| Wave 2 “LLM consistency reviewer” | Disagree for FIFA MVP — glossary + drift + FIFA preset terms should cover 90%; measure before building |
+| Difficulty Low–Medium | Wave 1 (event + toast + grid hints) is **Low**; Wave 2 LLM is Medium–High |

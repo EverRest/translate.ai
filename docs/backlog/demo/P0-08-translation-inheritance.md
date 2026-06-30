@@ -40,3 +40,36 @@ Copy approved translations from one event project to another (FIFA MC26 → FIFA
 ## Notes
 
 Overlaps P3-02 long-term; FIFA needs deterministic key-path match first, semantic match later.
+
+---
+
+## Agent review
+
+**Verdict:** Agree on approach (deterministic key match first). **Disagree** with Wave 3 timing — FIFA MC26→WWC27 story may be needed **before** browser extension; could be Wave 2 if events overlap.
+
+### Architecture
+
+- **`InheritTranslationsCommand`** — tenant guard: source and target projects **same tenantId**; audit log entry required.
+- Match rule: `(key, sourceText)` equality → copy translation value + status if in `copyStatuses`.
+- Changed source in target: skip copy or copy as `draft` — make policy explicit enum in command.
+- Consider [ADR 0006 branching](../../../adr/0006-project-branching.md) `ProjectBranch` for event variants instead of cross-project copy — **evaluate before building**: branch may already model “WWC27 delta on MC26 base”.
+- Follow-up job: reuse `CreateTranslationJobCommand` with key list from diff report.
+
+### Technical
+
+- Diff preview: read-only query `PreviewInheritanceQuery` before destructive command.
+- Large inherit: queue `project.inherit` for >500 keys — HTTP returns job id.
+- Do not duplicate keys automatically — offer “Import missing keys from source” as separate checkbox.
+
+### UI
+
+- **Project Settings → Inherit translations** wizard: select source project → diff table (inherited / changed / new / orphan) → confirm.
+- Color-code rows: green inherit, amber review needed, red new key.
+- After inherit: banner on Overview with link to “Translate 150 remaining keys”.
+
+### Disagreements
+
+| Backlog claim | Issue |
+|---------------|-------|
+| Cross-project only | Check if `ProjectBranch` fits event model — may avoid duplicate project sprawl |
+| Difficulty Medium–High | **Medium** for key+source match without semantic diff |

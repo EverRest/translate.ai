@@ -38,3 +38,31 @@ Evo Core calls translate.ai API at runtime instead of export/import bundles. Cha
 ## Notes
 
 Architectural shift for client — not MVP. Extension preview ([P0-10](./P0-10-live-browser-injection.md)) validates value before this investment.
+
+---
+
+## Agent review
+
+**Verdict:** Agree with deferral. EverRest is correct — this changes Wiz architecture and ops burden.
+
+### Architecture
+
+- Split into **Preview read path** (P0-10) vs **Production runtime path** (P0-D01) — do not merge APIs.
+- Production needs **draft vs published** separation ([approval module](../../../domain/approval.md)); today translations can be `approved` without publish gate — runtime API requires explicit publish command + cache bust.
+- CDN + Redis: invalidate on `TranslationPublishedEvent`, not on every draft edit — 30s SLA applies to **published** layer only.
+
+### Technical
+
+- p99 <100ms @ 1k RPS requires bundle endpoint returning pre-serialized JSON per project+locale — not per-key REST.
+- Service API keys scoped per environment; rate limit per tenant.
+
+### UI
+
+- No UI in translate.ai for runtime consumers — SDK/docs only. PM-facing “publish to staging/prod” buttons required first.
+
+### Disagreements
+
+| Backlog claim | Issue |
+|---------------|-------|
+| Depends on P0-04 stale detection | Depends on **publish workflow**, not stale detection — wrong dependency listed |
+| Resume when horizontal scaling ready | Also blocked until Wiz commits to runtime consumption model (currently file-based) |

@@ -51,3 +51,37 @@ Red:    <70% or blocking missing keys for launch language
 ## Notes
 
 Strong pre-launch sales/demo artifact; reuses existing translation status data.
+
+---
+
+## Agent review
+
+**Verdict:** Agree — high demo value, Medium difficulty fair **if** scope dimension is explicit from import.
+
+### Architecture
+
+- **`GetCoverageMatrixQuery`** in `project` or new `reporting` read-only module — no writes, CQRS query handler only.
+- Scope dimension: **require explicit `scope` tag** on keys from P0-03 import — do not rely only on `key.split('.')[0]` (Wiz keys may not be dotted).
+- SQL: single aggregated query with `GROUP BY scope, language` using conditional counts (`approved`, `missing`, `draft`) — avoid N scopes × M languages round trips.
+- Optional: nightly materialized view or Redis cache keyed by `projectId` if matrix >2s; invalidate on translation/key change events.
+- Share query infrastructure with P0-09 debt dashboard.
+
+### Technical
+
+- RAG thresholds: store in `project` settings JSON (small, validated) — `coverageGreenPct: 95`, etc.
+- Performance AC (<2s @ 5k×24): add composite indexes if needed; load test in e2e with seeded data.
+- CSV export: reuse `export` module patterns.
+
+### UI
+
+- Add **Coverage** sub-tab under existing **Analytics** page ([AnalyticsPage.tsx](../../../../frontend/src/features/analytics/pages/AnalyticsPage.tsx)) — not new top-level nav item.
+- Heatmap: HTML table with `aria-label`, color + **numeric %** (color-blind safe — do not rely on green/red alone).
+- Cell click → `/projects/:id/translations?scope=X&lang=fr&status=...` deep link (extend grid filters if missing).
+- Overview widget: **Launch readiness** card — worst 3 cells + optional `eventDate` field on project for countdown.
+
+### Disagreements
+
+| Backlog claim | Issue |
+|---------------|-------|
+| `scopeSegmentIndex` on project | Fragile; prefer imported `scope` column mapped to key metadata |
+| Dedicated **Coverage** tab | Analytics sub-tab is enough for MVP; avoids nav proliferation |
