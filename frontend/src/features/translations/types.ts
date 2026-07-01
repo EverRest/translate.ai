@@ -7,6 +7,7 @@ export type Translation = {
   status: string;
   provider: string | null;
   version: number;
+  isStale?: boolean;
 };
 
 export type TranslationRow = {

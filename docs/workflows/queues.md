@@ -52,7 +52,7 @@ This replaces Confluence webhooks (not available for OAuth 3LO). See [ADR 0016](
 2. Compares target-language variants; skips terms already covered by glossary
 3. Upserts open `terminology_drift_issues` rows
 
-**Producers:** `POST /projects/:id/terminology/scan` (idempotent per project via BullMQ `jobId`); `TerminologyScanOnJobCompletedHandler` when `Project.autoTerminologyScan` is `true`. See [P2-05](../backlog/P2-05-terminology-drift.md) and [P0-07](../backlog/demo/P0-07-consistency-check.md).
+**Producers:** `POST /projects/:id/terminology/scan` (idempotent per project via BullMQ `jobId`); `TerminologyScanOnJobCompletedHandler` when `Project.autoTerminologyScan` is `true`. See [P2-05](../backlog/P2-05-terminology-drift.md) and [shipped-baseline](../backlog/shipped-baseline.md) (P0-07).
 
 ## Job payload conventions
 

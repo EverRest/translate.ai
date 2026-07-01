@@ -33,6 +33,7 @@ import {
   shouldIncludeReferenceTranslations,
 } from '../utils/reference-translation.utils';
 import { JobCompletionService } from './job-completion.service';
+import { StaleTranslationService } from './stale-translation.service';
 import { TranslateTextService } from './translate-text.service';
 import { TranslationOutputValidator } from './translation-output.validator';
 import { TranslationQueueService } from '../../infrastructure/translation-queue.service';
@@ -54,6 +55,7 @@ export class TranslationJobRunnerService {
     private readonly glossary: GlossaryService,
     private readonly quality: TranslationQualityService,
     private readonly outputValidator: TranslationOutputValidator,
+    private readonly staleTranslations: StaleTranslationService,
   ) {}
 
   async handleCreate(payload: TranslationCreateJobPayload): Promise<void> {
@@ -238,6 +240,7 @@ export class TranslationJobRunnerService {
             status: TranslationStatus.draft,
             provider: resultProvider,
             version: existing.version + 1,
+            sourceTextSnapshot: sourceText,
           },
         });
         translationId = updated.id;
@@ -249,6 +252,7 @@ export class TranslationJobRunnerService {
             value: resultText,
             status: TranslationStatus.draft,
             provider: resultProvider,
+            sourceTextSnapshot: sourceText,
           },
         });
         translationId = created.id;

@@ -2,7 +2,7 @@
 
 > **Status:** Prioritized → see [fifa-wiz/](demo/README.md)
 
-Raw input captured below. EverRest review comments (Jun 2026) applied in prioritized backlog files (`P0-01` … `P0-D09`, `P0-S01` …).
+Raw input captured below. EverRest review comments (Jun 2026) applied in prioritized backlog files (`P0-04` … `P0-D09` active; shipped items in [shipped-baseline](shipped-baseline.md)).
 
 ---
 
@@ -18,10 +18,10 @@ AI видит что это объект (например филд) и пере
 ## 4. Consistency Check
 После перевода AI проверяет что одно и то же слово переведено одинаково по всем Fields (например "Submit" везде "Envoyer", а не "Soumettre" в одном месте).
 
-→ [P0-07](demo/P0-07-consistency-check.md) — Wave 1 shipped (auto drift scan, grid hints); EverRest: glossary + drift, not standalone AI
+→ [shipped-baseline](shipped-baseline.md) (P0-07) — Wave 1 shipped (auto drift scan, grid hints); EverRest: glossary + drift, not standalone AI
 
 ## 5. Confluence Import (must have)
-→ [P0-03](demo/P0-03-documentation-import) — shipped (file import + OAuth live sync)
+→ [shipped-baseline](shipped-baseline.md) (P0-03) — shipped (file import + OAuth live sync)
 
 ## 6. Translation Coverage Heatmap
 → [P0-06](demo/P0-06-translation-coverage-heatmap.md)
@@ -30,22 +30,22 @@ AI видит что это объект (например филд) и пере
 → [P0-11](demo/P0-11-new-keys-alert.md) — conditional
 
 ## 9. Sport-Domain AI Context (must have)
-→ [P0-01](demo/P0-01-sport-domain-ai-context.md) — shipped (`domainProfile`, presets API, copy-settings, FIFA glossary, Domain context UI, post-create onboarding)
+→ [shipped-baseline](shipped-baseline.md) (P0-01) — shipped (`domainProfile`, presets API, copy-settings, FIFA glossary, Domain context UI, post-create onboarding)
 
 ## 10. Excel Round-Trip Compatibility (must have)
-→ [P0-02](demo/P0-02-excel-delta-import.md) — shipped (Wiz Classic preset, delta fill, same-layout download; #17 merged)
+→ [shipped-baseline](shipped-baseline.md) (P0-02) — shipped (Wiz Classic preset, delta fill, same-layout download; #17 merged)
 
 ## 11. Placeholder Protection (must have)
-→ [P0-S02](demo/P0-S02-placeholder-protection.md) — shipped (validator + job summary metric)
+→ [shipped-baseline](shipped-baseline.md) (P0-S02) — shipped (validator + job summary metric)
 
 ## 12. Stale Translation Detection (must have)
-→ [P0-04](demo/P0-04-stale-translation-detection.md)
+→ [shipped-baseline](shipped-baseline.md) (P0-04) — shipped (snapshot staleness, `review` + `isStale`, stale-summary API, grid/overview UX, `onlyStale` jobs)
 
 ## 13. Translation Inheritance Between Events
 → [P0-08](demo/P0-08-translation-inheritance.md)
 
 ## 14. Glossary / Translation Memory (must have)
-→ [P0-S01](demo/P0-S01-glossary-platform.md) — shipped (glossary CRUD, presets, drift MVP via [P2-05](P2-05-terminology-drift.md))
+→ [shipped-baseline](shipped-baseline.md) (P0-S01) — shipped (glossary CRUD, presets, drift MVP via [P2-05](P2-05-terminology-drift.md))
 
 ## 15–16, 19–22, 24–27, 29
 See [fifa-wiz/README.md](demo/README.md) deferred and shipped sections.

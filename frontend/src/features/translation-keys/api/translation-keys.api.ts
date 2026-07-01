@@ -15,6 +15,7 @@ import type {
 export type ListTranslationKeysFilter = {
   localizationObjectId?: string;
   keyPrefix?: string;
+  staleOnly?: boolean;
 };
 
 export async function listTranslationKeys(
@@ -36,6 +37,9 @@ export async function listTranslationKeys(
   }
   if (filter?.keyPrefix) {
     params.set('keyPrefix', filter.keyPrefix);
+  }
+  if (filter?.staleOnly) {
+    params.set('staleOnly', 'true');
   }
 
   const response = await apiGet<ApiSuccess<PaginatedData<TranslationKey>>>(

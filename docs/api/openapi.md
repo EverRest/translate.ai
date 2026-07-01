@@ -303,7 +303,7 @@ Adds preset terms to the project glossary (skips duplicates). Response: `{ prese
 
 #### GET `/api/v1/projects/{projectId}/keys`
 
-**Query:** `page`, `limit`, `search`, `localizationObjectId`, `keyPrefix`
+**Query:** `page`, `limit`, `search`, `localizationObjectId`, `keyPrefix`, `staleOnly` (boolean — keys with ≥1 stale translation)
 
 #### POST `/api/v1/projects/{projectId}/keys`
 
@@ -318,6 +318,15 @@ Adds preset terms to the project glossary (skips duplicates). Response: `{ prese
 ```
 
 #### PATCH `/api/v1/projects/{projectId}/keys/{keyId}`
+
+**Request:** optional `description`, `context`, `contentType`, `sourceText`. Changing `sourceText` invalidates existing translations (sets `review` when value is non-empty).
+
+```json
+{
+  "sourceText": "Given Name",
+  "description": "Updated label after BA review"
+}
+```
 
 #### DELETE `/api/v1/projects/{projectId}/keys/{keyId}`
 
@@ -336,6 +345,43 @@ Bulk upsert translation keys.
 #### GET `/api/v1/projects/{projectId}/translations`
 
 **Query:** `language`, `status`, `keys`, `localizationObjectId`, `keyPrefix`
+
+Each item includes `isStale: boolean` when the translation has a snapshot that differs from the key's current `sourceText` (normalized).
+
+**Response item (excerpt):**
+
+```json
+{
+  "id": "660e8400-e29b-41d4-a716-446655440002",
+  "key": "label.name",
+  "sourceText": "Given Name",
+  "language": "fr",
+  "value": "Prénom",
+  "status": "review",
+  "provider": "gemini",
+  "version": 2,
+  "isStale": true
+}
+```
+
+#### GET `/api/v1/projects/{projectId}/translations/stale-summary`
+
+**Response `200`:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "totalStaleKeys": 3,
+    "totalStaleTranslations": 12,
+    "byLanguage": { "fr": 4, "de": 4, "es": 4 }
+  }
+}
+```
+
+#### GET `/api/v1/projects/{projectId}/translations/stale-key-hints`
+
+**Response `200`:** `{ "keyIds": ["uuid", "..."] }` — keys with at least one stale translation (for grid row hints).
 
 #### GET `/api/v1/projects/{projectId}/translations/{translationId}`
 
@@ -375,10 +421,13 @@ Create async translation job. Returns immediately; processing via BullMQ.
   "projectId": "550e8400-e29b-41d4-a716-446655440000",
   "languages": ["de", "fr", "es"],
   "keys": ["cart.checkout", "cart.total"],
+  "onlyStale": false,
   "provider": "gemini",
   "clientRequestId": "optional-idempotency-key"
 }
 ```
+
+When `onlyStale` is `true`, the job includes only stale key×language pairs for the requested languages. Omit `keys` to include all stale keys in the project; provide `keys` to limit scope. Returns `400` when no stale translations match.
 
 `provider` is **optional**. When omitted, the server uses `AI_PROVIDER` env (default `gemini`). The dashboard does not send `provider`; set it only for explicit API overrides.
 

@@ -11,7 +11,7 @@ One screen for localization health: keys in draft 6+ months, approved but unpubl
 ## Current state
 
 - Analytics v1 basic; no debt-specific aggregates
-- [P0-04](./P0-04-stale-translation-detection.md) not shipped — stale count unavailable
+- [P0-04](./P0-04-stale-translation-detection.md) **shipped (MVP)** — stale counts via `GET .../translations/stale-summary`
 - No “published” vs “approved” distinction unless publish workflow exists per tenant
 
 ## Proposed fit
@@ -34,7 +34,7 @@ Coverage gap  — languages below launch threshold
 
 ## Dependencies
 
-- [P0-04](./P0-04-stale-translation-detection.md) for stale bucket
+- [P0-04](./P0-04-stale-translation-detection.md) for stale bucket (shipped — reuse `StaleTranslationService.getStaleSummary`)
 - [P0-06](./P0-06-translation-coverage-heatmap.md) shares reporting infra
 
 ## Acceptance criteria

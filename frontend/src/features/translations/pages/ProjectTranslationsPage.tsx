@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useOutletContext, useParams } from 'react-router-dom';
+import {
+  Link,
+  useOutletContext,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import * as XLSX from 'xlsx';
 import { useAuthStore } from '../../../features/auth/store/auth.store';
@@ -38,6 +43,10 @@ import {
   terminologyDriftQueryKey,
   useTerminologyDriftKeyHints,
 } from '../../glossary/hooks/useTerminologyDrift';
+import {
+  staleTranslationsQueryKey,
+  useStaleTranslationKeyHints,
+} from '../hooks/useStaleTranslations';
 
 const CHUNK_SIZE = 100;
 const baseUrl = import.meta.env.VITE_API_URL ?? '/api/v1';
@@ -216,20 +225,24 @@ function TranslateModal({
 // ─── BulkMenu ────────────────────────────────────────────────────────────────
 function BulkMenu({
   onTranslateAll,
+  onRetranslateStale,
   onImport,
   onExport,
   onDeleteAll,
   isImporting,
   isTranslating,
   hasRows,
+  hasStale,
 }: {
   onTranslateAll: () => void;
+  onRetranslateStale: () => void;
   onImport: () => void;
   onExport: () => void;
   onDeleteAll: () => void;
   isImporting: boolean;
   isTranslating: boolean;
   hasRows: boolean;
+  hasStale: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -299,6 +312,17 @@ function BulkMenu({
               '⚡ Translate all'
             )}
           </button>
+          <button
+            type="button"
+            disabled={isTranslating || !hasStale}
+            onClick={() => {
+              close();
+              onRetranslateStale();
+            }}
+            className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-orange-300 hover:bg-slate-700 disabled:opacity-50"
+          >
+            ◐ Retranslate stale
+          </button>
           <div className="my-1 border-t border-slate-700" />
           <button
             type="button"
@@ -340,7 +364,13 @@ function BulkMenu({
 }
 
 // ─── TranslationCell ─────────────────────────────────────────────────────────
-function TranslationCell({ translation }: { translation: Translation }) {
+function TranslationCell({
+  translation,
+  isStale,
+}: {
+  translation: Translation;
+  isStale?: boolean;
+}) {
   const [editing, setEditing] = useState(false);
   const [localValue, setLocalValue] = useState(translation.value);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -376,8 +406,14 @@ function TranslationCell({ translation }: { translation: Translation }) {
       type="button"
       onClick={() => setEditing(true)}
       className="flex w-full items-center gap-1.5 rounded px-1 py-0.5 text-left hover:bg-slate-700/40"
-      title={`${localValue} (${translation.status}) — click to edit`}
+      title={`${localValue} (${translation.status}${isStale ? ', stale' : ''}) — click to edit`}
     >
+      {isStale && (
+        <span
+          className="h-1.5 w-1.5 shrink-0 rounded-full bg-orange-400"
+          title="Source changed — translation may be outdated"
+        />
+      )}
       <span
         className={`h-1.5 w-1.5 shrink-0 rounded-full ${statusDot[translation.status] ?? 'bg-slate-500'}`}
       />
@@ -396,6 +432,8 @@ export function ProjectTranslationsPage() {
   const queryClient = useQueryClient();
   const { localizationObjectId, objectName, clearFilter } =
     useObjectFilterFromUrl();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const staleFilter = searchParams.get('stale') === '1';
   const refetchTranslations = useRefetchTranslations(projectId ?? '');
   const refetchKeys = useRefetchTranslationKeys(projectId ?? '');
 
@@ -404,6 +442,8 @@ export function ProjectTranslationsPage() {
   const deleteKey = useDeleteTranslationKey(projectId ?? '');
   const { data: driftKeyHints = [] } = useTerminologyDriftKeyHints(projectId);
   const driftKeySet = useMemo(() => new Set(driftKeyHints), [driftKeyHints]);
+  const { data: staleKeyIds = [] } = useStaleTranslationKeyHints(projectId);
+  const staleKeyIdSet = useMemo(() => new Set(staleKeyIds), [staleKeyIds]);
 
   const languages = useMemo(
     () => (langData ?? []).filter((l) => !l.isDefault),
@@ -419,11 +459,14 @@ export function ProjectTranslationsPage() {
 
   useEffect(() => {
     gridRef.current?.refetch();
-  }, [localizationObjectId]);
+  }, [localizationObjectId, staleFilter]);
 
   const keyFilter = useMemo(
-    () => (localizationObjectId ? { localizationObjectId } : undefined),
-    [localizationObjectId],
+    () => ({
+      ...(localizationObjectId ? { localizationObjectId } : {}),
+      ...(staleFilter ? { staleOnly: true } : {}),
+    }),
+    [localizationObjectId, staleFilter],
   );
 
   // ── Live translations (SSE) ───────────────────────────────────────────────
@@ -521,6 +564,37 @@ export function ProjectTranslationsPage() {
 
   const startNextInQueueRef = useRef(startNextInQueue);
   startNextInQueueRef.current = startNextInQueue;
+
+  const startStaleJob = useCallback(
+    async (targetLangs?: string[]) => {
+      if (!projectId) return;
+      const langs = targetLangs ?? languages.map((l) => l.code);
+      if (langs.length === 0) {
+        toast.error(
+          'No target languages configured. Add languages in Settings.',
+        );
+        return;
+      }
+      const toastId = toast.loading('Retranslating stale translations…');
+      activeToastRef.current = toastId;
+      try {
+        const job = await createJob({
+          projectId,
+          languages: langs,
+          onlyStale: true,
+        });
+        setActiveJobId(job.jobId);
+      } catch (err) {
+        toast.update(
+          toastId,
+          err instanceof Error ? err.message : 'No stale translations found.',
+          'error',
+        );
+        activeToastRef.current = null;
+      }
+    },
+    [projectId, languages, toast],
+  );
 
   // ── startJob ──────────────────────────────────────────────────────────────
   const startJob = useCallback(
@@ -653,6 +727,9 @@ export function ProjectTranslationsPage() {
       }
 
       if (projectId) {
+        void queryClient.invalidateQueries({
+          queryKey: staleTranslationsQueryKey(projectId),
+        });
         void pollTerminologyDriftCount(projectId).then((count) => {
           void queryClient.invalidateQueries({
             queryKey: terminologyDriftQueryKey(projectId),
@@ -753,6 +830,14 @@ export function ProjectTranslationsPage() {
                 </svg>
               </Link>
             )}
+            {staleKeyIdSet.has(row.keyId) && (
+              <span
+                className="shrink-0 text-orange-400"
+                title="Source changed — translations need review"
+              >
+                ◐
+              </span>
+            )}
             <span
               className="truncate font-mono text-xs text-slate-300"
               title={row.key}
@@ -839,7 +924,13 @@ export function ProjectTranslationsPage() {
               </span>
             );
           }
-          if (t) return <TranslationCell translation={t} />;
+          if (t)
+            return (
+              <TranslationCell
+                translation={t}
+                isStale={t.isStale ?? staleKeyIdSet.has(row.keyId)}
+              />
+            );
           return <span className="text-xs text-slate-600">—</span>;
         },
       })),
@@ -851,6 +942,7 @@ export function ProjectTranslationsPage() {
     translatingKeys,
     activeJobId,
     driftKeySet,
+    staleKeyIdSet,
     projectId,
   ]);
 
@@ -1093,13 +1185,35 @@ export function ProjectTranslationsPage() {
       )}
       <BulkMenu
         onTranslateAll={() => setTranslateModalOpen(true)}
+        onRetranslateStale={() => void startStaleJob()}
         onImport={() => importFileRef.current?.click()}
         onExport={handleExport}
         onDeleteAll={() => void handleDeleteAll()}
         isImporting={isImporting}
         isTranslating={isTranslating}
         hasRows={(translationsData?.items.length ?? 0) > 0}
+        hasStale={staleKeyIds.length > 0}
       />
+      <button
+        type="button"
+        onClick={() => {
+          const next = new URLSearchParams(searchParams);
+          if (staleFilter) {
+            next.delete('stale');
+          } else {
+            next.set('stale', '1');
+          }
+          setSearchParams(next);
+        }}
+        className={`rounded-lg border px-3 py-1.5 text-sm ${
+          staleFilter
+            ? 'border-orange-600 bg-orange-950/40 text-orange-200'
+            : 'border-slate-700 text-slate-300 hover:border-slate-500'
+        }`}
+      >
+        {staleFilter ? 'Stale only ✓' : 'Stale'}
+        {staleKeyIds.length > 0 ? ` (${staleKeyIds.length})` : ''}
+      </button>
     </>
   );
 

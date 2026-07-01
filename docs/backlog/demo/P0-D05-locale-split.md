@@ -19,7 +19,7 @@ Support regional locales: FR-FR vs FR-CA vs FR-BE; ES-ES vs ES-MX vs ES-AR — n
 |-------|--------|
 | **Schema** | BCP-47 locales on project languages; glossary term optional `locale` scope |
 | **Router** | Controller picks prompt variant / glossary subset per locale |
-| **AI** | Locale notes in domain profile ([P0-01](./P0-01-sport-domain-ai-context.md)) |
+| **AI** | Locale notes in domain profile ([shipped-baseline](../shipped-baseline.md) P0-01) |
 
 ## Dependencies
 

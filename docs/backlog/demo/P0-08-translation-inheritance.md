@@ -27,7 +27,7 @@ Copy approved translations from one event project to another (FIFA MC26 → FIFA
 ## Dependencies
 
 - [P0-04](./P0-04-stale-translation-detection.md) aligns status rules for changed source
-- [P0-02](./P0-02-excel-delta-import.md) alternative for file-based clients
+- [shipped-baseline](../shipped-baseline.md) (P0-02) alternative for file-based clients
 
 ## Acceptance criteria
 

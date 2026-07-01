@@ -31,8 +31,8 @@ AI treats a **field** (or localization object) as one unit: Label + Placeholder 
 ## Dependencies
 
 - P3-12 localization objects (shipped)
-- [P0-01](./P0-01-sport-domain-ai-context.md) for domain tone
-- [P0-07](./P0-07-consistency-check.md) post-batch auto-scan (Wave 1 shipped)
+- [shipped-baseline](../shipped-baseline.md) (P0-01) for domain tone
+- [shipped-baseline](../shipped-baseline.md) (P0-07) post-batch auto-scan (Wave 1 shipped)
 
 ## Acceptance criteria
 

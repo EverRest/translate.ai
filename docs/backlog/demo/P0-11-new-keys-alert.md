@@ -20,7 +20,7 @@ After Evo Core release, compare translation key set to previous version snapshot
 |-------|--------|
 | **Schema** | `ProjectKeySnapshot` — `{ projectId, label, keyCount, keyHashes[], createdAt }` |
 | **API** | `POST /projects/:id/snapshots` (manual or webhook); `GET .../snapshots/diff?from=&to=` |
-| **Import** | Snapshot on Excel/Confluence sync ([P0-02](./P0-02-excel-delta-import.md), [P0-03](./P0-03-documentation-import)) |
+| **Import** | Snapshot on Excel/Confluence sync ([shipped-baseline](../shipped-baseline.md) P0-02, P0-03) |
 | **Alert** | Overview banner + optional [P2-06](../P2-06-slack-teams-notifications.md) |
 | **Frontend** | “Since v2.0” panel: new keys list, translate CTA |
 

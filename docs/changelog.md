@@ -4,6 +4,14 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Stale translation detection (P0-04 MVP)
+
+- **Schema:** `Translation.sourceTextSnapshot` + backfill migration
+- **Invalidation:** source change on import apply or `PATCH .../keys/:id` (`sourceText`) → non-empty translations set to `review`
+- **API:** `GET .../translations/stale-summary`, `GET .../translations/stale-key-hints`; `isStale` on list translations; `staleOnly` on list keys; `onlyStale` on `POST /jobs`
+- **UI:** edit `sourceText` on Keys page; translations grid stale hints + filter; overview widget; bulk **Retranslate stale**; Create Job **Stale keys only** checkbox
+- **Tests:** `stale-translation.utils.spec.ts`, `stale-translation.service.spec.ts`, `import-apply.service.spec.ts`, `stale-translations.e2e-spec.ts`
+
 ### Added — Excel round-trip + delta import (P0-02)
 
 Per [ADR 0016](./adr/0016-external-import.md):
@@ -24,10 +32,11 @@ Per [ADR 0016](./adr/0016-external-import.md):
 
 ### Changed — backlog
 
-- **P0-02 Excel round-trip** removed from active P0 table; added to [shipped-baseline](./backlog/shipped-baseline.md) and demo “Already shipped” (#10, #17); Wave 2 now P0-04 + P0-06 only
+- **P0-04 Stale translation detection** shipped (MVP); removed from active P0 table; added to [shipped-baseline](./backlog/shipped-baseline.md) and demo “Already shipped” (#12); Wave 2 now **P0-06** only
+- **Demo backlog cleanup** — removed shipped task files (P0-01, P0-02, P0-03/P0-03b, P0-S01, P0-S02, P0-07) from `docs/backlog/demo/`; details consolidated in [shipped-baseline](./backlog/shipped-baseline.md)
+- **P0-02 Excel round-trip** removed from active P0 table; added to [shipped-baseline](./backlog/shipped-baseline.md) and demo “Already shipped” (#10, #17)
 - Prior backlog cleanup: P0-01, P0-S02, P0-07, P0-03 removed from active work; **Wave 1 complete**
 - P2-05 removed from Phase 2 active table — MVP in [shipped-baseline](./backlog/shipped-baseline.md); full scope deferred in [P2-05](./backlog/P2-05-terminology-drift.md)
-- Created [P0-01](./backlog/demo/P0-01-sport-domain-ai-context.md) task file (was missing; links fixed)
 
 ### Added — Confluence file import (P0-03 Phase 1)
 
@@ -56,7 +65,7 @@ Per [ADR 0016](./adr/0016-external-import.md):
 
 ### Added — Confluence hardening (P0-03b)
 
-Per [P0-03b](./backlog/demo/P0-03b-confluence-hardening.md) and [ADR 0016](./adr/0016-external-import.md):
+Per [ADR 0016](./adr/0016-external-import.md) and [shipped-baseline](./backlog/shipped-baseline.md) (P0-03b):
 
 - **OAuth:** Multi-site picker after callback; `connect/pending-sites`, `connect/complete`
 - **Sync config:** `labelFilter`, `parseRulesJson` column mapping, `syncEnabled` + `syncIntervalMinutes`

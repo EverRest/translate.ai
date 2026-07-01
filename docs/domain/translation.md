@@ -49,6 +49,7 @@ Single unit of work: one key × one target language.
 | language | Language code (value object: `LanguageCode`) |
 | value | Translated text |
 | status | draft, review, approved, published |
+| source_text_snapshot | Source text at last translate/write time; used for staleness detection |
 | provider | Which AI provider produced it |
 | version | Optimistic locking / versioning |
 
@@ -112,6 +113,20 @@ Failures retry up to 3 times in-process; job item `errorMessage` includes the va
 - `GetJobStatusQuery`
 - `GetTranslationsQuery`
 - `ListTranslationKeysQuery`
+
+## Stale translation detection (P0-04)
+
+When `TranslationKey.sourceText` changes (manual edit on Keys page or import apply), existing translations with non-empty `value` move to `review`. Staleness is **computed**, not a separate status:
+
+```text
+isStale = sourceTextSnapshot IS NOT NULL
+       AND normalize(sourceTextSnapshot) ≠ normalize(key.sourceText)
+```
+
+- `normalize` trims and collapses internal whitespace (whitespace-only edits do not invalidate).
+- After a successful translation job item, `sourceTextSnapshot` is set to the key's current `sourceText`.
+- API: `GET .../translations/stale-summary`, `GET .../translations/stale-key-hints`; list translations include `isStale`.
+- Jobs: `onlyStale: true` creates items only for stale key×language pairs.
 
 ## Events
 
