@@ -13,7 +13,7 @@ When BA changes source text (e.g. Label “First Name” → “Given Name”), 
 - `TranslationKey.sourceText` editable; translations have `status` (draft, approved, …)
 - Updating source does **not** invalidate existing translations
 - No `sourceTextHash` or `sourceUpdatedAt` comparison on translation rows
-- Terminology drift (P2-05) detects inconsistent *terms across keys*, not source drift on one key
+- Terminology drift ([P2-05](../P2-05-terminology-drift.md) MVP shipped) detects inconsistent *terms across keys*, not source drift on one key
 
 ## Proposed fit
 

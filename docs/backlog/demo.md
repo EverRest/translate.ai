@@ -18,7 +18,7 @@ AI видит что это объект (например филд) и пере
 ## 4. Consistency Check
 После перевода AI проверяет что одно и то же слово переведено одинаково по всем Fields (например "Submit" везде "Envoyer", а не "Soumettre" в одном месте).
 
-→ [P0-07](demo/P0-07-consistency-check.md) — EverRest: glossary + drift, not standalone AI
+→ [P0-07](demo/P0-07-consistency-check.md) — Wave 1 shipped (auto drift scan, grid hints); EverRest: glossary + drift, not standalone AI
 
 ## 5. Confluence Import (must have)
 → [P0-03](demo/P0-03-documentation-import) — shipped (file import + OAuth live sync)
@@ -45,7 +45,7 @@ AI видит что это объект (например филд) и пере
 → [P0-08](demo/P0-08-translation-inheritance.md)
 
 ## 14. Glossary / Translation Memory (must have)
-→ [P0-S01](demo/P0-S01-glossary-platform.md) — shipped
+→ [P0-S01](demo/P0-S01-glossary-platform.md) — shipped (glossary CRUD, presets, drift MVP via [P2-05](P2-05-terminology-drift.md))
 
 ## 15–16, 19–22, 24–27, 29
 See [fifa-wiz/README.md](demo/README.md) deferred and shipped sections.

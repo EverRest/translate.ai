@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
+  IsBoolean,
   IsIn,
   IsOptional,
   IsString,
@@ -49,6 +50,14 @@ export class UpdateProjectDto {
   @ValidateNested()
   @Type(() => DomainProfileDto)
   domainProfile?: DomainProfileDto | null;
+
+  @ApiPropertyOptional({
+    description:
+      'Automatically scan for terminology drift after translation jobs complete',
+  })
+  @IsOptional()
+  @IsBoolean()
+  autoTerminologyScan?: boolean;
 }
 
 const COPY_SETTINGS_INCLUDE = ['domainProfile', 'glossary'] as const;
@@ -70,6 +79,7 @@ export class ProjectResponseDto {
   name!: string;
   description!: string | null;
   domainProfile!: DomainProfile | null;
+  autoTerminologyScan!: boolean;
   status!: string;
   createdAt!: Date;
   keysCount!: number;
@@ -80,6 +90,7 @@ export class ProjectResponseDto {
     name: string;
     description: string | null;
     domainProfile?: unknown;
+    autoTerminologyScan?: boolean;
     status: string;
     createdAt: Date;
     _count?: { translationKeys: number };
@@ -90,6 +101,7 @@ export class ProjectResponseDto {
     dto.name = project.name;
     dto.description = project.description;
     dto.domainProfile = parseDomainProfile(project.domainProfile);
+    dto.autoTerminologyScan = project.autoTerminologyScan ?? true;
     dto.status = project.status;
     dto.createdAt = project.createdAt;
     dto.keysCount = project._count?.translationKeys ?? 0;

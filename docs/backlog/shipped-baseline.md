@@ -13,6 +13,7 @@ Reference only — do **not** re-implement. Details live in `docs/domain/`, `doc
 | QA validators (placeholders, HTML tag balance) | ADR 0008, `translation/application/validators/`, `TRANSLATION_QA_VALIDATORS_ENABLED` |
 | Manual glossary | ADR 0005, `glossary` module |
 | Auto glossary suggestions | ADR 0012, `GlossarySuggestion`, `glossary.analyze` queue |
+| Glossary platform (P0-S01) | `glossary` module; presets in `glossary/domain/glossary-presets.ts`; prompt injection via `buildTranslationPrompts`; FIFA `fifa_accreditation` preset (24 terms) |
 | Branching | ADR 0006, `branching` module |
 | Approval + retranslate | `approval` module |
 | Webhooks (job + publish) | `webhook` module |
@@ -22,7 +23,9 @@ Reference only — do **not** re-implement. Details live in `docs/domain/`, `doc
 | Confluence file import (P0-03 Phase 1) | ADR 0016, `integration` module, `ImportSession`, Confluence HTML/CSV/ZIP parsers, project Import tab |
 | Confluence live sync (P0-03 Phase 2) | OAuth 3LO, `ConfluenceConnection`, `integration.confluence.sync` queue, Settings → Integrations; `oauthAvailable` UX when OAuth not configured |
 | Confluence hardening (P0-03b) | Site picker, label filter, column mapping, scheduled sync, tenant BYO OAuth, OAuth e2e mocks |
-| Placeholder protection + job summary (P0-S02) | `PlaceholderValidator` (ADR 0008); optional `placeholderSummary` on `GET /jobs/:id` and `job.completed` / `job.failed` webhooks |
-| Sport-domain AI context (P0-01) | `Project.domainProfile`; `GET /projects/:id/domain-presets`; `POST .../copy-settings`; domain block in `buildTranslationPrompts`; `fifa_accreditation` glossary preset; Settings → Domain context UI; post-create onboarding modal |
+| Placeholder protection + job summary (P0-S02) | `PlaceholderValidator` (`translation/application/validators/placeholder.validator.ts`); `placeholder.utils.ts`; optional `placeholderSummary` on `GET /jobs/:id` and `job.completed` / `job.failed` webhooks; job detail UI banner |
+| Sport-domain AI context (P0-01) | `Project.domainProfile` (Prisma); `backend/src/shared/domain/domain-presets.ts`; `domain-presets.handler.ts`, `copy-project-settings.handler.ts`; `GET /projects/:id/domain-presets`; `POST .../copy-settings`; domain block in `prompt.builder.ts`; `fifa_accreditation` glossary preset; `DomainContextPanel.tsx`; `ProjectOnboardingModal.tsx` |
+| Terminology drift detection (P2-05 MVP) | `terminology_drift_issues` (Prisma); `TerminologyDriftService`, `terminology-drift.utils.ts`; `terminology.scan` queue (`terminology.processor.ts`); `terminology.controller.ts` (scan/list/count/key-hints/resolve); `TerminologyDriftTable.tsx`, `useTerminologyDrift.ts`; Glossary nav badge |
+| Consistency check UX Wave 1 (P0-07) | `Project.autoTerminologyScan` (default `true`); `TerminologyScanOnJobCompletedHandler`; `ConsistencySettingsPanel.tsx`; post-job toast; translations grid drift hints (`ProjectTranslationsPage.tsx`) |
 
 When extending the platform, **build on these modules** — do not fork parallel implementations.

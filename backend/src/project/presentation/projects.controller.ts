@@ -131,6 +131,7 @@ export class ProjectsController {
         dto.domainProfile !== undefined
           ? parseDomainProfile(dto.domainProfile)
           : undefined,
+        dto.autoTerminologyScan,
       ),
     );
     return successResponse(data);

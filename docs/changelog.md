@@ -4,26 +4,18 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
-### Added — Sport-domain AI context (P0-01)
+### Shipped — FIFA/WIZ wave 1 + terminology drift MVP
 
-- **Schema:** optional `Project.domainProfile` JSON (`domain`, `event`, `tone`, `audience`, `notes`, `localeNotes`)
-- **API:** `GET /projects/:id/domain-presets` — FIFA accreditation and venue ops seed profiles; `PATCH /projects/:id` accepts `domainProfile`; `POST /projects/:id/copy-settings` copies `domainProfile` and/or glossary from another tenant project (upserts terms, skips duplicates); `GET/POST .../glossary/presets` list and apply FIFA glossary preset (24 terms)
-- **Prompts:** `buildTranslationPrompts` injects domain block before glossary rules; target-language `localeNotes` included per job item language
-- **UI:** Project **Settings → Domain context** — preset picker, structured fields, prompt preview, apply FIFA glossary CTA
-- **UI:** Post-create onboarding modal on **Projects** — optional FIFA preset (with glossary checkbox), copy domain context and glossary from another project, or skip
-
-### Added — Placeholder count in job summary (P0-S02)
-
-- **API:** `GET /jobs/:id` includes optional `placeholderSummary` (`placeholdersTotal`, `placeholdersPreserved`) — computed per unique key from source text, omitted when zero
-- **Webhooks:** `job.completed` and `job.failed` payloads include `placeholderSummary` when placeholders exist
-- **UI:** Green success banner on job detail when job completed with placeholder summary
-- **Utils:** Shared `placeholder.utils.ts` for `{{…}}` and `%%…%%` extraction (DRY with `PlaceholderValidator`)
+- **P0-01 Sport-domain AI context** — `Project.domainProfile`; domain presets API; `copy-settings`; FIFA glossary preset; domain block in prompts; Domain context UI; post-create onboarding modal
+- **P0-S02 Placeholder job summary** — optional `placeholderSummary` on `GET /jobs/:id` and job webhooks; job detail UI banner
+- **P0-07 Consistency check Wave 1** — `autoTerminologyScan` (default true); auto scan after job; Settings → Consistency toggle; post-job toast; translations grid drift hints
+- **P2-05 Terminology drift MVP** — `terminology_drift_issues`; `terminology.scan` queue; scan/list/resolve API; Glossary → Terminology drift tab
 
 ### Changed — backlog
 
-- **Backlog:** P0-01 sport-domain AI context shipped — removed from Wave 1 / active P0 table; moved to [shipped-baseline](./backlog/shipped-baseline.md) and [demo/README](./backlog/demo/README.md#already-shipped--covered-no-new-p0-work); Wave 1 is P0-07 only
-- **Backlog:** P0-S02 placeholder count in job summary shipped — removed from Wave 1; moved to [shipped-baseline](./backlog/shipped-baseline.md) and [demo/README](./backlog/demo/README.md#already-shipped--covered-no-new-p0-work)
-- **Backlog:** P0-03 Confluence import (Phase 1 + Phase 2) removed from active FIFA/WIZ P0 table and Wave 2 — moved to [shipped-baseline](./backlog/shipped-baseline.md) and [demo/README](./backlog/demo/README.md#already-shipped--covered-no-new-p0-work)
+- Active P0 table and Wave 1 section updated: P0-01, P0-S02, P0-07, P0-03 removed from active work; **Wave 1 complete**; Wave 2 starts with P0-02 Excel
+- P2-05 removed from Phase 2 active table — MVP in [shipped-baseline](./backlog/shipped-baseline.md); full scope deferred in [P2-05](./backlog/P2-05-terminology-drift.md)
+- Created [P0-01](./backlog/demo/P0-01-sport-domain-ai-context.md) task file (was missing; links fixed)
 
 ### Added — Confluence file import (P0-03 Phase 1)
 

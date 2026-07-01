@@ -5,11 +5,13 @@ import { ApiKeysPanel } from '../components/ApiKeysPanel';
 import { LanguagesPanel } from '../components/LanguagesPanel';
 import { WebhooksPanel } from '../components/WebhooksPanel';
 import { ConfluenceIntegrationsPanel } from '../components/ConfluenceIntegrationsPanel';
+import { ConsistencySettingsPanel } from '../components/ConsistencySettingsPanel';
 import { DomainContextPanel } from '../components/DomainContextPanel';
 import type { SettingsTab } from '../types';
 
 const tabs: Array<{ id: SettingsTab; label: string }> = [
   { id: 'domain', label: 'Domain context' },
+  { id: 'consistency', label: 'Consistency' },
   { id: 'languages', label: 'Languages' },
   { id: 'api-keys', label: 'API Keys' },
   { id: 'webhooks', label: 'Webhooks' },
@@ -66,6 +68,9 @@ export function ProjectSettingsPage() {
 
       <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-6">
         {tab === 'domain' && <DomainContextPanel project={project} />}
+        {tab === 'consistency' && (
+          <ConsistencySettingsPanel project={project} />
+        )}
         {tab === 'languages' && <LanguagesPanel projectId={projectId} />}
         {tab === 'api-keys' && (
           <ApiKeysPanel projectId={projectId} projectName={project.name} />

@@ -16,6 +16,7 @@ export class UpdateProjectCommand {
     public readonly name?: string,
     public readonly description?: string,
     public readonly domainProfile?: DomainProfile | null,
+    public readonly autoTerminologyScan?: boolean,
   ) {}
 }
 

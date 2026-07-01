@@ -5,6 +5,7 @@ export const QUEUES = {
   TRANSLATION_REVIEW: 'translation.review',
   TRANSLATION_EXPORT: 'translation.export',
   GLOSSARY_ANALYZE: 'glossary.analyze',
+  TERMINOLOGY_SCAN: 'terminology.scan',
   LOCALIZATION_OBJECT_GENERATE: 'localization-object.generate',
   INTEGRATION_OPENAPI_IMPORT: 'integration.openapi.import',
   INTEGRATION_IMPORT_PARSE: 'integration.import.parse',
