@@ -27,11 +27,11 @@ Example: a **Registration Form** object contains nested UI copy instead of dozen
 
 ```text
 LocalizationObject (authoring / UX)
-  └── LocalizationNode tree (structure + metadata)
-        └── leaf nodes ──materialize──► TranslationKey rows (existing)
-                                              │
-                                              ▼
-                                    Jobs · Memory · QA · Export (unchanged)
+ └── LocalizationNode tree (structure + metadata)
+ └── leaf nodes ──materialize──► TranslationKey rows (existing)
+ │
+ ▼
+ Jobs · Memory · QA · Export (unchanged)
 ```
 
 Materialization writes or updates `TranslationKey` rows using a stable dotted path:
@@ -165,18 +165,18 @@ Object **Registration Form** (`slug: registration_form`):
 
 ```text
 registration_form
-├── title          → "Create account"
-├── description    → "Create your account to continue."
+├── title → "Create account"
+├── description → "Create your account to continue."
 ├── fields
-│   └── email
-│       ├── label       → "Email"
-│       ├── placeholder → "Enter email"
-│       └── errors
-│           ├── required → "Email is required"
-│           └── invalid    → "Invalid email"
+│ └── email
+│ ├── label → "Email"
+│ ├── placeholder → "Enter email"
+│ └── errors
+│ ├── required → "Email is required"
+│ └── invalid → "Invalid email"
 └── buttons
-    ├── submit → "Create account"
-    └── cancel → "Cancel"
+ ├── submit → "Create account"
+ └── cancel → "Cancel"
 ```
 
 Each leaf becomes one `TranslationKey` with appropriate `contentType` for the existing AI pipeline.

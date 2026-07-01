@@ -4,38 +4,38 @@
 
 High Level Architecture
 ┌────────────────────────────────────────────┐
-│                 React UI                   │
-│      MaryUI + Tailwind + Tanstack          │
+│ React UI │
+│ MaryUI + Tailwind + Tanstack │
 └─────────────────┬──────────────────────────┘
 │
 ▼
 ┌────────────────────────────────────────────┐
-│              API Gateway                   │
-│              NestJS REST API               │
+│ API Gateway │
+│ NestJS REST API │
 └───────────────┬────────────────────────────┘
 │
 │
 ┌──────────────┼─────────────────────────┐
-│              │                         │
-▼              ▼                         ▼
+│ │ │
+▼ ▼ ▼
 
-Auth       Translation Domain       Project Domain
+Auth Translation Domain Project Domain
 
-│              │                         │
-▼              ▼                         ▼
+│ │ │
+▼ ▼ ▼
 
-Postgres   BullMQ Queue          Webhook Domain
+Postgres BullMQ Queue Webhook Domain
 
-│              │
-│              ▼
-│      Translation Worker
+│ │
+│ ▼
+│ Translation Worker
 │
-│              ▼
-│      AI Provider Layer
+│ ▼
+│ AI Provider Layer
 │
-│     ┌────────┼────────┬─────────┐
-│     ▼        ▼        ▼         ▼
-│  OpenAI   Gemini   Claude    Ollama
+│ ┌────────┼────────┬─────────┐
+│ ▼ ▼ ▼ ▼
+│ OpenAI Gemini Claude Ollama
 │
 ▼
 Redis
@@ -45,13 +45,13 @@ server
 ├── nginx
 │
 ├── frontend
-│   └── react
+│ └── react
 │
 ├── backend-api
-│   └── nestjs
+│ └── nestjs
 │
 ├── worker
-│   └── bullmq
+│ └── bullmq
 │
 ├── postgres
 │
@@ -155,39 +155,39 @@ webhook.send
 Queue Flow
 User Request
 
-      │
+ │
 
-      ▼
+ ▼
 
 Create Translation Job
 
-      │
+ │
 
-      ▼
+ ▼
 
 BullMQ Queue
 
-      │
+ │
 
-      ▼
+ ▼
 
 Split Into Tasks
 
-      │
+ │
 
-      ▼
+ ▼
 
 AI Translation
 
-      │
+ │
 
-      ▼
+ ▼
 
 Save To DB
 
-      │
+ │
 
-      ▼
+ ▼
 
 Webhook
 Database UML
@@ -325,10 +325,10 @@ Tenant
 ├──────── Webhook
 │
 ├──────── TranslationJob
-│               │
-│               │
-│               ▼
-│       TranslationJobItem
+│ │
+│ │
+│ ▼
+│ TranslationJobItem
 │
 ▼
 TranslationKey
@@ -372,9 +372,9 @@ hash
 Check Memory
 │
 ├── found
-│      │
-│      ▼
-│   return
+│ │
+│ ▼
+│ return
 │
 └── not found
 │

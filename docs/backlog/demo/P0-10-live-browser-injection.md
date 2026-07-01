@@ -1,6 +1,6 @@
 # P0-10 — Live browser injection
 
-**Phase:** FIFA/WIZ P0 · **Importance:** High · **Difficulty:** High · **Status:** Backlog
+**Phase:** P0 · **Importance:** High · **Difficulty:** High · **Status:** Backlog
 
 **Client idea:** #29 · **EverRest:** “Killer feature” (demo)
 
@@ -25,7 +25,7 @@ Chrome extension: on client staging site, toggle **preview mode** — live UI re
 | **Cache** | Local storage + If-None-Match; refresh every 30s |
 | **Safety** | Extension only activates on allowlisted staging domains |
 
-### Evo Core adapter (Wiz-specific)
+### Evo Core adapter (Client-specific)
 
 ```text
 Detect translation key attribute or internal API hook
@@ -35,7 +35,7 @@ Show badge “Preview: FR (draft)” in corner
 
 ## Dependencies
 
-- Stable key naming aligned with [shipped Confluence import](../shipped-baseline.md) (P0-03) / Evo Core
+- Stable key naming aligned with [P0-03-shipped](./P0-03-documentation-import-shipped.md) / Evo Core
 - [P0-D01](./P0-D01-runtime-translation-api.md) long-term production path; extension is preview-only
 
 ## Acceptance criteria
@@ -59,11 +59,11 @@ High demo impact; requires client cooperation on DOM key exposure. POC before pr
 ### Architecture
 
 - **Preview API** (subset of P0-D01, not full runtime):
-  - `POST /projects/:id/preview-tokens` → short-lived JWT, scopes: `read:translations`, `projectId`, `language`, optional `statuses: [draft, approved]`
-  - `GET /preview/bundle?token=` — gzip JSON map `{ [key]: value }` + ETag
+ - `POST /projects/:id/preview-tokens` → short-lived JWT, scopes: `read:translations`, `projectId`, `language`, optional `statuses: [draft, approved]`
+ - `GET /preview/bundle?token=` — gzip JSON map `{ [key]: value }` + ETag
 - Extension MV3: service worker + content script; **domain allowlist** in token claims.
 - **Interim demo without extension:** translate.ai **Preview page** — iframe staging URL + injected overlay script served from translate.ai (bookmarklet) — validates API before store listing.
-- Injection priority: (1) `[data-i18n-key]` (2) Wiz-specific adapter config JSON per project (3) text match fallback **disabled by default** (fragile).
+- Injection priority: (1) `[data-i18n-key]` (2) Client-specific adapter config JSON per project (3) text match fallback **disabled by default** (fragile).
 
 ### Technical
 
@@ -76,12 +76,12 @@ High demo impact; requires client cooperation on DOM key exposure. POC before pr
 
 - translate.ai: **Project → Preview** — generate token, QR/link for extension setup, language picker, “includes draft translations” toggle.
 - Extension popup: project picker, language, on/off toggle, connection status.
-- On-page badge: **“translate.ai preview · FR · draft”** — draggable, does not cover FIFA branding.
+- On-page badge: **“translate.ai preview · FR · draft”** — draggable, does not cover Client branding.
 
 ### Disagreements
 
 | Backlog claim | Issue |
 |---------------|-------|
-| Wave 3 POC alongside debt dashboard | Extension is **highest risk** item — schedule after key naming from P0-03 confirmed with Wiz |
+| Wave 3 POC alongside debt dashboard | Extension is **highest risk** item — schedule after key naming from P0-03 confirmed with the client |
 | WebSocket delta stream | Overkill for v1; ETag polling sufficient for demo |
 | Full extension before bookmarklet | Ship bookmarklet/interim preview page first (1–2 days) to unblock PM demos |

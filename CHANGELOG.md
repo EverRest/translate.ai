@@ -19,8 +19,7 @@
 
 ### Changed
 
-- **Backlog** — P0-04 stale detection shipped (MVP); removed from active P0 table; Wave 2 = P0-06 only; see `docs/backlog/shipped-baseline.md`
-- **Backlog** — P0-02 Excel shipped (MVP); removed from active P0 table; see `docs/backlog/shipped-baseline.md`
+- **Backlog** — shipped tasks kept as `docs/backlog/demo/P0-*-shipped.md` reference specs; Wave 2 = P0-06 only; see `docs/backlog/shipped-baseline.md`
 - **Backlog** — P0-01, P0-S02, P0-07, P0-03 out of active P0 table; Wave 1 complete; P2-05 out of Phase 2 active table (MVP shipped); see `docs/backlog/shipped-baseline.md`
 
 ### Added

@@ -1,6 +1,6 @@
 # P0-D03 — Visual context (screenshot)
 
-**Phase:** FIFA/WIZ Deferred · **Importance:** Medium · **Difficulty:** High · **Status:** Deferred
+**Phase:** Deferred · **Importance:** Medium · **Difficulty:** High · **Status:** Deferred
 
 **Client idea:** #21 · **EverRest:** Future — complex cases only
 
@@ -46,7 +46,7 @@ Overlap with [P3-06](../P3-06-screenshot-regression.md) and [P0-D04](./P0-D04-ch
 ### Technical
 
 - Store images outside DB (S3); key holds URL + hash only.
-- GDPR: accreditation screenshots may contain PII — tenant retention policy required before FIFA uses this.
+- GDPR: accreditation screenshots may contain PII — tenant retention policy required before Clients use this.
 
 ### UI
 

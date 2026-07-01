@@ -1,6 +1,6 @@
 # P0-05 — Context-aware object translation
 
-**Phase:** FIFA/WIZ P0 · **Importance:** Critical · **Difficulty:** Medium · **Status:** Partial
+**Phase:** P0 · **Importance:** Critical · **Difficulty:** Medium · **Status:** Partial
 
 **Client idea:** #1 · **EverRest:** Must have
 
@@ -31,20 +31,20 @@ AI treats a **field** (or localization object) as one unit: Label + Placeholder 
 ## Dependencies
 
 - P3-12 localization objects (shipped)
-- [shipped-baseline](../shipped-baseline.md) (P0-01) for domain tone
-- [shipped-baseline](../shipped-baseline.md) (P0-07) post-batch auto-scan (Wave 1 shipped)
+- [shipped-baseline](../shipped-baseline.md) ([P0-01-shipped](./P0-01-sport-domain-ai-context-shipped.md)) for domain tone
+- [P0-07-shipped](./P0-07-consistency-check-shipped.md) post-batch auto-scan (Wave 1 shipped)
 
 ## Acceptance criteria
 
 - [ ] Translate all leaves under one field node in a **single AI request** (or structured multi-turn with shared context)
-- [ ] Multi-select  N objects → one job with object-level progress events (SSE/WebSocket or poll)
+- [ ] Multi-select N objects → one job with object-level progress events (SSE/WebSocket or poll)
 - [ ] UI progress: “Field 12 of 50”, not “Key 847 of 2100”
 - [ ] QA validators still run per output string (placeholders, HTML)
 - [ ] E2e: object with label+placeholder+error → three keys, one batch call (mock provider)
 
 ## Notes
 
-Structural authoring is done (P3-12). This item is **AI batching + UX** — the visible “must have” difference for FIFA demo.
+Structural authoring is done (P3-12). This item is **AI batching + UX** — the visible “must have” difference for Client demo.
 
 ---
 
@@ -55,8 +55,8 @@ Structural authoring is done (P3-12). This item is **AI batching + UX** — the 
 ### Architecture
 
 - **Extend existing job pipeline**, do not add parallel queue `localization-object.translate-batch`:
-  - New job type flag `batchGroupId` on `TranslationJobItem` (same `translation.process` worker)
-  - Worker detects group → calls new `AiProvider.translateBatch()` returning `{ keyPath: value }[]`
+ - New job type flag `batchGroupId` on `TranslationJobItem` (same `translation.process` worker)
+ - Worker detects group → calls new `AiProvider.translateBatch()` returning `{ keyPath: value }[]`
 - Alternative (lower risk): **reference translation chaining** — translate label first, pass as `referenceTranslations` to placeholder/error items in same field (uses existing `formatReferenceTranslationsPrompt` in prompt builder). Three API calls but shared tone without JSON parse failures.
 - QA: run `PlaceholderValidator` + sanitizers **per output string** even when one AI response returns JSON array.
 - Progress: job completion service aggregates by `batchGroupId` → expose `{ objectsDone, objectsTotal }` on job status API.

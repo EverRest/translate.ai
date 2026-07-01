@@ -1,12 +1,12 @@
 # P0-08 — Translation inheritance between events
 
-**Phase:** FIFA/WIZ P0 · **Importance:** High · **Difficulty:** Medium–High · **Status:** Backlog
+**Phase:** P0 · **Importance:** High · **Difficulty:** Medium–High · **Status:** Backlog
 
 **Client idea:** #13
 
 ## Goal
 
-Copy approved translations from one event project to another (FIFA MC26 → FIFA WWC27). Show **diff only**: new keys and changed source — translate 150 keys instead of 2000.
+Copy approved translations from one event project to another (source event → target event (e.g. MC26 → WWC27)). Show **diff only**: new keys and changed source — translate 150 keys instead of 2000.
 
 ## Current state
 
@@ -26,8 +26,8 @@ Copy approved translations from one event project to another (FIFA MC26 → FIFA
 
 ## Dependencies
 
-- [P0-04](./P0-04-stale-translation-detection.md) aligns status rules for changed source
-- [shipped-baseline](../shipped-baseline.md) (P0-02) alternative for file-based clients
+- [P0-04](./P0-04-stale-translation-detection-shipped.md) aligns status rules for changed source
+- [P0-02-shipped](./P0-02-excel-delta-import-shipped.md) alternative for file-based clients
 
 ## Acceptance criteria
 
@@ -39,13 +39,13 @@ Copy approved translations from one event project to another (FIFA MC26 → FIFA
 
 ## Notes
 
-Overlaps P3-02 long-term; FIFA needs deterministic key-path match first, semantic match later.
+Overlaps P3-02 long-term; Clients need deterministic key-path match first, semantic match later.
 
 ---
 
 ## Agent review
 
-**Verdict:** Agree on approach (deterministic key match first). **Disagree** with Wave 3 timing — FIFA MC26→WWC27 story may be needed **before** browser extension; could be Wave 2 if events overlap.
+**Verdict:** Agree on approach (deterministic key match first). **Disagree** with Wave 3 timing — source event → target event story may be needed **before** browser extension; could be Wave 2 if events overlap.
 
 ### Architecture
 

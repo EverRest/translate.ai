@@ -1,6 +1,6 @@
 # P0-D02 — Back-translation QA
 
-**Phase:** FIFA/WIZ Deferred · **Importance:** Medium · **Difficulty:** High · **Status:** Deferred
+**Phase:** Deferred · **Importance:** Medium · **Difficulty:** High · **Status:** Deferred
 
 **Client idea:** #20 · **EverRest:** “Agree — interesting but expensive”
 
@@ -60,4 +60,4 @@ Consider sampling (10% of keys) instead of 100% for cost control.
 | Backlog claim | Issue |
 |---------------|-------|
 | `needs_review` status in AC | Use `review` enum value |
-| 10% sampling in Notes | Make sampling the **default** if built — 100% is not economically viable for FIFA volume |
+| 10% sampling in Notes | Make sampling the **default** if built — 100% is not economically viable for client volume |

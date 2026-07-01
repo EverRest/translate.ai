@@ -1,6 +1,6 @@
 # P0-06 — Translation coverage heatmap
 
-**Phase:** FIFA/WIZ P0 · **Importance:** High · **Difficulty:** Medium · **Status:** Backlog
+**Phase:** P0 · **Importance:** High · **Difficulty:** Medium · **Status:** Backlog
 
 **Client idea:** #6 · **EverRest:** “I like it from UX perspective”
 
@@ -30,14 +30,14 @@ Report: matrix **scope × language** with live progress — green / yellow / red
 ### RAG defaults
 
 ```text
-Green:  ≥95% approved
+Green: ≥95% approved
 Yellow: 70–94% or draft-heavy
-Red:    <70% or blocking missing keys for launch language
+Red: <70% or blocking missing keys for launch language
 ```
 
 ## Dependencies
 
-- [shipped Confluence import](../shipped-baseline.md) (P0-03) or key prefix convention for meaningful scopes
+- [shipped Confluence import](./P0-03-documentation-import-shipped.md) or key prefix convention for meaningful scopes
 - Translation statuses (shipped)
 
 ## Acceptance criteria
@@ -61,7 +61,7 @@ Strong pre-launch sales/demo artifact; reuses existing translation status data.
 ### Architecture
 
 - **`GetCoverageMatrixQuery`** in `project` or new `reporting` read-only module — no writes, CQRS query handler only.
-- Scope dimension: **require explicit `scope` tag** on keys from P0-03 import — do not rely only on `key.split('.')[0]` (Wiz keys may not be dotted).
+- Scope dimension: **require explicit `scope` tag** on keys from P0-03 import — do not rely only on `key.split('.')[0]` (Imported keys may not be dotted).
 - SQL: single aggregated query with `GROUP BY scope, language` using conditional counts (`approved`, `missing`, `draft`) — avoid N scopes × M languages round trips.
 - Optional: nightly materialized view or Redis cache keyed by `projectId` if matrix >2s; invalidate on translation/key change events.
 - Share query infrastructure with P0-09 debt dashboard.

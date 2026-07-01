@@ -1,8 +1,8 @@
 # P0-04 — Stale translation detection
 
-**Phase:** FIFA/WIZ P0 · **Status:** Shipped (MVP)
+**Phase:** P0 · **Slug:** `P0-04-stale-translation-detection-shipped` · **Status:** Shipped (MVP)
 
-See [shipped-baseline](../shipped-baseline.md) and [translation domain](../../domain/translation.md).
+> Reference spec — not active backlog. Code pointers: [shipped-baseline](../shipped-baseline.md) · [translation domain](../../domain/translation.md).
 
 ## Shipped (MVP)
 

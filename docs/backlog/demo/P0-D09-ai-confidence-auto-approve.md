@@ -1,6 +1,6 @@
 # P0-D09 — AI confidence + auto-approve
 
-**Phase:** FIFA/WIZ Deferred · **Importance:** Medium · **Difficulty:** Medium · **Status:** Deferred
+**Phase:** Deferred · **Importance:** Medium · **Difficulty:** Medium · **Status:** Deferred
 
 **Client idea:** #16 · **EverRest:** Future
 
@@ -31,13 +31,13 @@ Per translation confidence score (e.g. “Cancel” → “Annuler” 99%) — a
 
 ## Notes
 
-Useful for high-volume UI strings after FIFA glossary stabilizes terminology.
+Useful for high-volume UI strings after Domain glossary stabilizes terminology.
 
 ---
 
 ## Agent review
 
-**Verdict:** Agree — defer until glossary + drift stable; auto-approve without terminology enforcement risks publishing inconsistent FIFA terms.
+**Verdict:** Agree — defer until glossary + drift stable; auto-approve without terminology enforcement risks publishing inconsistent Glossary terms.
 
 ### Architecture
 

@@ -1,6 +1,6 @@
 # P0-D05 — Locale split
 
-**Phase:** FIFA/WIZ Deferred · **Importance:** Medium · **Difficulty:** High · **Status:** Deferred
+**Phase:** Deferred · **Importance:** Medium · **Difficulty:** High · **Status:** Deferred
 
 **Client idea:** #25 · **EverRest:** “Need additional models and controller; in general doable”
 
@@ -19,7 +19,7 @@ Support regional locales: FR-FR vs FR-CA vs FR-BE; ES-ES vs ES-MX vs ES-AR — n
 |-------|--------|
 | **Schema** | BCP-47 locales on project languages; glossary term optional `locale` scope |
 | **Router** | Controller picks prompt variant / glossary subset per locale |
-| **AI** | Locale notes in domain profile ([shipped-baseline](../shipped-baseline.md) P0-01) |
+| **AI** | Locale notes in domain profile ([P0-01-shipped](./P0-01-sport-domain-ai-context-shipped.md)) |
 
 ## Dependencies
 
@@ -33,7 +33,7 @@ Support regional locales: FR-FR vs FR-CA vs FR-BE; ES-ES vs ES-MX vs ES-AR — n
 
 ## Notes
 
-FIFA international audience eventually needs this; not blocking first Wiz demo.
+international audience eventually needs this; not blocking first The client demo.
 
 ---
 

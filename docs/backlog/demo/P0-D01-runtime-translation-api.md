@@ -1,6 +1,6 @@
 # P0-D01 — Runtime translation API
 
-**Phase:** FIFA/WIZ Deferred · **Importance:** High · **Difficulty:** High · **Status:** Deferred
+**Phase:** Deferred · **Importance:** High · **Difficulty:** High · **Status:** Deferred
 
 **Client idea:** #19 · **EverRest:** “Needs horizontal scaling; for now postponed”
 
@@ -26,7 +26,7 @@ Evo Core calls translate.ai API at runtime instead of export/import bundles. Cha
 
 ## Dependencies
 
-- [P0-04](./P0-04-stale-translation-detection.md) publish workflow
+- [P0-04](./P0-04-stale-translation-detection-shipped.md) publish workflow
 - Platform ops: scaling runbook
 
 ## Acceptance criteria
@@ -43,7 +43,7 @@ Architectural shift for client — not MVP. Extension preview ([P0-10](./P0-10-l
 
 ## Agent review
 
-**Verdict:** Agree with deferral. EverRest is correct — this changes Wiz architecture and ops burden.
+**Verdict:** Agree with deferral. EverRest is correct — this changes The client architecture and ops burden.
 
 ### Architecture
 
@@ -65,4 +65,4 @@ Architectural shift for client — not MVP. Extension preview ([P0-10](./P0-10-l
 | Backlog claim | Issue |
 |---------------|-------|
 | Depends on P0-04 stale detection | Depends on **publish workflow**, not stale detection — wrong dependency listed |
-| Resume when horizontal scaling ready | Also blocked until Wiz commits to runtime consumption model (currently file-based) |
+| Resume when horizontal scaling ready | Also blocked until the client commits to runtime consumption model (currently file-based) |

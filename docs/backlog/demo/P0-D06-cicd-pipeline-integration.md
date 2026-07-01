@@ -1,6 +1,6 @@
 # P0-D06 — CI/CD pipeline integration
 
-**Phase:** FIFA/WIZ Deferred · **Importance:** Medium · **Difficulty:** High · **Status:** Deferred
+**Phase:** Deferred · **Importance:** Medium · **Difficulty:** High · **Status:** Deferred
 
 **Client idea:** #26 · **EverRest:** “Not for MVP version”
 
@@ -19,7 +19,7 @@ See [P1-02](../P1-02-github-gitlab-integration.md) + [P1-06](../P1-06-translatio
 
 ## Acceptance criteria
 
-- [ ] Deferred — tracked under platform Phase 1/3 backlog, not FIFA P0
+- [ ] Deferred — tracked under platform Phase 1/3 backlog, not P0
 
 ## Notes
 
@@ -29,16 +29,16 @@ Same vision as client #26; implement via existing roadmap IDs when MVP client on
 
 ## Agent review
 
-**Verdict:** Strongly agree — not FIFA demo scope. Wiz uses Confluence/Excel, not git keys.
+**Verdict:** Strongly agree — not Client demo scope. The client uses Confluence/Excel, not git keys.
 
 ### Architecture
 
-- No FIFA-specific work — track only under [P1-02](../P1-02-github-gitlab-integration.md) / [P3-07](../P3-07-localization-pipeline-as-code.md).
+- No Domain-specific work — track only under [P1-02](../P1-02-github-gitlab-integration.md) / [P3-07](../P3-07-localization-pipeline-as-code.md).
 - Webhook inbound endpoint belongs in `integration` module when built — same as Confluence phase 2.
 
 ### Technical / UI
 
-- N/A for FIFA track — remove from demo planning entirely.
+- N/A for client track — remove from demo planning entirely.
 
 ### Disagreements
 

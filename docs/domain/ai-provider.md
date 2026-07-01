@@ -6,19 +6,19 @@ Abstraction over external and local LLM translation APIs.
 
 ```typescript
 interface AiProvider {
-  translate(
-    text: string,
-    sourceLang: string,
-    targetLang: string,
-    options?: TranslateOptions,
-  ): Promise<string>;
+ translate(
+ text: string,
+ sourceLang: string,
+ targetLang: string,
+ options?: TranslateOptions,
+ ): Promise<string>;
 }
 
 interface TranslateOptions {
-  context?: string;       // key description, UI context
-  tone?: 'formal' | 'friendly' | 'technical';
-  glossary?: GlossaryTerm[];
-  contentType?: ContentType;  // ui | email | legal | marketing | article | chat | technical | general
+ context?: string; // key description, UI context
+ tone?: 'formal' | 'friendly' | 'technical';
+ glossary?: GlossaryTerm[];
+ contentType?: ContentType; // ui | email | legal | marketing | article | chat | technical | general
 }
 ```
 
@@ -61,15 +61,15 @@ Cloud testing / production default (`AI_PROVIDER_FALLBACK=openai`):
 
 ```text
 Primary (Gemini: gemini-2.5-flash-lite)
-  │ transient retry (ADR 0010)
-  │ optional GEMINI_MODEL_FALLBACK tier (ADR 0011)
-  │ fail (timeout, rate limit, error)
-  ▼
+ │ transient retry (ADR 0010)
+ │ optional GEMINI_MODEL_FALLBACK tier (ADR 0011)
+ │ fail (timeout, rate limit, error)
+ ▼
 Secondary (OpenAI: gpt-4.1-mini)
-  │ transient retry
-  │ optional OPENAI_MODEL_FALLBACK tier (ADR 0013)
-  │ fail
-  ▼
+ │ transient retry
+ │ optional OPENAI_MODEL_FALLBACK tier (ADR 0013)
+ │ fail
+ ▼
 Job item failed (no Ollama in cloud chain)
 ```
 
@@ -109,10 +109,10 @@ System prompt must instruct model to:
 
 ```text
 Pre-process (chunk, sanitize HTML)
-  → Memory lookup
-  → LLM translate
-  → Optional post-edit pass (second model)
-  → Store + cache
+ → Memory lookup
+ → LLM translate
+ → Optional post-edit pass (second model)
+ → Store + cache
 ```
 
 ## Commands / services

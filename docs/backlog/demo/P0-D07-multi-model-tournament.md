@@ -1,6 +1,6 @@
 # P0-D07 — Multi-model tournament
 
-**Phase:** FIFA/WIZ Deferred · **Importance:** Low · **Difficulty:** Medium · **Status:** Deferred
+**Phase:** Deferred · **Importance:** Low · **Difficulty:** Medium · **Status:** Deferred
 
 **Client idea:** #27 · **EverRest:** “Needs RAG otherwise expensive; difficulty low; postponed till next iteration”
 
@@ -40,7 +40,7 @@ For high-stakes strings (email subject, legal), run Gemini + GPT-4o + Claude in 
 
 ### Architecture
 
-- Implement under [P2-02](../P2-02-cross-provider-cost-router.md) as job mode — not FIFA-specific.
+- Implement under [P2-02](../P2-02-cross-provider-cost-router.md) as job mode — not Domain-specific.
 - RAG few-shot from approved translations requires P1-01 — without RAG, tournament is just expensive A/B with no memory.
 
 ### Technical

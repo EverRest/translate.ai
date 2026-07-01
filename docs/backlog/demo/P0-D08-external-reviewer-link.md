@@ -1,12 +1,12 @@
 # P0-D08 — External reviewer link
 
-**Phase:** FIFA/WIZ Deferred · **Importance:** Medium · **Difficulty:** Medium · **Status:** Deferred
+**Phase:** Deferred · **Importance:** Medium · **Difficulty:** Medium · **Status:** Deferred
 
 **Client idea:** #15 · **EverRest:** Future
 
 ## Goal
 
-Shareable link for FIFA official translator: scoped to language + scope, read-only + approve/reject + comment — no translate.ai account.
+Shareable link for client official translator: scoped to language + scope, read-only + approve/reject + comment — no translate.ai account.
 
 ## Current state
 
@@ -33,20 +33,20 @@ Shareable link for FIFA official translator: scoped to language + scope, read-on
 
 ## Notes
 
-Common enterprise TMS feature; not blocking Wiz Excel/Confluence path.
+Common enterprise TMS feature; not blocking The client Excel/Confluence path.
 
 ---
 
 ## Agent review
 
-**Verdict:** Agree — defer post-MVP. FIFA may ask for this in review phase — design now, build later.
+**Verdict:** Agree — defer post-MVP. may ask for this in review phase — design now, build later.
 
 ### Architecture
 
 - **`ReviewInvite`** token table — scoped claims: `{ projectId, language, scope?, expiresAt, permissions: ['read','approve'] }`.
 - Public routes under `/api/v1/guest/review/:token` — separate guard from JWT; rate limited.
 - Reuse `approval` module commands for approve/reject — guest handler wraps same commands with token scope check.
-- Audit log mandatory for FIFA compliance.
+- Audit log mandatory for client compliance.
 
 ### Technical
 
@@ -56,8 +56,8 @@ Common enterprise TMS feature; not blocking Wiz Excel/Confluence path.
 ### UI
 
 - Minimal guest SPA or SSR page: source | translation | comment | approve/reject buttons.
-- Branded “FIFA FR review” header; no sidebar navigation to main app.
+- Branded “FR review” header; no sidebar navigation to main app.
 
 ### Disagreements
 
-None on deferral — correct for current Wiz file-based workflow.
+None on deferral — correct for current The client file-based workflow.

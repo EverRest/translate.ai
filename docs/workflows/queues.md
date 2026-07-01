@@ -5,11 +5,11 @@ BullMQ + Redis async processing. Separate worker process from NestJS API.
 ## Architecture
 
 ```text
-nestjs-api (producer)     nestjs-worker (consumer)
-        │                          │
-        └──────── Redis ───────────┘
-                    │
-              BullMQ queues
+nestjs-api (producer) nestjs-worker (consumer)
+ │ │
+ └──────── Redis ───────────┘
+ │
+ BullMQ queues
 ```
 
 ## Queue definitions
@@ -58,9 +58,9 @@ This replaces Confluence webhooks (not available for OAuth 3LO). See [ADR 0016](
 
 ```typescript
 interface TranslationProcessJob {
-  jobItemId: string;
-  tenantId: string;
-  correlationId: string;
+ jobItemId: string;
+ tenantId: string;
+ correlationId: string;
 }
 ```
 
@@ -80,10 +80,10 @@ Default BullMQ options:
 
 ```typescript
 {
-  attempts: 3,
-  backoff: { type: 'exponential', delay: 5000 },
-  removeOnComplete: 1000,
-  removeOnFail: false, // keep for DLQ inspection
+ attempts: 3,
+ backoff: { type: 'exponential', delay: 5000 },
+ removeOnComplete: 1000,
+ removeOnFail: false, // keep for DLQ inspection
 }
 ```
 
@@ -112,11 +112,11 @@ Docker Compose services:
 
 ```yaml
 redis:
-  image: redis:7
+ image: redis:7
 worker:
-  build: ./backend
-  command: npm run worker
-  depends_on: [redis, postgres]
+ build: ./backend
+ command: npm run worker
+ depends_on: [redis, postgres]
 ```
 
 ## Related

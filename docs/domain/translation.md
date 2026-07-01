@@ -75,12 +75,12 @@ Separate aggregate for cost optimization.
 
 ## Domain profile
 
-Projects may set an optional `domainProfile` (JSON on `Project`) to steer AI tone and terminology for an entire project — e.g. FIFA accreditation forms.
+Projects may set an optional `domainProfile` (JSON on `Project`) to steer AI tone and terminology for an entire project — e.g. Sport accreditation forms.
 
 | Field | Purpose |
 |-------|---------|
 | `domain` | Broad domain (`sports`, …) |
-| `event` | Event name (`FIFA World Cup 2026`) |
+| `event` | Event name (`Major championship 2026`) |
 | `tone` | Formality / voice hint (`formal`, …) |
 | `audience` | Who reads the copy (`accreditation`, `venue operations`, …) |
 | `notes` | Free-text additional context |
@@ -88,7 +88,7 @@ Projects may set an optional `domainProfile` (JSON on `Project`) to steer AI ton
 
 **Pipeline:** `translation.process` loads `project.domainProfile` via `buildTranslateOptionsFromKey` → `TranslateOptions.domainProfile` → `buildTranslationPrompts` adds a **Domain context** block in the **system prompt** (before glossary rules). The matching `localeNotes[targetLang]` entry is included for each job item's target language.
 
-Seed presets: `GET /projects/:id/domain-presets` (`fifa_accreditation`, `fifa_venue_ops`). FIFA glossary terms: `POST .../glossary/presets/apply` with `fifa_accreditation`.
+Seed presets: `GET /projects/:id/domain-presets` (`fifa_accreditation`, `fifa_venue_ops`). Domain glossary terms: `POST .../glossary/presets/apply` with `fifa_accreditation`.
 
 ## Output validation
 
@@ -120,7 +120,7 @@ When `TranslationKey.sourceText` changes (manual edit on Keys page or import app
 
 ```text
 isStale = sourceTextSnapshot IS NOT NULL
-       AND normalize(sourceTextSnapshot) ≠ normalize(key.sourceText)
+ AND normalize(sourceTextSnapshot) ≠ normalize(key.sourceText)
 ```
 
 - `normalize` trims and collapses internal whitespace (whitespace-only edits do not invalidate).

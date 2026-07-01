@@ -78,7 +78,7 @@ Project
 - Project belongs to exactly one tenant.
 - Deleting a project is soft-delete (archive) unless explicitly purged.
 - API keys and webhooks are never shared across projects.
-- After create, the UI offers optional onboarding: FIFA domain preset (+ glossary), copy `domainProfile` from another tenant project, or skip.
+- After create, the UI offers optional onboarding: domain preset (+ glossary), copy `domainProfile` from another tenant project, or skip.
 
 ## Related
 

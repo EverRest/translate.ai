@@ -8,13 +8,13 @@ PostgreSQL via Prisma. ~18–22 tables at MVP. All tenant-scoped tables include 
 Tenant
 ├── User
 └── Project
-    ├── ApiKey
-    ├── Webhook
-    ├── TranslationJob
-    │   └── TranslationJobItem
-    └── TranslationKey
-        └── Translation
-            └── Review / Approval / Comment
+ ├── ApiKey
+ ├── Webhook
+ ├── TranslationJob
+ │ └── TranslationJobItem
+ └── TranslationKey
+ └── Translation
+ └── Review / Approval / Comment
 
 TranslationMemory (global per tenant, keyed by hash)
 AuditLog

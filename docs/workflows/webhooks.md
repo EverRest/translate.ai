@@ -16,17 +16,17 @@ Delivers events to customer-configured HTTPS endpoints when domain events occur.
 
 ```json
 {
-  "event": "job.completed",
-  "timestamp": "2026-06-25T12:00:00Z",
-  "data": {
-    "jobId": "uuid",
-    "projectId": "uuid",
-    "status": "completed",
-    "placeholderSummary": {
-      "placeholdersTotal": 134,
-      "placeholdersPreserved": 134
-    }
-  }
+ "event": "job.completed",
+ "timestamp": "2026-06-25T12:00:00Z",
+ "data": {
+ "jobId": "uuid",
+ "projectId": "uuid",
+ "status": "completed",
+ "placeholderSummary": {
+ "placeholdersTotal": 134,
+ "placeholdersPreserved": 134
+ }
+ }
 }
 ```
 
@@ -36,22 +36,22 @@ Delivers events to customer-configured HTTPS endpoints when domain events occur.
 
 ```text
 Domain event (e.g. TranslationJobCompletedEvent)
-  → WebhookEventHandler
-  → Load enabled webhooks for project
-  → For each webhook: enqueue webhook.send
-        │
-        ▼
+ → WebhookEventHandler
+ → Load enabled webhooks for project
+ → For each webhook: enqueue webhook.send
+ │
+ ▼
 Worker: webhook.send
-  → Build payload
-  → Sign: HMAC-SHA256(payload, webhook.secret)
-  → POST to webhook.url
-      Headers:
-        X-Webhook-Signature: sha256=<hex>
-        X-Webhook-Event: job.completed
-        X-Request-Id: <correlation-id>
-  → Success (2xx) → log delivery
-  → Failure → retry with backoff
-  → Max retries exceeded → Dead Letter Queue
+ → Build payload
+ → Sign: HMAC-SHA256(payload, webhook.secret)
+ → POST to webhook.url
+ Headers:
+ X-Webhook-Signature: sha256=<hex>
+ X-Webhook-Event: job.completed
+ X-Request-Id: <correlation-id>
+ → Success (2xx) → log delivery
+ → Failure → retry with backoff
+ → Max retries exceeded → Dead Letter Queue
 ```
 
 ## Security
@@ -83,12 +83,12 @@ Customers should treat webhooks as at-least-once delivery.
 
 ```typescript
 const expected = crypto
-  .createHmac('sha256', webhookSecret)
-  .update(rawBody)
-  .digest('hex');
+ .createHmac('sha256', webhookSecret)
+ .update(rawBody)
+ .digest('hex');
 
 if (`sha256=${expected}` !== req.headers['x-webhook-signature']) {
-  throw new Error('Invalid signature');
+ throw new Error('Invalid signature');
 }
 ```
 
