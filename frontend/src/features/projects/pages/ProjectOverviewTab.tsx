@@ -3,6 +3,7 @@ import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { ProjectFormModal } from '../components/ProjectFormModal';
 import { useUpdateProject } from '../hooks/useProjects';
 import { useTranslations } from '../../translations/hooks/useTranslations';
+import { useStaleTranslationSummary } from '../../translations/hooks/useStaleTranslations';
 import { useTranslationKeys } from '../../translation-keys/hooks/useTranslationKeys';
 import { useJobsList } from '../../translation-jobs/hooks/useTranslationJobs';
 import { useProjectReviews } from '../../approvals/hooks/useApprovals';
@@ -183,6 +184,7 @@ export function ProjectOverviewTab() {
   const { data: jobsData } = useJobsList(1, 100, projectId);
   const { data: pendingReviews } = useProjectReviews(projectId, 'pending');
   const { data: approvedReviews } = useProjectReviews(projectId, 'approved');
+  const { data: staleSummary } = useStaleTranslationSummary(projectId);
 
   const totalKeys = keysData?.meta.total ?? project.keysCount ?? 0;
   const targetLangs = project.languages.filter((l) => !l.isDefault);
@@ -245,6 +247,26 @@ export function ProjectOverviewTab() {
             className="shrink-0 rounded-lg border border-amber-700/60 px-3 py-1.5 text-xs font-medium text-amber-200 hover:bg-amber-900/40"
           >
             Set up domain context
+          </button>
+        </div>
+      )}
+
+      {(staleSummary?.totalStaleTranslations ?? 0) > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-orange-800/50 bg-orange-950/30 px-4 py-3 shrink-0">
+          <p className="text-sm text-orange-200/90">
+            {staleSummary!.totalStaleTranslations} translation
+            {staleSummary!.totalStaleTranslations === 1 ? '' : 's'} need review
+            (source changed across {staleSummary!.totalStaleKeys} key
+            {staleSummary!.totalStaleKeys === 1 ? '' : 's'}).
+          </p>
+          <button
+            type="button"
+            onClick={() =>
+              navigate(`/projects/${projectId}/translations?stale=1`)
+            }
+            className="shrink-0 rounded-lg border border-orange-700/60 px-3 py-1.5 text-xs font-medium text-orange-200 hover:bg-orange-900/40"
+          >
+            View stale
           </button>
         </div>
       )}

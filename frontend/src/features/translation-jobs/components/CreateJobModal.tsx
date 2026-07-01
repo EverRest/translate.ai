@@ -39,6 +39,7 @@ export function CreateJobModal({
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [keySource, setKeySource] = useState<KeySource>('catalog');
   const [inlineKeys, setInlineKeys] = useState('');
+  const [onlyStale, setOnlyStale] = useState(false);
   const [formError, setFormError] = useState<string>();
   const { data: aiConfig } = useAiConfig();
 
@@ -56,6 +57,7 @@ export function CreateJobModal({
       setSelectedKeys([]);
       setKeySource('catalog');
       setInlineKeys('');
+      setOnlyStale(false);
       setFormError(undefined);
     }
   }, [open, defaultProjectId, projects]);
@@ -115,6 +117,18 @@ export function CreateJobModal({
     ];
     if (languages.length === 0) {
       setFormError('Select at least one target language.');
+      return;
+    }
+
+    if (onlyStale) {
+      onSubmit({
+        projectId,
+        languages,
+        onlyStale: true,
+        ...(keySource === 'catalog' && selectedKeys.length > 0
+          ? { keys: selectedKeys }
+          : {}),
+      });
       return;
     }
 
@@ -328,6 +342,19 @@ export function CreateJobModal({
             </div>
           )}
         </div>
+
+        <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-300">
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={onlyStale}
+            onChange={(event) => setOnlyStale(event.target.checked)}
+          />
+          <span>
+            Stale keys only — re-translate translations whose source text
+            changed since last job (optional key selection limits scope).
+          </span>
+        </label>
 
         <p className="text-xs text-slate-500">
           Uses server AI provider (

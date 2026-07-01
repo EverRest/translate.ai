@@ -24,15 +24,15 @@ Post-MVP frontend plan for **translate.ai**. Backend phases 1–5 are complete; 
 ## Phase overview
 
 ```text
-UI-1  Auth + app shell          ← start here
-UI-2  Dashboard home
-UI-3  Projects (list, create, detail)
-UI-4  Translation keys
-UI-5  Translation jobs
-UI-6  Approvals
-UI-7  Project settings (languages, API keys, webhooks)
-UI-8  Audit logs + usage analytics
-UI-9  Tenant settings
+UI-1 Auth + app shell ← start here
+UI-2 Dashboard home
+UI-3 Projects (list, create, detail)
+UI-4 Translation keys
+UI-5 Translation jobs
+UI-6 Approvals
+UI-7 Project settings (languages, API keys, webhooks)
+UI-8 Audit logs + usage analytics
+UI-9 Tenant settings
 UI-10 Glossary (backend + UI)
 UI-11 Branching (backend + UI)
 UI-12 Playwright E2E tests
@@ -237,24 +237,24 @@ Prefer composition over a heavy component library until Mary UI is adopted (see 
 ```text
 frontend/src/
 ├── app/
-│   ├── layout/AppLayout.tsx
-│   ├── providers/AppProviders.tsx
-│   └── router/
-│       ├── AppRouter.tsx
-│       └── ProtectedRoute.tsx
+│ ├── layout/AppLayout.tsx
+│ ├── providers/AppProviders.tsx
+│ └── router/
+│ ├── AppRouter.tsx
+│ └── ProtectedRoute.tsx
 ├── features/
-│   ├── auth/
-│   ├── dashboard/
-│   ├── projects/
-│   ├── translation-keys/
-│   ├── translation-jobs/
-│   ├── approvals/
-│   ├── audit/
-│   ├── analytics/
-│   └── settings/
+│ ├── auth/
+│ ├── dashboard/
+│ ├── projects/
+│ ├── translation-keys/
+│ ├── translation-jobs/
+│ ├── approvals/
+│ ├── audit/
+│ ├── analytics/
+│ └── settings/
 └── shared/
-    ├── api/client.ts
-    └── ui/
+ ├── api/client.ts
+ └── ui/
 ```
 
 ---

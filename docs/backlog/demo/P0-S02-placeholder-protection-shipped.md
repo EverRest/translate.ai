@@ -1,8 +1,10 @@
 # P0-S02 — Placeholder protection
 
-**Phase:** FIFA/WIZ · **Importance:** Critical · **Status:** Shipped
+**Phase:** · **Importance:** Critical · **Status:** Shipped
 
-> Moved out of active backlog — see [shipped-baseline](../shipped-baseline.md) and [demo/README](./README.md#already-shipped--covered-no-new-p0-work).
+**Slug:** `P0-S02-placeholder-protection-shipped` · Reference spec — not active backlog.
+
+> See [shipped-baseline](../shipped-baseline.md) and [demo/README](./README.md#shipped-tasks-reference).
 
 **Client idea:** #11 · **EverRest:** “Ok” (with open questions on email templates / GDPR)
 
@@ -25,21 +27,21 @@
 
 ## Open edge cases (future, not blocking)
 
-- Email templates with mixed HTML + GDPR merge fields — validate parser on real Wiz samples
+- Email templates with mixed HTML + GDPR merge fields — validate parser on real client samples
 - Placeholders in **translatable** surrounding prose (lock token only, not whole sentence)
-- Confluence Hints → auto-tag keys with placeholder strict mode ([P0-03](./P0-03-documentation-import))
-- Wiz email template fixtures in e2e suite
+- Confluence Hints → auto-tag keys with placeholder strict mode ([P0-03](./P0-03-documentation-import-shipped.md))
+- Client email template fixtures in e2e suite
 
 ## Acceptance criteria (original #11)
 
 - [x] `%%TOKEN%%` preserved in output or job fails QA
 - [x] `{{name}}` style placeholders preserved
 - [x] Report placeholder count in job summary (demo hook)
-- [ ] Wiz email template fixtures in e2e suite (deferred — needs real Wiz samples)
+- [ ] Client email template fixtures in e2e suite (deferred — needs real client samples)
 
 ## Notes
 
-Core requirement and demo metric shipped. Email/GDPR edge cases remain open until Wiz provides sample templates.
+Core requirement and demo metric shipped. Email/GDPR edge cases remain open until the client provides sample templates.
 
 ---
 
@@ -50,7 +52,7 @@ Core requirement and demo metric shipped. Email/GDPR edge cases remain open unti
 ### Architecture
 
 - Counter: `buildJobPlaceholderSummary` aggregates per unique key from source text during job status query and webhook dispatch.
-- Email/GDPR edge cases: extend validator with HTML-aware token extraction only after **real Wiz email fixtures** — do not guess merge-field syntax.
+- Email/GDPR edge cases: extend validator with HTML-aware token extraction only after **real Client email fixtures** — do not guess merge-field syntax.
 
 ### Technical
 
@@ -65,4 +67,4 @@ Core requirement and demo metric shipped. Email/GDPR edge cases remain open unti
 
 | Backlog claim | Issue |
 |---------------|-------|
-| Open questions on email/GDPR | Valid — need Wiz sample before changing validator; current %%/{{}} logic may miss `{variable}` styles |
+| Open questions on email/GDPR | Valid — need client sample before changing validator; current %%/{{}} logic may miss `{variable}` styles |

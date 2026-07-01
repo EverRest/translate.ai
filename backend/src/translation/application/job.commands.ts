@@ -16,6 +16,7 @@ export class CreateTranslationJobCommand {
     public readonly provider?: string,
     public readonly clientRequestId?: string,
     public readonly createdById?: string,
+    public readonly onlyStale?: boolean,
   ) {}
 }
 

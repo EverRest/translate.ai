@@ -5,11 +5,11 @@ BullMQ + Redis async processing. Separate worker process from NestJS API.
 ## Architecture
 
 ```text
-nestjs-api (producer)     nestjs-worker (consumer)
-        │                          │
-        └──────── Redis ───────────┘
-                    │
-              BullMQ queues
+nestjs-api (producer) nestjs-worker (consumer)
+ │ │
+ └──────── Redis ───────────┘
+ │
+ BullMQ queues
 ```
 
 ## Queue definitions
@@ -52,15 +52,15 @@ This replaces Confluence webhooks (not available for OAuth 3LO). See [ADR 0016](
 2. Compares target-language variants; skips terms already covered by glossary
 3. Upserts open `terminology_drift_issues` rows
 
-**Producers:** `POST /projects/:id/terminology/scan` (idempotent per project via BullMQ `jobId`); `TerminologyScanOnJobCompletedHandler` when `Project.autoTerminologyScan` is `true`. See [P2-05](../backlog/P2-05-terminology-drift.md) and [P0-07](../backlog/demo/P0-07-consistency-check.md).
+**Producers:** `POST /projects/:id/terminology/scan` (idempotent per project via BullMQ `jobId`); `TerminologyScanOnJobCompletedHandler` when `Project.autoTerminologyScan` is `true`. See [P2-05](../backlog/P2-05-terminology-drift.md) and [shipped-baseline](../backlog/shipped-baseline.md) (P0-07).
 
 ## Job payload conventions
 
 ```typescript
 interface TranslationProcessJob {
-  jobItemId: string;
-  tenantId: string;
-  correlationId: string;
+ jobItemId: string;
+ tenantId: string;
+ correlationId: string;
 }
 ```
 
@@ -80,10 +80,10 @@ Default BullMQ options:
 
 ```typescript
 {
-  attempts: 3,
-  backoff: { type: 'exponential', delay: 5000 },
-  removeOnComplete: 1000,
-  removeOnFail: false, // keep for DLQ inspection
+ attempts: 3,
+ backoff: { type: 'exponential', delay: 5000 },
+ removeOnComplete: 1000,
+ removeOnFail: false, // keep for DLQ inspection
 }
 ```
 
@@ -112,11 +112,11 @@ Docker Compose services:
 
 ```yaml
 redis:
-  image: redis:7
+ image: redis:7
 worker:
-  build: ./backend
-  command: npm run worker
-  depends_on: [redis, postgres]
+ build: ./backend
+ command: npm run worker
+ depends_on: [redis, postgres]
 ```
 
 ## Related

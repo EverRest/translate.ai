@@ -34,29 +34,29 @@
 
 ```text
 React UI / API Client
-        │
-        ▼
+ │
+ ▼
 NestJS API ──► Create TranslationJob (DB)
-        │
-        ▼
+ │
+ ▼
 BullMQ: translation.create
-        │
-        ▼
+ │
+ ▼
 Worker: split into TranslationJobItems
-        │
-        ▼
+ │
+ ▼
 BullMQ: translation.process
-        │
-        ▼
+ │
+ ▼
 For each item:
-  Check TranslationMemory
-  └── miss → AI Provider.translate()
-  └── hit  → reuse cached translation
-        │
-        ▼
+ Check TranslationMemory
+ └── miss → AI Provider.translate()
+ └── hit → reuse cached translation
+ │
+ ▼
 Save Translation records (status: draft)
-        │
-        ▼
+ │
+ ▼
 BullMQ: webhook.send (job.completed)
 ```
 
@@ -64,14 +64,14 @@ BullMQ: webhook.send (job.completed)
 
 ```text
 Draft translation
-      │
-      ▼
+ │
+ ▼
 Reviewer edits / comments
-      │
-      ▼
+ │
+ ▼
 Approved → Published
-      │
-      ▼
+ │
+ ▼
 Webhook: translation.approved
 ```
 
@@ -79,10 +79,10 @@ Webhook: translation.approved
 
 ```text
 server/
-├── nginx          # reverse proxy
-├── frontend/      # React (Vite)
-├── backend-api/   # NestJS REST API
-├── worker/        # BullMQ workers
+├── nginx # reverse proxy
+├── frontend/ # React (Vite)
+├── backend-api/ # NestJS REST API
+├── worker/ # BullMQ workers
 ├── postgres/
 ├── redis/
 ├── prometheus/

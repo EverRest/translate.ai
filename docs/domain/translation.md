@@ -49,6 +49,7 @@ Single unit of work: one key × one target language.
 | language | Language code (value object: `LanguageCode`) |
 | value | Translated text |
 | status | draft, review, approved, published |
+| source_text_snapshot | Source text at last translate/write time; used for staleness detection |
 | provider | Which AI provider produced it |
 | version | Optimistic locking / versioning |
 
@@ -74,12 +75,12 @@ Separate aggregate for cost optimization.
 
 ## Domain profile
 
-Projects may set an optional `domainProfile` (JSON on `Project`) to steer AI tone and terminology for an entire project — e.g. FIFA accreditation forms.
+Projects may set an optional `domainProfile` (JSON on `Project`) to steer AI tone and terminology for an entire project — e.g. Sport accreditation forms.
 
 | Field | Purpose |
 |-------|---------|
 | `domain` | Broad domain (`sports`, …) |
-| `event` | Event name (`FIFA World Cup 2026`) |
+| `event` | Event name (`Major championship 2026`) |
 | `tone` | Formality / voice hint (`formal`, …) |
 | `audience` | Who reads the copy (`accreditation`, `venue operations`, …) |
 | `notes` | Free-text additional context |
@@ -87,7 +88,7 @@ Projects may set an optional `domainProfile` (JSON on `Project`) to steer AI ton
 
 **Pipeline:** `translation.process` loads `project.domainProfile` via `buildTranslateOptionsFromKey` → `TranslateOptions.domainProfile` → `buildTranslationPrompts` adds a **Domain context** block in the **system prompt** (before glossary rules). The matching `localeNotes[targetLang]` entry is included for each job item's target language.
 
-Seed presets: `GET /projects/:id/domain-presets` (`fifa_accreditation`, `fifa_venue_ops`). FIFA glossary terms: `POST .../glossary/presets/apply` with `fifa_accreditation`.
+Seed presets: `GET /projects/:id/domain-presets` (`fifa_accreditation`, `fifa_venue_ops`). Domain glossary terms: `POST .../glossary/presets/apply` with `fifa_accreditation`.
 
 ## Output validation
 
@@ -112,6 +113,20 @@ Failures retry up to 3 times in-process; job item `errorMessage` includes the va
 - `GetJobStatusQuery`
 - `GetTranslationsQuery`
 - `ListTranslationKeysQuery`
+
+## Stale translation detection (P0-04)
+
+When `TranslationKey.sourceText` changes (manual edit on Keys page or import apply), existing translations with non-empty `value` move to `review`. Staleness is **computed**, not a separate status:
+
+```text
+isStale = sourceTextSnapshot IS NOT NULL
+ AND normalize(sourceTextSnapshot) ≠ normalize(key.sourceText)
+```
+
+- `normalize` trims and collapses internal whitespace (whitespace-only edits do not invalidate).
+- After a successful translation job item, `sourceTextSnapshot` is set to the key's current `sourceText`.
+- API: `GET .../translations/stale-summary`, `GET .../translations/stale-key-hints`; list translations include `isStale`.
+- Jobs: `onlyStale: true` creates items only for stale key×language pairs.
 
 ## Events
 

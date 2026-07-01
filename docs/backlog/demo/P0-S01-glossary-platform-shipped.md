@@ -1,6 +1,10 @@
 # P0-S01 — Glossary / translation memory platform
 
-**Phase:** FIFA/WIZ · **Importance:** Critical · **Status:** Shipped (improvements ongoing)
+**Phase:** · **Importance:** Critical · **Status:** Shipped (improvements ongoing)
+
+**Slug:** `P0-S01-glossary-platform-shipped` · Reference spec — not active backlog.
+
+> See [shipped-baseline](../shipped-baseline.md) and [demo/README](./README.md#shipped-tasks-reference).
 
 **Client idea:** #14 · **EverRest:** “General implementation is ready; expecting improvements in future”
 
@@ -21,11 +25,11 @@ Terms like “Accreditation”, “Venue”, “Privilege”, “Registration Gr
 | AI prompt injection | `buildTranslationPrompts` + glossary terms |
 | Semantic TM | [P1-01](../P1-01-semantic-translation-memory.md) — backlog enhancement |
 
-## Remaining improvements (not blocking FIFA demo)
+## Remaining improvements (not blocking Client demo)
 
-- [x] FIFA-specific preset pack ([P0-01](./P0-01-sport-domain-ai-context.md)) — `fifa_accreditation` (24 terms)
+- [x] Domain-specific preset pack ([P0-01](./P0-01-sport-domain-ai-context-shipped.md)) — `fifa_accreditation` (24 terms)
 - [ ] Tenant-level glossary shared across event projects
-- [x] Auto-scan after translate job ([P0-07](./P0-07-consistency-check.md) Wave 1)
+- [x] Auto-scan after translate job ([P0-07](./P0-07-consistency-check-shipped.md) Wave 1)
 - [ ] Per-language glossary target terms
 - [ ] CSV glossary import
 
@@ -38,7 +42,7 @@ Terms like “Accreditation”, “Venue”, “Privilege”, “Registration Gr
 
 ## Notes
 
-Client #4 consistency check is **partially addressed** via glossary + drift — see [P0-07](./P0-07-consistency-check.md).
+Client #4 consistency check is **partially addressed** via glossary + drift — see [P0-07](./P0-07-consistency-check-shipped.md).
 
 ---
 
@@ -53,7 +57,7 @@ Client #4 consistency check is **partially addressed** via glossary + drift — 
 
 ### Technical
 
-- FIFA preset: add `fifa_sports_en_fr_es` to `glossary-presets.ts` — content work, not code architecture.
+- Domain preset: add `fifa_sports_en_fr_es` to `glossary-presets.ts` — content work, not code architecture.
 - CSV import: reuse bulk-upsert endpoint with CSV parser in `integration` module.
 
 ### UI
@@ -65,4 +69,4 @@ Client #4 consistency check is **partially addressed** via glossary + drift — 
 
 | Backlog claim | Issue |
 |---------------|-------|
-| Listed as “no new P0 work” | P0-01 FIFA preset + P0-07 auto-scan shipped in Wave 1 — remaining items are tenant-level shared glossary and CSV import |
+| Listed as “no new P0 work” | P0-01 Domain preset + P0-07 auto-scan shipped in Wave 1 — remaining items are tenant-level shared glossary and CSV import |

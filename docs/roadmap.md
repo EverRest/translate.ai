@@ -9,23 +9,23 @@ This roadmap assumes:
 * Queue: BullMQ + Redis
 * AI Providers:
 
-    * OpenAI
-    * Gemini
-    * Anthropic
-    * Ollama (local)
-    * Custom providers
+ * OpenAI
+ * Gemini
+ * Anthropic
+ * Ollama (local)
+ * Custom providers
 * Deployment:
 
-    * Docker
-    * Docker Compose
-    * Nginx/Caddy
+ * Docker
+ * Docker Compose
+ * Nginx/Caddy
 * Architecture:
 
-    * DDD
-    * CQRS
-    * Event Driven
-    * TDD
-    * 100% test coverage target
+ * DDD
+ * CQRS
+ * Event Driven
+ * TDD
+ * 100% test coverage target
 
 ---
 
@@ -49,12 +49,12 @@ Input:
 
 ```json
 {
-  "project": "shop",
-  "languages": ["de", "fr", "es"],
-  "keys": {
-    "cart.checkout": "Checkout",
-    "cart.total": "Total"
-  }
+ "project": "shop",
+ "languages": ["de", "fr", "es"],
+ "keys": {
+ "cart.checkout": "Checkout",
+ "cart.total": "Total"
+ }
 }
 ```
 
@@ -70,13 +70,13 @@ Output:
 
 ```json
 {
-  "status": "completed",
-  "translations": {
-    "de": {
-      "cart.checkout": "Zur Kasse",
-      "cart.total": "Gesamt"
-    }
-  }
+ "status": "completed",
+ "translations": {
+ "de": {
+ "cart.checkout": "Zur Kasse",
+ "cart.total": "Gesamt"
+ }
+ }
 }
 ```
 
@@ -85,32 +85,32 @@ Output:
 # 2. High Level Architecture
 
 ```text
-                +----------------+
-                | React Dashboard|
-                +--------+-------+
-                         |
-                         |
-                +--------v-------+
-                | NestJS API     |
-                +--------+-------+
-                         |
-      +------------------+------------------+
-      |                  |                  |
-      |                  |                  |
-+-----v----+      +------v-----+    +------v------+
-| Postgres |      | BullMQ     |    | Redis       |
-+----------+      +------------+    +-------------+
-                         |
-                         |
-                +--------v-------+
-                | AI Workers     |
-                +--------+-------+
-                         |
-      +------------------+--------------------+
-      |                  |                    |
-+-----v----+     +-------v------+    +-------v------+
-| OpenAI   |     | Gemini       |    | Ollama       |
-+----------+     +--------------+    +--------------+
+ +----------------+
+ | React Dashboard|
+ +--------+-------+
+ |
+ |
+ +--------v-------+
+ | NestJS API |
+ +--------+-------+
+ |
+ +------------------+------------------+
+ | | |
+ | | |
++-----v----+ +------v-----+ +------v------+
+| Postgres | | BullMQ | | Redis |
++----------+ +------------+ +-------------+
+ |
+ |
+ +--------v-------+
+ | AI Workers |
+ +--------+-------+
+ |
+ +------------------+--------------------+
+ | | |
++-----v----+ +-------v------+ +-------v------+
+| OpenAI | | Gemini | | Ollama |
++----------+ +--------------+ +--------------+
 
 ```
 
@@ -347,11 +347,11 @@ Request:
 
 ```json
 {
-  "projectId": 1,
-  "languages": ["de", "fr"],
-  "keys": [
-    "cart.checkout"
-  ]
+ "projectId": 1,
+ "languages": ["de", "fr"],
+ "keys": [
+ "cart.checkout"
+ ]
 }
 ```
 
@@ -359,7 +359,7 @@ Response:
 
 ```json
 {
-  "jobId": "123"
+ "jobId": "123"
 }
 ```
 
@@ -409,13 +409,13 @@ Worker Flow:
 
 ```text
 Create Job
-      ↓
+ ↓
 Split Job
-      ↓
+ ↓
 AI Translate
-      ↓
+ ↓
 Store Results
-      ↓
+ ↓
 Send Webhook
 ```
 
@@ -427,10 +427,10 @@ Create abstraction:
 
 ```typescript
 interface AiProvider {
-  translate(
-    source: string,
-    targetLanguage: string
-  ): Promise<string>;
+ translate(
+ source: string,
+ targetLanguage: string
+ ): Promise<string>;
 }
 ```
 
@@ -576,8 +576,8 @@ Payload:
 
 ```json
 {
-  "event": "job.completed",
-  "jobId": "123"
+ "event": "job.completed",
+ "jobId": "123"
 }
 ```
 

@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-Localization objects (user-facing **entities**) model forms, pages, and APIs as trees. FIFA/Wiz teams organize copy by **scope** (BMA, Accreditation, etc.). A flat list of entities per project does not match how teams think about their domains.
+Localization objects (user-facing **entities**) model forms, pages, and APIs as trees. Product teams organize copy by **scope** (e.g. login, accreditation). A flat list of entities per project does not match how teams think about their domains.
 
 ## Decision
 

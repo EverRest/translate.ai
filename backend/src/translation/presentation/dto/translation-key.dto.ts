@@ -76,4 +76,14 @@ export class UpdateTranslationKeyDto {
   @IsString()
   @IsIn(VALID_CONTENT_TYPES)
   contentType?: string | null;
+
+  @ApiPropertyOptional({
+    example: 'Given Name',
+    description:
+      'New source text. When changed (normalized), non-empty translations for this key move to review.',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  sourceText?: string;
 }

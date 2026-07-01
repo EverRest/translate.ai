@@ -53,6 +53,7 @@ export type CreateJobInput = {
   }>;
   provider?: string;
   clientRequestId?: string;
+  onlyStale?: boolean;
 };
 
 export type ProjectLanguage = {

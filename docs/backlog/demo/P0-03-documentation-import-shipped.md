@@ -1,14 +1,16 @@
 # P0-03 — Confluence import
 
-**Phase:** FIFA/WIZ P0 · **Importance:** Critical · **Difficulty:** Medium–High · **Status:** Shipped (Phase 1 + Phase 2 OAuth)
+**Phase:** P0 · **Importance:** Critical · **Difficulty:** Medium–High · **Status:** Shipped (Phase 1 + Phase 2 OAuth)
 
-> Moved out of active P0 backlog — see [shipped-baseline](../shipped-baseline.md) and [demo/README](./README.md#already-shipped--covered-no-new-p0-work).
+**Slug:** `P0-03-documentation-import-shipped` · Reference spec — not active backlog.
+
+> See [shipped-baseline](../shipped-baseline.md) and [demo/README](./README.md#shipped-tasks-reference).
 
 **Client idea:** #5 · **EverRest:** “Killer feature”
 
 ## Goal
 
-Wiz developers store translation keys on Confluence pages (BMA/PMA/SEQ). translate.ai connects (or accepts export), parses scope/key/value structure, and imports into a project automatically.
+Client teams store translation keys on Confluence pages (BMA/PMA/SEQ). translate.ai connects (or accepts export), parses scope/key/value structure, and imports into a project automatically.
 
 **Demo hook:** “Connected Confluence — 847 keys imported in 10 seconds.”
 
@@ -43,7 +45,7 @@ Wiz developers store translation keys on Confluence pages (BMA/PMA/SEQ). transla
 | **API** | `POST /projects/:id/integrations/confluence/sync`, webhook optional (page updated) |
 | **Frontend** | Settings → Integrations → Confluence; manual sync + last sync stats |
 
-### Parse rules (Wiz)
+### Parse rules (client export format)
 
 ```text
 Table columns: Scope | Key | Default (EN) | Hints
@@ -53,8 +55,8 @@ Hints containing "%%…%% must be kept" → flag key context for QA
 
 ## Dependencies
 
-- [P0-02](./P0-02-excel-delta-import.md) shares import UX patterns
-- [P0-S02](./P0-S02-placeholder-protection.md) for %% hints
+- [P0-02](./P0-02-excel-delta-import-shipped.md) shares import UX patterns
+- [P0-S02](./P0-S02-placeholder-protection-shipped.md) for %% hints
 
 ## Acceptance criteria
 
@@ -73,16 +75,16 @@ Phase 1 (file import) and Phase 2 (OAuth live sync) are both shipped. Historical
 
 ## Agent review
 
-**Verdict:** Agree — killer feature; **phase 1 file import should be Wave 2 priority #1** (before Excel if Confluence is primary source of truth for Wiz).
+**Verdict:** Agree — killer feature; **phase 1 file import should be Wave 2 priority #1** (before Excel if Confluence is primary source of truth for the client).
 
 ### Architecture
 
 - **Shared parser interface** with P0-02:
-  ```text
-  ImportParser.parse(buffer) → { rows: ImportRow[], warnings[], stats }
-  ImportRow: { scope, key, sourceText, hints?, externalId? }
-  ```
-- Confluence HTML export is messy (merged cells, macros). Phase 1: support **Confluence “Export to Word/HTML” table** + **CSV export** if Wiz uses it — get **one real page sample** from client before coding parser.
+ ```text
+ ImportParser.parse(buffer) → { rows: ImportRow[], warnings[], stats }
+ ImportRow: { scope, key, sourceText, hints?, externalId? }
+ ```
+- Confluence HTML export is messy (merged cells, macros). Phase 1: support **Confluence “Export to Word/HTML” table** + **CSV export** if the client uses it — get **one real page sample** from client before coding parser.
 - Map `scope` → key prefix `{scope}.{key}` **or** store `scope` tag on key (`TranslationKey.context` prefix line `scope:Interface Elements`) — explicit tag beats fragile prefix index ([P0-06](./P0-06-translation-coverage-heatmap.md) depends on this).
 - Hints column → `TranslationKey.context`; regex-detect `%%…%%` and append `strictPlaceholders: true` hint for QA.
 - Phase 2 OAuth: store tokens encrypted in tenant settings; `integration.confluence.sync` queue — never call Confluence from HTTP handler.
@@ -104,5 +106,5 @@ Phase 1 (file import) and Phase 2 (OAuth live sync) are both shipped. Historical
 | Backlog claim | Issue |
 |---------------|-------|
 | Difficulty Medium–High | Phase 1 file-only is **Medium**; live OAuth + webhooks is **High** — split AC by phase |
-| `Key path: {scope}.{key}` | Confirm with Wiz — their Evo import may use flat keys with scope in separate column; wrong guess breaks round-trip |
+| `Key path: {scope}.{key}` | Confirm with the client — their Evo import may use flat keys with scope in separate column; wrong guess breaks round-trip |
 | Separate ADR 0016 only for Confluence | One ADR for external import (Excel + Confluence + future) |

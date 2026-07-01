@@ -90,10 +90,10 @@ Read this index first. Each doc is written so an agent can understand the system
 ## Stack (reference)
 
 ```text
-Frontend:  React, TypeScript, Vite, Tailwind, TanStack Query, Zustand  → frontend/
-Backend:   NestJS, DDD, CQRS, BullMQ, Redis, PostgreSQL, Prisma       → backend/
-AI:        OpenAI, Gemini, Claude, Ollama
-Infra:     Docker Compose (postgres, redis, api, worker, frontend)
+Frontend: React, TypeScript, Vite, Tailwind, TanStack Query, Zustand → frontend/
+Backend: NestJS, DDD, CQRS, BullMQ, Redis, PostgreSQL, Prisma → backend/
+AI: OpenAI, Gemini, Claude, Ollama
+Infra: Docker Compose (postgres, redis, api, worker, frontend)
 ```
 
 ## Local development
@@ -122,8 +122,8 @@ cd frontend && npm install && npm run dev
 ### Docker (full stack)
 
 ```bash
-make docker-env      # copies backend/.env.docker → backend/.env (if missing)
-make docker-app      # postgres + redis + api + worker + frontend
+make docker-env # copies backend/.env.docker → backend/.env (if missing)
+make docker-app # postgres + redis + api + worker + frontend
 # Admin: admin@translate.ai / admin123 (see backend/.env.docker)
 ```
 
@@ -132,18 +132,18 @@ make docker-app      # postgres + redis + api + worker + frontend
 From repo root:
 
 ```bash
-make help          # list all targets
-make install       # npm ci in backend + frontend
+make help # list all targets
+make install # npm ci in backend + frontend
 make hooks-install # git hooks via .husky (after git init)
-make db-seed       # create/update default admin user
-make lint          # ESLint (check mode)
-make format-check  # Prettier check
-make typecheck     # tsc both apps
-make test          # unit tests
-make build         # production build
-make ci            # lint + format + typecheck + test + build
-./scripts/ci-local.sh  # full pipeline incl. backend e2e (needs postgres/redis)
-make dev-infra     # start postgres + redis
+make db-seed # create/update default admin user
+make lint # ESLint (check mode)
+make format-check # Prettier check
+make typecheck # tsc both apps
+make test # unit tests
+make build # production build
+make ci # lint + format + typecheck + test + build
+./scripts/ci-local.sh # full pipeline incl. backend e2e (needs postgres/redis)
+make dev-infra # start postgres + redis
 ```
 
 - API: http://localhost:3000/api/v1

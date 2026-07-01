@@ -1,8 +1,10 @@
 # P0-07 — Consistency check (post-translate)
 
-**Phase:** FIFA/WIZ P0 · **Importance:** High · **Difficulty:** Low–Medium · **Status:** Wave 1 shipped
+**Phase:** P0 · **Importance:** High · **Difficulty:** Low–Medium · **Status:** Wave 1 shipped
 
-> Wave 1 moved out of active backlog — see [shipped-baseline](../shipped-baseline.md) and [demo/README](./README.md#already-shipped--covered-no-new-p0-work). Wave 2 (LLM consistency reviewer) deferred below.
+**Slug:** `P0-07-consistency-check-shipped` · Reference spec — not active backlog. Wave 2 (LLM consistency reviewer) deferred in this file.
+
+> See [shipped-baseline](../shipped-baseline.md) and [demo/README](./README.md#shipped-tasks-reference).
 
 **Client idea:** #4 · **EverRest:** Postponed as standalone feature — “resolve with glossaries + post-validation by another model”
 
@@ -50,7 +52,7 @@ EverRest explicitly deferred a dedicated consistency AI in favor of glossary + v
 
 ## Agent review
 
-**Verdict:** Strongly agree with EverRest — **do not build standalone “consistency AI”** for FIFA. Glossary + drift scan is the correct architecture.
+**Verdict:** Strongly agree with EverRest — **do not build standalone “consistency AI”** for client. Glossary + drift scan is the correct architecture.
 
 ### Architecture
 

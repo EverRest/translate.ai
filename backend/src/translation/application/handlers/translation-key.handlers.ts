@@ -11,6 +11,7 @@ import {
   DeleteTranslationKeyCommand,
   UpdateTranslationKeyCommand,
 } from '../translation-key.commands';
+import { StaleTranslationService } from '../services/stale-translation.service';
 
 @Injectable()
 @CommandHandler(CreateTranslationKeyCommand)
@@ -49,6 +50,7 @@ export class UpdateTranslationKeyHandler implements ICommandHandler<UpdateTransl
   constructor(
     private readonly prisma: PrismaService,
     private readonly projectAccess: ProjectAccessService,
+    private readonly staleTranslations: StaleTranslationService,
   ) {}
 
   async execute(command: UpdateTranslationKeyCommand) {
@@ -64,6 +66,14 @@ export class UpdateTranslationKeyHandler implements ICommandHandler<UpdateTransl
       throw new NotFoundException('Translation key not found');
     }
 
+    if (command.sourceText !== undefined) {
+      await this.staleTranslations.invalidateIfSourceChanged(
+        existing.id,
+        existing.sourceText,
+        command.sourceText,
+      );
+    }
+
     return this.prisma.translationKey.update({
       where: { id: command.keyId },
       data: {
@@ -71,6 +81,9 @@ export class UpdateTranslationKeyHandler implements ICommandHandler<UpdateTransl
         context: command.context,
         ...(command.contentType !== undefined
           ? { contentType: command.contentType }
+          : {}),
+        ...(command.sourceText !== undefined
+          ? { sourceText: command.sourceText }
           : {}),
       },
     });

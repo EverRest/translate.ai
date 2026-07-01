@@ -29,6 +29,7 @@ import {
   CreateTranslationKeyDto,
   UpdateTranslationKeyDto,
 } from './dto/translation-key.dto';
+import { ListTranslationKeysQueryDto } from './dto/list-translation-keys-query.dto';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { ProjectAccessService } from '../../project/infrastructure/project-access.service';
 
@@ -45,18 +46,15 @@ export class TranslationKeysController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'List translation keys' })
+  @ApiOperation({
+    summary: 'List translation keys',
+    description:
+      'Use `staleOnly=true` to return only keys with at least one stale translation.',
+  })
   async list(
     @CurrentUser() user: AuthUser,
     @Param('projectId') projectId: string,
-    @Query()
-    query: {
-      page?: string;
-      limit?: string;
-      search?: string;
-      localizationObjectId?: string;
-      keyPrefix?: string;
-    },
+    @Query() query: ListTranslationKeysQueryDto,
   ) {
     const { page, limit } = parsePagination(query);
     const data = await this.queryBus.execute(
@@ -68,6 +66,7 @@ export class TranslationKeysController {
         query.search,
         query.localizationObjectId,
         query.keyPrefix,
+        query.staleOnly === 'true' || query.staleOnly === '1',
       ),
     );
     return paginatedResponse(data.items, page, limit, data.meta.total);
@@ -141,6 +140,7 @@ export class TranslationKeysController {
         dto.description,
         dto.context,
         dto.contentType,
+        dto.sourceText,
       ),
     );
     return successResponse(data);

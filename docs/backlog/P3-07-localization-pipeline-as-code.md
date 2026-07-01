@@ -26,12 +26,12 @@
 
 ```yaml
 pipeline:
-  - extract: { paths: ["locales/en.json"] }
-  - translation_memory: { semantic: true }
-  - glossary: true
-  - ai_translate: { provider: ollama, languages: [de, fr] }
-  - qa: [placeholders, html]
-  - pull_request: { branch: main }
+ - extract: { paths: ["locales/en.json"] }
+ - translation_memory: { semantic: true }
+ - glossary: true
+ - ai_translate: { provider: ollama, languages: [de, fr] }
+ - qa: [placeholders, html]
+ - pull_request: { branch: main }
 ```
 
 ## Dependencies

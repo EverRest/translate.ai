@@ -3,13 +3,13 @@
 <!--
 Metadata (not part of the filename — keep slug aligned with Problem section):
 
-| Field     | Value |
+| Field | Value |
 |-----------|-------|
-| ID        | 001 |
-| Status    | Open — solution to discuss |
-| Reported  | 2026-06-27 |
-| Area      | local-dev, docker, ollama, ai-providers |
-| Commands  | make docker-ollama-app, docker compose --profile ollama up |
+| ID | 001 |
+| Status | Open — solution to discuss |
+| Reported | 2026-06-27 |
+| Area | local-dev, docker, ollama, ai-providers |
+| Commands | make docker-ollama-app, docker compose --profile ollama up |
 -->
 
 ## Problem
@@ -69,11 +69,11 @@ The model router may load **more than one** model during a job batch (different 
 **Idea:** Do not run Ollama in Docker for daily dev. Install [Ollama for macOS](https://ollama.com/download), run infra in Compose, run API/worker on the host.
 
 ```bash
-make dev-infra          # postgres + redis only
-ollama pull qwen2.5:3b  # or llama3.2:3b — one model only
-make dev-backend        # terminal 1
-make dev-worker         # terminal 2
-make dev-frontend       # terminal 3
+make dev-infra # postgres + redis only
+ollama pull qwen2.5:3b # or llama3.2:3b — one model only
+make dev-backend # terminal 1
+make dev-worker # terminal 2
+make dev-frontend # terminal 3
 ```
 
 Point all router env vars at the **same** small model in `backend/.env`:
@@ -87,7 +87,7 @@ OLLAMA_ROUTING_MODE=rules
 OLLAMA_POLISH_ENABLED=false
 ```
 
-**Pros:** Native GPU/Metal, no Docker VM overhead, one model ≈ 2–3 GB, matches “real” Ollama path.  
+**Pros:** Native GPU/Metal, no Docker VM overhead, one model ≈ 2–3 GB, matches “real” Ollama path. 
 **Cons:** Hybrid setup (some services in Docker, some on host); quality lower than 7B (fine for dev).
 
 ---
@@ -102,7 +102,7 @@ MOCK_TRANSLATIONS=true
 
 Used today in CI, Playwright, and translation-flow e2e.
 
-**Pros:** Zero AI RAM; fast jobs; deterministic.  
+**Pros:** Zero AI RAM; fast jobs; deterministic. 
 **Cons:** Does not exercise Ollama provider or model router.
 
 ---
@@ -116,7 +116,7 @@ Keep `make docker-app` (api, worker, frontend in containers) but connect to host
 OLLAMA_BASE_URL=http://host.docker.internal:11434
 ```
 
-**Pros:** Full stack parity in Docker; AI on host with Metal.  
+**Pros:** Full stack parity in Docker; AI on host with Metal. 
 **Cons:** Extra networking config; still need small model discipline.
 
 ---
@@ -140,7 +140,7 @@ Optional Ollama server env: `OLLAMA_MAX_LOADED_MODELS=1` to force unload between
 
 Use Gemini/OpenAI for spot checks; keep local loop on mock or tiny Ollama.
 
-**Pros:** No local RAM for quality validation.  
+**Pros:** No local RAM for quality validation. 
 **Cons:** Needs API keys; not offline; costs (usually low for dev).
 
 ---
@@ -149,13 +149,13 @@ Use Gemini/OpenAI for spot checks; keep local loop on mock or tiny Ollama.
 
 ```yaml
 ollama:
-  deploy:
-    resources:
-      limits:
-        memory: 6G
+ deploy:
+ resources:
+ limits:
+ memory: 6G
 ```
 
-**Pros:** Caps runaway container.  
+**Pros:** Caps runaway container. 
 **Cons:** Does not fix Docker Desktop VM size; swapping makes freeze *worse*; still no Metal. **Not recommended as primary dev path on Mac.**
 
 ---

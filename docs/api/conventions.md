@@ -26,8 +26,8 @@ All authenticated routes run through `JwtAuthGuard` or `ApiKeyGuard` + `TenantGu
 
 ```json
 {
-  "success": true,
-  "data": { }
+ "success": true,
+ "data": { }
 }
 ```
 
@@ -35,12 +35,12 @@ All authenticated routes run through `JwtAuthGuard` or `ApiKeyGuard` + `TenantGu
 
 ```json
 {
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Human-readable message",
-    "details": []
-  }
+ "success": false,
+ "error": {
+ "code": "VALIDATION_ERROR",
+ "message": "Human-readable message",
+ "details": []
+ }
 }
 ```
 
@@ -71,9 +71,9 @@ Request:
 
 ```json
 {
-  "projectId": "uuid",
-  "languages": ["de", "fr"],
-  "keys": ["cart.checkout", "cart.total"]
+ "projectId": "uuid",
+ "languages": ["de", "fr"],
+ "keys": ["cart.checkout", "cart.total"]
 }
 ```
 
@@ -81,8 +81,8 @@ Response:
 
 ```json
 {
-  "success": true,
-  "data": { "jobId": "uuid" }
+ "success": true,
+ "data": { "jobId": "uuid" }
 }
 ```
 
@@ -93,18 +93,18 @@ GET /api/v1/jobs/{id}
 ### Projects
 
 ```http
-GET    /api/v1/projects
-POST   /api/v1/projects
-GET    /api/v1/projects/{id}
-PATCH  /api/v1/projects/{id}
+GET /api/v1/projects
+POST /api/v1/projects
+GET /api/v1/projects/{id}
+PATCH /api/v1/projects/{id}
 ```
 
 ### Translation keys
 
 ```http
-GET    /api/v1/projects/{id}/keys
-POST   /api/v1/projects/{id}/keys
-PATCH  /api/v1/projects/{id}/keys/{keyId}
+GET /api/v1/projects/{id}/keys
+POST /api/v1/projects/{id}/keys
+PATCH /api/v1/projects/{id}/keys/{keyId}
 ```
 
 ### Export
@@ -118,8 +118,8 @@ Formats: `json`, `yaml`, `csv`, `xlsx`, `android-xml`, `ios-strings`, `po`.
 ### Webhooks (management)
 
 ```http
-GET    /api/v1/projects/{id}/webhooks
-POST   /api/v1/projects/{id}/webhooks
+GET /api/v1/projects/{id}/webhooks
+POST /api/v1/projects/{id}/webhooks
 DELETE /api/v1/projects/{id}/webhooks/{webhookId}
 ```
 

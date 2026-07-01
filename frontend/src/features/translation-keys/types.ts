@@ -20,4 +20,5 @@ export type UpdateTranslationKeyInput = {
   description?: string;
   context?: string;
   contentType?: string | null;
+  sourceText?: string;
 };

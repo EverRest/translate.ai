@@ -12,6 +12,7 @@ import { resolveJobAiProvider } from '../../../ai-provider/domain/ai-provider.ut
 import { ProjectAccessService } from '../../../project/infrastructure/project-access.service';
 import { TranslationQueueService } from '../../infrastructure/translation-queue.service';
 import { TranslationJobRunnerService } from '../services/translation-job-runner.service';
+import { StaleTranslationService } from '../services/stale-translation.service';
 import {
   CancelTranslationJobCommand,
   CreateTranslationJobCommand,
@@ -28,6 +29,7 @@ export class CreateTranslationJobHandler implements ICommandHandler<CreateTransl
     private readonly queue: TranslationQueueService,
     private readonly jobRunner: TranslationJobRunnerService,
     private readonly config: ConfigService,
+    private readonly staleTranslations: StaleTranslationService,
   ) {}
 
   async execute(command: CreateTranslationJobCommand) {
@@ -45,15 +47,59 @@ export class CreateTranslationJobHandler implements ICommandHandler<CreateTransl
 
     await this.ensureProjectLanguages(command.projectId, languages);
 
+    const provider = resolveJobAiProvider(
+      command.provider,
+      this.config.get<string>('AI_PROVIDER', 'gemini'),
+    );
+
+    if (command.onlyStale) {
+      const staleItems = await this.staleTranslations.filterStaleJobItems(
+        command.projectId,
+        languages,
+        command.keys.length > 0 ? command.keys : undefined,
+      );
+
+      if (staleItems.length === 0) {
+        throw new BadRequestException(
+          'No stale translations found for the selected languages',
+        );
+      }
+
+      const job = await this.prisma.translationJob.create({
+        data: {
+          projectId: command.projectId,
+          provider,
+          status: JobStatus.pending,
+          createdById: command.createdById,
+          items: {
+            create: staleItems.map((item) => ({
+              translationKeyId: item.translationKeyId,
+              language: item.language,
+              status: JobItemStatus.pending,
+            })),
+          },
+        },
+      });
+
+      this.jobRunner.publishJobCreated(
+        job.id,
+        command.projectId,
+        command.tenantId,
+      );
+
+      await this.queue.enqueueCreate({
+        jobId: job.id,
+        tenantId: command.tenantId,
+        correlationId: command.clientRequestId,
+      });
+
+      return { jobId: job.id, status: job.status };
+    }
+
     const translationKeys = await this.resolveTranslationKeys(
       command.projectId,
       command.keys,
       command.keyItems,
-    );
-
-    const provider = resolveJobAiProvider(
-      command.provider,
-      this.config.get<string>('AI_PROVIDER', 'gemini'),
     );
 
     const job = await this.prisma.translationJob.create({

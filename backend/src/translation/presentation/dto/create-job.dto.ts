@@ -82,4 +82,12 @@ export class CreateJobDto {
   @IsOptional()
   @IsString()
   clientRequestId?: string;
+
+  @ApiPropertyOptional({
+    example: false,
+    description:
+      'When true, create job items only for stale translations (source changed since last translate). Omit keys[] to include all stale keys for the selected languages.',
+  })
+  @IsOptional()
+  onlyStale?: boolean;
 }

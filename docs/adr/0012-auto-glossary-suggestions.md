@@ -14,11 +14,11 @@ Extend the `glossary` module with:
 
 1. **`GlossarySuggestion` model** — `projectId`, `sourceTerm`, optional `targetTerm`, `doNotTranslate`, `confidence`, `reason`, `status` (`pending` | `approved` | `rejected`).
 2. **Heuristic miner** (`glossary-suggestion.utils.ts`) — no LLM in v1:
-   - Identical source/target across languages → do-not-translate
-   - Stable preferred pairs (same target for a source token)
-   - Product codes (regex)
-   - Capitalized tokens with high frequency
-   - `mergeSuggestionCandidates()` dedupes and ranks by confidence
+ - Identical source/target across languages → do-not-translate
+ - Stable preferred pairs (same target for a source token)
+ - Product codes (regex)
+ - Capitalized tokens with high frequency
+ - `mergeSuggestionCandidates()` dedupes and ranks by confidence
 3. **Async analyze** — `POST .../glossary/suggestions/analyze` validates ≥ `GLOSSARY_ANALYZE_MIN_TRANSLATIONS` (default 100), enqueues `glossary.analyze` on BullMQ; worker replaces pending suggestions for the project.
 4. **Review API** — list pending, approve (upserts `GlossaryTerm`), reject.
 5. **Frontend** — Glossary tab: **Suggest terms** button, pending suggestions table with approve/reject.

@@ -6,13 +6,13 @@ Local Ollama integration with automatic model selection per content type, option
 
 ```text
 Translation job item
-  → TranslateTextService
-  → ProviderRegistryService (fallback chain unchanged)
-  → OllamaProvider
-      → ContentClassifierService
-      → OllamaModelRouterService
-      → OllamaClient (primary model)
-      → OllamaPolishService (optional)
+ → TranslateTextService
+ → ProviderRegistryService (fallback chain unchanged)
+ → OllamaProvider
+ → ContentClassifierService
+ → OllamaModelRouterService
+ → OllamaClient (primary model)
+ → OllamaPolishService (optional)
 ```
 
 Do not call Ollama models directly from workers or controllers — always go through `AiProvider`.

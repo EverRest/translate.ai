@@ -1,7 +1,8 @@
 # P0-03b — Confluence hardening (follow-up)
 
-**Status:** Shipped  
-**Parent:** [P0-03](./P0-03-documentation-import.md) (Phase 1 + 2 shipped)
+**Status:** Shipped 
+**Slug:** `P0-03b-confluence-hardening-shipped` · Reference spec — not active backlog. 
+**Parent:** [P0-03](./P0-03-documentation-import-shipped.md) (Phase 1 + 2 shipped)
 
 ## Goal
 
@@ -17,7 +18,7 @@ Post-MVP improvements for Confluence live sync: multi-site OAuth, label filter, 
 | `labelFilter` in API + UI | Shipped |
 | Column mapping UI (Integrations + Import advanced) | Shipped |
 | E2E with mocked Atlassian API | Shipped |
-| Wiz production fixtures | Blocked on client samples (`test/fixtures/confluence/wiz/`) |
+| Client production fixtures | Blocked on client samples (`test/fixtures/confluence/client/`) |
 
 ### Wave B — Scheduled sync
 

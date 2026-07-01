@@ -17,6 +17,7 @@ const createSchema = z.object({
 });
 
 const editSchema = z.object({
+  sourceText: z.string().min(1, 'Source text is required'),
   description: z.string().optional(),
   context: z.string().optional(),
   contentType: contentTypeSchema,
@@ -202,12 +203,18 @@ export function EditTranslationKeyModal({
 }: EditModalProps) {
   const { register, handleSubmit, reset } = useForm<EditKeyFormValues>({
     resolver: zodResolver(editSchema),
-    defaultValues: { description: '', context: '', contentType: '' },
+    defaultValues: {
+      sourceText: '',
+      description: '',
+      context: '',
+      contentType: '',
+    },
   });
 
   useEffect(() => {
     if (open && translationKey) {
       reset({
+        sourceText: translationKey.sourceText ?? '',
         description: translationKey.description ?? '',
         context: translationKey.context ?? '',
         contentType: translationKey.contentType ?? '',
@@ -224,9 +231,24 @@ export function EditTranslationKeyModal({
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-3 text-sm">
           <p className="font-mono text-sky-300">{translationKey.key}</p>
-          <p className="mt-2 text-slate-300">{translationKey.sourceText}</p>
-          <p className="mt-2 text-xs text-slate-500">
-            Key and source text cannot be changed after creation.
+        </div>
+
+        <div>
+          <label
+            className="block text-sm text-slate-300"
+            htmlFor="edit-sourceText"
+          >
+            Source text
+          </label>
+          <textarea
+            id="edit-sourceText"
+            rows={2}
+            className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-sky-500"
+            {...register('sourceText')}
+          />
+          <p className="mt-1 text-xs text-slate-500">
+            Changing source text marks existing translations as stale (needs
+            review).
           </p>
         </div>
 

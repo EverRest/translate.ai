@@ -450,13 +450,14 @@ model LocalizationNode {
 }
 
 model Translation {
-  id               String            @id @default(uuid()) @db.Uuid
-  translationKeyId String            @map("translation_key_id") @db.Uuid
-  language         String            @db.VarChar(5)
-  value            String
-  status           TranslationStatus @default(draft)
-  provider         String?
-  version          Int               @default(1)
+  id                  String            @id @default(uuid()) @db.Uuid
+  translationKeyId    String            @map("translation_key_id") @db.Uuid
+  language            String            @db.VarChar(5)
+  value               String
+  status              TranslationStatus @default(draft)
+  provider            String?
+  version             Int               @default(1)
+  sourceTextSnapshot  String?           @map("source_text_snapshot")
 
   translationKey TranslationKey @relation(fields: [translationKeyId], references: [id], onDelete: Cascade)
   reviews        Review[]

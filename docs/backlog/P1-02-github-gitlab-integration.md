@@ -28,9 +28,9 @@ Sync translation keys from repos; trigger jobs on push; close the loop for dev t
 
 ```text
 GitHub push → POST /api/v1/integrations/github/webhook
-  → verify signature
-  → enqueue integration.sync
-  → diff keys → create job for new/changed sourceText
+ → verify signature
+ → enqueue integration.sync
+ → diff keys → create job for new/changed sourceText
 ```
 
 ## Dependencies

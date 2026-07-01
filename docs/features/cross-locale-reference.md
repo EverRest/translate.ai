@@ -19,11 +19,11 @@
 
 ```text
 translation-job-runner.handleProcess
-  → loadReferenceTranslations(keyId, targetLang)     [Prisma]
-  → selectReferenceTranslations(rows)                [pure util]
-  → buildTranslateOptionsFromKey + referenceTranslations
-  → translateText → prompt.builder
-       → formatReferenceTranslationsPrompt() in user prompt
+ → loadReferenceTranslations(keyId, targetLang) [Prisma]
+ → selectReferenceTranslations(rows) [pure util]
+ → buildTranslateOptionsFromKey + referenceTranslations
+ → translateText → prompt.builder
+ → formatReferenceTranslationsPrompt() in user prompt
 ```
 
 ## Фази

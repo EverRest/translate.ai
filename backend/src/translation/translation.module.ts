@@ -15,6 +15,10 @@ import {
   GetJobStatusHandler,
   ListTranslationJobsHandler,
 } from './application/handlers/translation-job-query.handlers';
+import {
+  GetStaleTranslationKeyHintsHandler,
+  GetStaleTranslationSummaryHandler,
+} from './application/handlers/stale-translation.handlers';
 import { ListTranslationKeysHandler } from './application/handlers/list-translation-keys.handler';
 import {
   CreateTranslationKeyHandler,
@@ -28,6 +32,7 @@ import {
 } from './application/handlers/translation-query.handlers';
 import { RecordTranslationQualityHandler } from './application/handlers/record-translation-quality.handler';
 import { JobCompletionService } from './application/services/job-completion.service';
+import { StaleTranslationService } from './application/services/stale-translation.service';
 import { TranslationSseService } from './application/services/translation-sse.service';
 import { TranslateTextService } from './application/services/translate-text.service';
 import { TranslationJobRunnerService } from './application/services/translation-job-runner.service';
@@ -55,6 +60,8 @@ const queryHandlers = [
   ListTranslationsHandler,
   GetTranslationHandler,
   LookupTranslationsHandler,
+  GetStaleTranslationSummaryHandler,
+  GetStaleTranslationKeyHintsHandler,
 ];
 
 const services = [
@@ -65,6 +72,7 @@ const services = [
   TranslationJobRunnerService,
   TranslationOutputValidator,
   TranslationSseService,
+  StaleTranslationService,
 ];
 
 @Module({
@@ -89,6 +97,11 @@ const services = [
     TranslationsController,
   ],
   providers: [...commandHandlers, ...queryHandlers, ...services],
-  exports: [...services, TranslationQueueService, TranslationMemoryService],
+  exports: [
+    ...services,
+    TranslationQueueService,
+    TranslationMemoryService,
+    StaleTranslationService,
+  ],
 })
 export class TranslationModule {}

@@ -29,9 +29,9 @@ Route strings to the right **provider + model** by content type, length, and ten
 
 ```yaml
 routing:
-  ui: { provider: ollama, model: llama3.2:3b }
-  legal: { provider: openai, model: gpt-4o }
-  default: { provider: openai, model: gpt-4o-mini }
+ ui: { provider: ollama, model: llama3.2:3b }
+ legal: { provider: openai, model: gpt-4o }
+ default: { provider: openai, model: gpt-4o-mini }
 ```
 
 ## Dependencies

@@ -15,9 +15,9 @@ Source of truth at runtime: Swagger decorators on controllers and DTOs in `backe
 ```yaml
 openapi: 3.0.3
 info:
-  title: translate.ai API
-  version: 1.0.0
-  description: Multi-tenant AI translation platform API
+ title: translate.ai API
+ version: 1.0.0
+ description: Multi-tenant AI translation platform API
 ```
 
 ---
@@ -26,16 +26,16 @@ info:
 
 ```yaml
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-      description: Dashboard user session (JWT access token)
-    apiKeyAuth:
-      type: http
-      scheme: bearer
-      description: Project API key (Bearer token)
+ securitySchemes:
+ bearerAuth:
+ type: http
+ scheme: bearer
+ bearerFormat: JWT
+ description: Dashboard user session (JWT access token)
+ apiKeyAuth:
+ type: http
+ scheme: bearer
+ description: Project API key (Bearer token)
 ```
 
 Most endpoints accept either scheme. `TenantGuard` resolves tenant from JWT claims or API key → project → tenant.
@@ -48,56 +48,56 @@ Most endpoints accept either scheme. `TenantGuard` resolves tenant from JWT clai
 
 ```yaml
 SuccessResponse:
-  type: object
-  required: [success, data]
-  properties:
-    success:
-      type: boolean
-      example: true
-    data:
-      type: object
+ type: object
+ required: [success, data]
+ properties:
+ success:
+ type: boolean
+ example: true
+ data:
+ type: object
 ```
 
 ### Error envelope
 
 ```yaml
 ErrorResponse:
-  type: object
-  required: [success, error]
-  properties:
-    success:
-      type: boolean
-      example: false
-    error:
-      type: object
-      required: [code, message]
-      properties:
-        code:
-          type: string
-          example: VALIDATION_ERROR
-        message:
-          type: string
-        details:
-          type: array
-          items:
-            type: object
+ type: object
+ required: [success, error]
+ properties:
+ success:
+ type: boolean
+ example: false
+ error:
+ type: object
+ required: [code, message]
+ properties:
+ code:
+ type: string
+ example: VALIDATION_ERROR
+ message:
+ type: string
+ details:
+ type: array
+ items:
+ type: object
 ```
 
 ### Pagination
 
 ```yaml
 PaginatedMeta:
-  type: object
-  properties:
-    page:
-      type: integer
-      minimum: 1
-    limit:
-      type: integer
-      minimum: 1
-      maximum: 100
-    total:
-      type: integer
+ type: object
+ properties:
+ page:
+ type: integer
+ minimum: 1
+ limit:
+ type: integer
+ minimum: 1
+ maximum: 100
+ total:
+ type: integer
 ```
 
 ---
@@ -114,8 +114,8 @@ Login with email and password. Returns JWT access + refresh tokens.
 
 ```json
 {
-  "email": "user@example.com",
-  "password": "secret"
+ "email": "user@example.com",
+ "password": "secret"
 }
 ```
 
@@ -123,12 +123,12 @@ Login with email and password. Returns JWT access + refresh tokens.
 
 ```json
 {
-  "success": true,
-  "data": {
-    "accessToken": "eyJ...",
-    "refreshToken": "eyJ...",
-    "expiresIn": 3600
-  }
+ "success": true,
+ "data": {
+ "accessToken": "eyJ...",
+ "refreshToken": "eyJ...",
+ "expiresIn": 3600
+ }
 }
 ```
 
@@ -154,20 +154,20 @@ List projects for current tenant.
 
 ```json
 {
-  "success": true,
-  "data": {
-    "items": [
-      {
-        "id": "550e8400-e29b-41d4-a716-446655440000",
-        "name": "Shop",
-        "description": "E-commerce strings",
-        "autoTerminologyScan": true,
-        "status": "active",
-        "createdAt": "2026-06-25T12:00:00Z"
-      }
-    ],
-    "meta": { "page": 1, "limit": 20, "total": 1 }
-  }
+ "success": true,
+ "data": {
+ "items": [
+ {
+ "id": "550e8400-e29b-41d4-a716-446655440000",
+ "name": "Shop",
+ "description": "E-commerce strings",
+ "autoTerminologyScan": true,
+ "status": "active",
+ "createdAt": "2026-06-25T12:00:00Z"
+ }
+ ],
+ "meta": { "page": 1, "limit": 20, "total": 1 }
+ }
 }
 ```
 
@@ -177,8 +177,8 @@ List projects for current tenant.
 
 ```json
 {
-  "name": "Shop",
-  "description": "E-commerce strings"
+ "name": "Shop",
+ "description": "E-commerce strings"
 }
 ```
 
@@ -192,20 +192,20 @@ Returns project metadata including optional `domainProfile` (same shape as PATCH
 
 ```json
 {
-  "name": "FIFA Accred",
-  "description": "Accreditation strings",
-  "autoTerminologyScan": true,
-  "domainProfile": {
-    "domain": "sports",
-    "event": "FIFA World Cup 2026",
-    "tone": "formal",
-    "audience": "accreditation",
-    "notes": "Official FIFA copy",
-    "localeNotes": {
-      "fr": "Use official FIFA French terminology",
-      "es": "Use official FIFA Spanish terminology"
-    }
-  }
+ "name": "Accreditation project",
+ "description": "Accreditation strings",
+ "autoTerminologyScan": true,
+ "domainProfile": {
+ "domain": "sports",
+ "event": "Major championship 2026",
+ "tone": "formal",
+ "audience": "accreditation",
+ "notes": "Official event copy",
+ "localeNotes": {
+ "fr": "Use official French sports terminology",
+ "es": "Use official Spanish sports terminology"
+ }
+ }
 }
 ```
 
@@ -221,8 +221,8 @@ Copy domain profile and/or glossary from another project in the same tenant.
 
 ```json
 {
-  "sourceProjectId": "uuid",
-  "include": ["domainProfile", "glossary"]
+ "sourceProjectId": "uuid",
+ "include": ["domainProfile", "glossary"]
 }
 ```
 
@@ -233,12 +233,12 @@ Copy domain profile and/or glossary from another project in the same tenant.
 
 ```json
 {
-  "success": true,
-  "data": {
-    "domainProfileCopied": true,
-    "glossaryAdded": 18,
-    "glossarySkipped": 6
-  }
+ "success": true,
+ "data": {
+ "domainProfileCopied": true,
+ "glossaryAdded": 18,
+ "glossarySkipped": 6
+ }
 }
 ```
 
@@ -250,28 +250,28 @@ Returns seed domain context presets (`fifa_accreditation`, `fifa_venue_ops`) wit
 
 ```json
 {
-  "success": true,
-  "data": {
-    "items": [
-      {
-        "id": "fifa_accreditation",
-        "name": "FIFA Accreditation",
-        "description": "Formal accreditation forms and badges for FIFA World Cup — official sports terminology, especially for FR/ES.",
-        "glossaryPresetId": "fifa_accreditation",
-        "profile": {
-          "domain": "sports",
-          "event": "FIFA World Cup 2026",
-          "tone": "formal",
-          "audience": "accreditation",
-          "notes": "Official FIFA accreditation copy. Use established FIFA terminology; preserve brand names and competition titles.",
-          "localeNotes": {
-            "fr": "Use official FIFA French terminology (e.g. Accréditation, Stade, Privilège). Avoid informal or generic sports wording.",
-            "es": "Use official FIFA Spanish terminology (e.g. Acreditación, Estadio, Privilegio). Prefer formal register used in FIFA publications."
-          }
-        }
-      }
-    ]
-  }
+ "success": true,
+ "data": {
+ "items": [
+ {
+ "id": "fifa_accreditation",
+ "name": "Sport accreditation",
+ "description": "Formal accreditation forms and badges for client World Cup — official sports terminology, especially for FR/ES.",
+ "glossaryPresetId": "fifa_accreditation",
+ "profile": {
+ "domain": "sports",
+ "event": "Major championship 2026",
+ "tone": "formal",
+ "audience": "accreditation",
+ "notes": "Official accreditation copy. Use established Official sports terminology; preserve brand names and competition titles.",
+ "localeNotes": {
+ "fr": "Use official French sports terminology (e.g. Accréditation, Stade, Privilège). Avoid informal or generic sports wording.",
+ "es": "Use official Spanish sports terminology (e.g. Acreditación, Estadio, Privilegio). Prefer formal register used in official publications."
+ }
+ }
+ }
+ ]
+ }
 }
 ```
 
@@ -303,7 +303,7 @@ Adds preset terms to the project glossary (skips duplicates). Response: `{ prese
 
 #### GET `/api/v1/projects/{projectId}/keys`
 
-**Query:** `page`, `limit`, `search`, `localizationObjectId`, `keyPrefix`
+**Query:** `page`, `limit`, `search`, `localizationObjectId`, `keyPrefix`, `staleOnly` (boolean — keys with ≥1 stale translation)
 
 #### POST `/api/v1/projects/{projectId}/keys`
 
@@ -311,13 +311,22 @@ Adds preset terms to the project glossary (skips duplicates). Response: `{ prese
 
 ```json
 {
-  "key": "cart.checkout",
-  "description": "Checkout button label",
-  "context": "Primary CTA on cart page"
+ "key": "cart.checkout",
+ "description": "Checkout button label",
+ "context": "Primary CTA on cart page"
 }
 ```
 
 #### PATCH `/api/v1/projects/{projectId}/keys/{keyId}`
+
+**Request:** optional `description`, `context`, `contentType`, `sourceText`. Changing `sourceText` invalidates existing translations (sets `review` when value is non-empty).
+
+```json
+{
+ "sourceText": "Given Name",
+ "description": "Updated label after BA review"
+}
+```
 
 #### DELETE `/api/v1/projects/{projectId}/keys/{keyId}`
 
@@ -337,6 +346,43 @@ Bulk upsert translation keys.
 
 **Query:** `language`, `status`, `keys`, `localizationObjectId`, `keyPrefix`
 
+Each item includes `isStale: boolean` when the translation has a snapshot that differs from the key's current `sourceText` (normalized).
+
+**Response item (excerpt):**
+
+```json
+{
+ "id": "660e8400-e29b-41d4-a716-446655440002",
+ "key": "label.name",
+ "sourceText": "Given Name",
+ "language": "fr",
+ "value": "Prénom",
+ "status": "review",
+ "provider": "gemini",
+ "version": 2,
+ "isStale": true
+}
+```
+
+#### GET `/api/v1/projects/{projectId}/translations/stale-summary`
+
+**Response `200`:**
+
+```json
+{
+ "success": true,
+ "data": {
+ "totalStaleKeys": 3,
+ "totalStaleTranslations": 12,
+ "byLanguage": { "fr": 4, "de": 4, "es": 4 }
+ }
+}
+```
+
+#### GET `/api/v1/projects/{projectId}/translations/stale-key-hints`
+
+**Response `200`:** `{ "keyIds": ["uuid", "..."] }` — keys with at least one stale translation (for grid row hints).
+
 #### GET `/api/v1/projects/{projectId}/translations/{translationId}`
 
 ---
@@ -351,12 +397,12 @@ Authenticated (JWT or project API key). Returns server AI provider defaults — 
 
 ```json
 {
-  "success": true,
-  "data": {
-    "defaultProvider": "gemini",
-    "supportedProviders": ["openai", "gemini", "ollama"],
-    "providerFallback": ["openai"]
-  }
+ "success": true,
+ "data": {
+ "defaultProvider": "gemini",
+ "supportedProviders": ["openai", "gemini", "ollama"],
+ "providerFallback": ["openai"]
+ }
 }
 ```
 
@@ -372,13 +418,16 @@ Create async translation job. Returns immediately; processing via BullMQ.
 
 ```json
 {
-  "projectId": "550e8400-e29b-41d4-a716-446655440000",
-  "languages": ["de", "fr", "es"],
-  "keys": ["cart.checkout", "cart.total"],
-  "provider": "gemini",
-  "clientRequestId": "optional-idempotency-key"
+ "projectId": "550e8400-e29b-41d4-a716-446655440000",
+ "languages": ["de", "fr", "es"],
+ "keys": ["cart.checkout", "cart.total"],
+ "onlyStale": false,
+ "provider": "gemini",
+ "clientRequestId": "optional-idempotency-key"
 }
 ```
+
+When `onlyStale` is `true`, the job includes only stale key×language pairs for the requested languages. Omit `keys` to include all stale keys in the project; provide `keys` to limit scope. Returns `400` when no stale translations match.
 
 `provider` is **optional**. When omitted, the server uses `AI_PROVIDER` env (default `gemini`). The dashboard does not send `provider`; set it only for explicit API overrides.
 
@@ -386,11 +435,11 @@ Create async translation job. Returns immediately; processing via BullMQ.
 
 ```json
 {
-  "success": true,
-  "data": {
-    "jobId": "660e8400-e29b-41d4-a716-446655440001",
-    "status": "pending"
-  }
+ "success": true,
+ "data": {
+ "jobId": "660e8400-e29b-41d4-a716-446655440001",
+ "status": "pending"
+ }
 }
 ```
 
@@ -404,24 +453,24 @@ List jobs. **Query:** `projectId`, `status`, `page`, `limit`
 
 ```json
 {
-  "success": true,
-  "data": {
-    "id": "660e8400-e29b-41d4-a716-446655440001",
-    "projectId": "550e8400-e29b-41d4-a716-446655440000",
-    "status": "completed",
-    "provider": "openai",
-    "progress": {
-      "total": 6,
-      "completed": 6,
-      "failed": 0
-    },
-    "placeholderSummary": {
-      "placeholdersTotal": 134,
-      "placeholdersPreserved": 134
-    },
-    "createdAt": "2026-06-25T12:00:00Z",
-    "completedAt": "2026-06-25T12:00:05Z"
-  }
+ "success": true,
+ "data": {
+ "id": "660e8400-e29b-41d4-a716-446655440001",
+ "projectId": "550e8400-e29b-41d4-a716-446655440000",
+ "status": "completed",
+ "provider": "openai",
+ "progress": {
+ "total": 6,
+ "completed": 6,
+ "failed": 0
+ },
+ "placeholderSummary": {
+ "placeholdersTotal": 134,
+ "placeholdersPreserved": 134
+ },
+ "createdAt": "2026-06-25T12:00:00Z",
+ "completedAt": "2026-06-25T12:00:05Z"
+ }
 }
 ```
 
@@ -461,7 +510,7 @@ Pending translations for review.
 
 ```json
 {
-  "comment": "Tone is too informal"
+ "comment": "Tone is too informal"
 }
 ```
 
@@ -693,7 +742,7 @@ Client Excel export in → AI fills **empty target cells only** → same-layout 
 
 ```text
 pending → parsing → preview_ready → translating → composing → download_ready
-                                                              ↘ failed
+ ↘ failed
 ```
 
 | Status | Meaning |
@@ -721,56 +770,56 @@ Other `ImportSessionStatus` values (`applying`, `completed`, `cancelled`) apply 
 
 ```json
 {
-  "preset": "wiz_classic",
-  "columnMapping": {
-    "fieldId": "Field ID",
-    "scope": "Scope",
-    "key": "Key",
-    "sourceLang": "EN",
-    "targetLangColumns": { "fr": "FR", "es": "ES" }
-  }
+ "preset": "wiz_classic",
+ "columnMapping": {
+ "fieldId": "Field ID",
+ "scope": "Scope",
+ "key": "Key",
+ "sourceLang": "EN",
+ "targetLangColumns": { "fr": "FR", "es": "ES" }
+ }
 }
 ```
 
-When omitted, uses saved `Project.excelImportProfile` or Wiz Classic defaults.
+When omitted, uses saved `Project.excelImportProfile` or Classic import defaults.
 
 **Response `200`:**
 
 ```json
 {
-  "success": true,
-  "data": {
-    "id": "session-uuid",
-    "projectId": "project-uuid",
-    "sourceType": "excel_delta",
-    "status": "preview_ready",
-    "queued": false,
-    "stats": {
-      "totalRows": 847,
-      "validRows": 845,
-      "emptyCellsByLang": { "fr": 312, "es": 401 },
-      "filledCellsByLang": { "fr": 533, "es": 444 },
-      "sourceLanguage": "en",
-      "targetLanguages": ["fr", "es"],
-      "columns": ["Field ID", "Scope", "Key", "EN", "FR", "ES"]
-    },
-    "warnings": [],
-    "sampleRows": [
-      {
-        "rowIndex": 2,
-        "fieldId": "fld_001",
-        "scope": "accreditation",
-        "key": "title",
-        "sourceText": "Accreditation",
-        "translations": { "fr": null, "es": "Acreditación" }
-      }
-    ],
-    "originalFilename": "wiz-export.xlsx",
-    "translationJobId": null,
-    "errorMessage": null,
-    "createdAt": "2026-07-01T12:00:00.000Z",
-    "completedAt": null
-  }
+ "success": true,
+ "data": {
+ "id": "session-uuid",
+ "projectId": "project-uuid",
+ "sourceType": "excel_delta",
+ "status": "preview_ready",
+ "queued": false,
+ "stats": {
+ "totalRows": 847,
+ "validRows": 845,
+ "emptyCellsByLang": { "fr": 312, "es": 401 },
+ "filledCellsByLang": { "fr": 533, "es": 444 },
+ "sourceLanguage": "en",
+ "targetLanguages": ["fr", "es"],
+ "columns": ["Field ID", "Scope", "Key", "EN", "FR", "ES"]
+ },
+ "warnings": [],
+ "sampleRows": [
+ {
+ "rowIndex": 2,
+ "fieldId": "fld_001",
+ "scope": "accreditation",
+ "key": "title",
+ "sourceText": "Accreditation",
+ "translations": { "fr": null, "es": "Acreditación" }
+ }
+ ],
+    "originalFilename": "export.xlsx",
+ "translationJobId": null,
+ "errorMessage": null,
+ "createdAt": "2026-07-01T12:00:00.000Z",
+ "completedAt": null
+ }
 }
 ```
 
@@ -778,23 +827,23 @@ Large files: `queued: true` — poll `GET .../import/excel/{sessionId}` until `s
 
 #### GET `/api/v1/projects/{projectId}/import/excel/profile`
 
-Returns saved import profile or Wiz Classic default.
+Returns saved import profile or Classic import default.
 
 **Response `200`:**
 
 ```json
 {
-  "success": true,
-  "data": {
-    "preset": "wiz_classic",
-    "columnMapping": {
-      "fieldId": "Field ID",
-      "scope": "Scope",
-      "key": "Key",
-      "sourceLang": "EN",
-      "targetLangColumns": { "fr": "FR", "es": "ES" }
-    }
-  }
+ "success": true,
+ "data": {
+ "preset": "wiz_classic",
+ "columnMapping": {
+ "fieldId": "Field ID",
+ "scope": "Scope",
+ "key": "Key",
+ "sourceLang": "EN",
+ "targetLangColumns": { "fr": "FR", "es": "ES" }
+ }
+ }
 }
 ```
 
@@ -804,14 +853,14 @@ Returns saved import profile or Wiz Classic default.
 
 ```json
 {
-  "preset": "wiz_classic",
-  "columnMapping": {
-    "fieldId": "Field ID",
-    "scope": "Scope",
-    "key": "Key",
-    "sourceLang": "EN",
-    "targetLangColumns": { "fr": "FR", "es": "ES" }
-  }
+ "preset": "wiz_classic",
+ "columnMapping": {
+ "fieldId": "Field ID",
+ "scope": "Scope",
+ "key": "Key",
+ "sourceLang": "EN",
+ "targetLangColumns": { "fr": "FR", "es": "ES" }
+ }
 }
 ```
 
@@ -829,8 +878,8 @@ Requires `status: preview_ready`.
 
 ```json
 {
-  "languages": ["fr", "es"],
-  "provider": "gemini"
+ "languages": ["fr", "es"],
+ "provider": "gemini"
 }
 ```
 
@@ -843,13 +892,13 @@ Requires `status: preview_ready`.
 
 ```json
 {
-  "success": true,
-  "data": {
-    "sessionId": "session-uuid",
-    "jobId": "job-uuid",
-    "itemCount": 713,
-    "status": "translating"
-  }
+ "success": true,
+ "data": {
+ "sessionId": "session-uuid",
+ "jobId": "job-uuid",
+ "itemCount": 713,
+ "status": "translating"
+ }
 }
 ```
 
@@ -857,7 +906,7 @@ Poll session until `download_ready` or `failed`. Linked translation job availabl
 
 #### GET `/api/v1/projects/{projectId}/import/excel/{sessionId}/download`
 
-Requires `status: download_ready`. **Response:** binary `.xlsx` (`Content-Disposition: attachment`). Filename derived from `originalFilename` (e.g. `wiz-export-translated.xlsx`).
+Requires `status: download_ready`. **Response:** binary `.xlsx` (`Content-Disposition: attachment`). Filename derived from `originalFilename` (e.g. `export-translated.xlsx`).
 
 **Dashboard:** Project → **Import** → **Excel round-trip** tab (`ExcelImportPanel`).
 
@@ -892,18 +941,18 @@ Requires `ATLASSIAN_CLIENT_ID`, `ATLASSIAN_CLIENT_SECRET`, `ATLASSIAN_REDIRECT_U
 
 ```json
 {
-  "success": true,
-  "data": {
-    "connected": false,
-    "oauthAvailable": false,
-    "setupHint": {
-      "steps": ["..."],
-      "scopes": ["read:confluence-content.all", "read:confluence-space.summary", "offline_access"],
-      "envVars": ["ATLASSIAN_CLIENT_ID", "ATLASSIAN_CLIENT_SECRET", "ATLASSIAN_REDIRECT_URI", "ATLASSIAN_SCOPES", "CONFLUENCE_TOKEN_ENCRYPTION_KEY"],
-      "redirectUri": "http://localhost:3000/api/v1/integrations/confluence/oauth/callback",
-      "docsUrl": "https://developer.atlassian.com/cloud/confluence/oauth-2-3lo-apps/"
-    }
-  }
+ "success": true,
+ "data": {
+ "connected": false,
+ "oauthAvailable": false,
+ "setupHint": {
+ "steps": ["..."],
+ "scopes": ["read:confluence-content.all", "read:confluence-space.summary", "offline_access"],
+ "envVars": ["ATLASSIAN_CLIENT_ID", "ATLASSIAN_CLIENT_SECRET", "ATLASSIAN_REDIRECT_URI", "ATLASSIAN_SCOPES", "CONFLUENCE_TOKEN_ENCRYPTION_KEY"],
+ "redirectUri": "http://localhost:3000/api/v1/integrations/confluence/oauth/callback",
+ "docsUrl": "https://developer.atlassian.com/cloud/confluence/oauth-2-3lo-apps/"
+ }
+ }
 }
 ```
 
@@ -931,13 +980,13 @@ When `oauthAvailable` is `true`, `setupHint` is `null`.
 
 ```json
 {
-  "success": true,
-  "data": {
-    "id": "...",
-    "name": "CI pipeline",
-    "secret": "ta_live_...",
-    "active": true
-  }
+ "success": true,
+ "data": {
+ "id": "...",
+ "name": "CI pipeline",
+ "secret": "ta_live_...",
+ "active": true
+ }
 }
 ```
 
@@ -955,9 +1004,9 @@ When `oauthAvailable` is `true`, `setupHint` is `null`.
 
 ```json
 {
-  "url": "https://example.com/webhooks/translate",
-  "secret": "whsec_...",
-  "enabled": true
+ "url": "https://example.com/webhooks/translate",
+ "secret": "whsec_...",
+ "enabled": true
 }
 ```
 
@@ -975,11 +1024,11 @@ No auth. Returns DB + Redis status.
 
 ```json
 {
-  "status": "ok",
-  "info": {
-    "database": { "status": "up" },
-    "redis": { "status": "up" }
-  }
+ "status": "ok",
+ "info": {
+ "database": { "status": "up" },
+ "redis": { "status": "up" }
+ }
 }
 ```
 
@@ -1001,17 +1050,17 @@ Not OpenAPI paths — documented for integrators. See [../workflows/webhooks.md]
 
 ```json
 {
-  "event": "job.completed",
-  "timestamp": "2026-06-25T12:00:00Z",
-  "data": {
-    "jobId": "uuid",
-    "projectId": "uuid",
-    "status": "completed",
-    "placeholderSummary": {
-      "placeholdersTotal": 134,
-      "placeholdersPreserved": 134
-    }
-  }
+ "event": "job.completed",
+ "timestamp": "2026-06-25T12:00:00Z",
+ "data": {
+ "jobId": "uuid",
+ "projectId": "uuid",
+ "status": "completed",
+ "placeholderSummary": {
+ "placeholdersTotal": 134,
+ "placeholdersPreserved": 134
+ }
+ }
 }
 ```
 

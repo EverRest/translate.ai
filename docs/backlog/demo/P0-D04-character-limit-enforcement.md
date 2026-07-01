@@ -1,6 +1,6 @@
 # P0-D04 — Character limit enforcement
 
-**Phase:** FIFA/WIZ Deferred · **Importance:** Medium · **Difficulty:** Medium · **Status:** Deferred
+**Phase:** Deferred · **Importance:** Medium · **Difficulty:** Medium · **Status:** Deferred
 
 **Client idea:** #22 · **EverRest:** Future
 
@@ -33,7 +33,7 @@ AI respects max character count per UI element (e.g. German button label must fi
 
 ## Notes
 
-German +30% length vs EN is common FIFA pain on mobile accreditation flows.
+German +30% length vs EN is common pain on mobile accreditation flows.
 
 ---
 

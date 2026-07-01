@@ -9,6 +9,8 @@ import {
 } from '../translation.queries';
 import { buildTranslationKeyListFilter } from '../utils/translation-key-filter.utils';
 
+import { isTranslationStale } from '../utils/stale-translation.utils';
+
 function mapTranslation(translation: {
   id: string;
   language: string;
@@ -16,6 +18,7 @@ function mapTranslation(translation: {
   status: string;
   provider: string | null;
   version: number;
+  sourceTextSnapshot: string | null;
   translationKey: { key: string; sourceText: string };
 }) {
   return {
@@ -27,6 +30,10 @@ function mapTranslation(translation: {
     status: translation.status,
     provider: translation.provider,
     version: translation.version,
+    isStale: isTranslationStale(
+      translation.sourceTextSnapshot,
+      translation.translationKey.sourceText,
+    ),
   };
 }
 

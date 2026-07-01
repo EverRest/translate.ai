@@ -1,6 +1,6 @@
 # P0-09 — Translation debt dashboard
 
-**Phase:** FIFA/WIZ P0 · **Importance:** Medium · **Difficulty:** Medium · **Status:** Backlog
+**Phase:** P0 · **Importance:** Medium · **Difficulty:** Medium · **Status:** Backlog
 
 **Client idea:** #28 · **EverRest:** “Added” (approved for backlog)
 
@@ -11,7 +11,7 @@ One screen for localization health: keys in draft 6+ months, approved but unpubl
 ## Current state
 
 - Analytics v1 basic; no debt-specific aggregates
-- [P0-04](./P0-04-stale-translation-detection.md) not shipped — stale count unavailable
+- [P0-04](./P0-04-stale-translation-detection-shipped.md) **shipped (MVP)** — stale counts via `GET .../translations/stale-summary`
 - No “published” vs “approved” distinction unless publish workflow exists per tenant
 
 ## Proposed fit
@@ -26,15 +26,15 @@ One screen for localization health: keys in draft 6+ months, approved but unpubl
 ### Debt buckets
 
 ```text
-Old draft     — status=draft AND updatedAt < 6 months ago
-Stale         — source changed after translation (P0-04)
-Unpublished   — approved but last export > N days (if export tracking added)
-Coverage gap  — languages below launch threshold
+Old draft — status=draft AND updatedAt < 6 months ago
+Stale — source changed after translation (P0-04)
+Unpublished — approved but last export > N days (if export tracking added)
+Coverage gap — languages below launch threshold
 ```
 
 ## Dependencies
 
-- [P0-04](./P0-04-stale-translation-detection.md) for stale bucket
+- [P0-04](./P0-04-stale-translation-detection-shipped.md) for stale bucket (shipped — reuse `StaleTranslationService.getStaleSummary`)
 - [P0-06](./P0-06-translation-coverage-heatmap.md) shares reporting infra
 
 ## Acceptance criteria
@@ -58,16 +58,16 @@ Good demo narrative without deep integration work — mostly read-model aggregat
 
 - Single **`GetProjectHealthQuery`** returning debt + coverage summary — P0-06 and P0-09 should share one handler/response shape to avoid duplicate SQL.
 - v1 buckets only:
-  - `oldDrafts` (draft + age > 6mo)
-  - `staleSource` (requires P0-04)
-  - `coverageGap` (languages below threshold — from heatmap logic)
+ - `oldDrafts` (draft + age > 6mo)
+ - `staleSource` (requires P0-04)
+ - `coverageGap` (languages below threshold — from heatmap logic)
 - Defer `approvedNotExported` until export job stores `lastExportedAt` per project/language.
 - “Debt score 0–100”: define formula in ADR snippet — e.g. weighted sum of bucket severities — avoid magic number in UI only.
 
 ### Technical
 
 - Read-only aggregates; cache 5 min per project for dashboard load.
-- Demo seed script: `backend/scripts/seed-fifa-debt-demo.ts` — intentional old drafts + stale keys for sales.
+- Demo seed script: `backend/scripts/seed-debt-demo.ts` — intentional old drafts + stale keys for sales.
 
 ### UI
 

@@ -60,6 +60,12 @@ export function useUpdateTranslationKey(projectId: string) {
       void queryClient.invalidateQueries({
         queryKey: ['translation-keys', projectId],
       });
+      void queryClient.invalidateQueries({
+        queryKey: ['translations', projectId],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ['stale-translations', projectId],
+      });
     },
   });
 }

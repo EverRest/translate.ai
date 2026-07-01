@@ -4,30 +4,39 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Stale translation detection (P0-04 MVP)
+
+- **Schema:** `Translation.sourceTextSnapshot` + backfill migration
+- **Invalidation:** source change on import apply or `PATCH .../keys/:id` (`sourceText`) → non-empty translations set to `review`
+- **API:** `GET .../translations/stale-summary`, `GET .../translations/stale-key-hints`; `isStale` on list translations; `staleOnly` on list keys; `onlyStale` on `POST /jobs`
+- **UI:** edit `sourceText` on Keys page; translations grid stale hints + filter; overview widget; bulk **Retranslate stale**; Create Job **Stale keys only** checkbox
+- **Tests:** `stale-translation.utils.spec.ts`, `stale-translation.service.spec.ts`, `import-apply.service.spec.ts`, `stale-translations.e2e-spec.ts`
+
 ### Added — Excel round-trip + delta import (P0-02)
 
 Per [ADR 0016](./adr/0016-external-import.md):
 
-- **Parser:** `exceljs` workbook parse on worker; Wiz Classic preset (`Field ID | Scope | Key | EN | FR | ES…`); empty-cell detection per language
+- **Parser:** `exceljs` workbook parse on worker; Classic import preset (`Field ID | Scope | Key | EN | FR | ES…`); empty-cell detection per language
 - **Queues:** `integration.excel.parse`, `integration.excel.compose` — parse preview + merge AI results into stored original workbook
 - **API:** `POST .../import/excel/preview`, `POST .../:sessionId/delta-translate`, `GET .../:sessionId/download`, profile GET/PUT
 - **Schema:** `ImportSession.translationJobId`, `outputStoragePath`, `excelLayoutJson`; `Project.excelImportProfile`
 - **UI:** Import tab → **Excel round-trip** — upload → empty-cell stats → translate → download (same column layout)
 - **Tests:** `excel.parser.spec.ts`, `import-excel.e2e-spec.ts` (mock translations)
 
-### Shipped — FIFA/WIZ wave 1 + terminology drift MVP
+### Shipped — Wave 1 + terminology drift MVP
 
-- **P0-01 Sport-domain AI context** — `Project.domainProfile`; domain presets API; `copy-settings`; FIFA glossary preset; domain block in prompts; Domain context UI; post-create onboarding modal
+- **P0-01 Sport-domain AI context** — `Project.domainProfile`; domain presets API; `copy-settings`; Domain glossary preset; domain block in prompts; Domain context UI; post-create onboarding modal
 - **P0-S02 Placeholder job summary** — optional `placeholderSummary` on `GET /jobs/:id` and job webhooks; job detail UI banner
 - **P0-07 Consistency check Wave 1** — `autoTerminologyScan` (default true); auto scan after job; Settings → Consistency toggle; post-job toast; translations grid drift hints
 - **P2-05 Terminology drift MVP** — `terminology_drift_issues`; `terminology.scan` queue; scan/list/resolve API; Glossary → Terminology drift tab
 
 ### Changed — backlog
 
-- **P0-02 Excel round-trip** removed from active P0 table; added to [shipped-baseline](./backlog/shipped-baseline.md) and demo “Already shipped” (#10, #17); Wave 2 now P0-04 + P0-06 only
+- **P0-04 Stale translation detection** shipped (MVP); active specs renamed to `*-shipped.md`; see [shipped-baseline](./backlog/shipped-baseline.md) and [demo shipped tasks](./backlog/demo/README.md#shipped-tasks-reference); Wave 2 now **P0-06** only
+- **Demo backlog** — shipped shipped demo tasks kept as reference under `docs/backlog/demo/P0-*-shipped.md` (not deleted); code pointers in [shipped-baseline](./backlog/shipped-baseline.md)
+- **P0-02 Excel round-trip** removed from active P0 table; added to [shipped-baseline](./backlog/shipped-baseline.md) and demo “Already shipped” (#10, #17)
 - Prior backlog cleanup: P0-01, P0-S02, P0-07, P0-03 removed from active work; **Wave 1 complete**
 - P2-05 removed from Phase 2 active table — MVP in [shipped-baseline](./backlog/shipped-baseline.md); full scope deferred in [P2-05](./backlog/P2-05-terminology-drift.md)
-- Created [P0-01](./backlog/demo/P0-01-sport-domain-ai-context.md) task file (was missing; links fixed)
 
 ### Added — Confluence file import (P0-03 Phase 1)
 
@@ -56,7 +65,7 @@ Per [ADR 0016](./adr/0016-external-import.md):
 
 ### Added — Confluence hardening (P0-03b)
 
-Per [P0-03b](./backlog/demo/P0-03b-confluence-hardening.md) and [ADR 0016](./adr/0016-external-import.md):
+Per [ADR 0016](./adr/0016-external-import.md) and [shipped-baseline](./backlog/shipped-baseline.md) (P0-03b):
 
 - **OAuth:** Multi-site picker after callback; `connect/pending-sites`, `connect/complete`
 - **Sync config:** `labelFilter`, `parseRulesJson` column mapping, `syncEnabled` + `syncIntervalMinutes`
@@ -380,15 +389,15 @@ Per [roadmap.md](./roadmap.md) Phase 1 and [domain/tenant.md](./domain/tenant.md
 - Prisma model: `ProjectLanguage`
 
 ### Added — Monorepo scaffold
-  - `backend/` — NestJS API with DDD module skeletons, Prisma schema, BullMQ worker
-  - `frontend/` — React + Vite + Tailwind + TanStack Query feature structure
-  - `docker-compose.yml` — postgres, redis, api, worker, frontend
-  - `backend/.env.example`, `frontend/.env.example`
+ - `backend/` — NestJS API with DDD module skeletons, Prisma schema, BullMQ worker
+ - `frontend/` — React + Vite + Tailwind + TanStack Query feature structure
+ - `docker-compose.yml` — postgres, redis, api, worker, frontend
+ - `backend/.env.example`, `frontend/.env.example`
 - **OpenAPI docs:** `docs/api/openapi.md`
 - **Docs translated to English:** `docs/important.md`
 - AI-optimized docs pack:
-  - `docs/README.md`, `system-overview.md`, `patterns.md`, `coding-standards.md`
-  - `docs/domain/`, `docs/api/`, `docs/database/`, `docs/workflows/`, `docs/adr/`
+ - `docs/README.md`, `system-overview.md`, `patterns.md`, `coding-standards.md`
+ - `docs/domain/`, `docs/api/`, `docs/database/`, `docs/workflows/`, `docs/adr/`
 - `AGENTS.md` — Cursor / LLM agent instructions
 
 ### Backend modules (skeleton)
