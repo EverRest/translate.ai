@@ -21,7 +21,7 @@ AI видит что это объект (например филд) и пере
 → [P0-07](demo/P0-07-consistency-check.md) — EverRest: glossary + drift, not standalone AI
 
 ## 5. Confluence Import (must have)
-→ [P0-03](demo/P0-03-documentation-import) — EverRest: killer feature
+→ [P0-03](demo/P0-03-documentation-import) — shipped (file import + OAuth live sync)
 
 ## 6. Translation Coverage Heatmap
 → [P0-06](demo/P0-06-translation-coverage-heatmap.md)

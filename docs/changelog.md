@@ -4,6 +4,10 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Changed — backlog
+
+- **Backlog:** P0-03 Confluence import (Phase 1 + Phase 2) removed from active FIFA/WIZ P0 table and Wave 2 — moved to [shipped-baseline](./backlog/shipped-baseline.md) and [demo/README](./backlog/demo/README.md#already-shipped--covered-no-new-p0-work)
+
 ### Added — Confluence file import (P0-03 Phase 1)
 
 Per [ADR 0016](./adr/0016-external-import.md):

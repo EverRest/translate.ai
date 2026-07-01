@@ -1,6 +1,8 @@
-  # P0-03 — Confluence import
+# P0-03 — Confluence import
 
 **Phase:** FIFA/WIZ P0 · **Importance:** Critical · **Difficulty:** Medium–High · **Status:** Shipped (Phase 1 + Phase 2 OAuth)
+
+> Moved out of active P0 backlog — see [shipped-baseline](../shipped-baseline.md) and [demo/README](./README.md#already-shipped--covered-no-new-p0-work).
 
 **Client idea:** #5 · **EverRest:** “Killer feature”
 
@@ -65,7 +67,7 @@ Hints containing "%%…%% must be kept" → flag key context for QA
 
 ## Notes
 
-Start with file import to unblock demo without Atlassian app review; live API is phase 2.
+Phase 1 (file import) and Phase 2 (OAuth live sync) are both shipped. Historical planning detail below.
 
 ---
 
