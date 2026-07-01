@@ -1,6 +1,8 @@
-  # P0-03 — Confluence import
+# P0-03 — Confluence import
 
-**Phase:** FIFA/WIZ P0 · **Importance:** Critical · **Difficulty:** Medium–High · **Status:** Backlog
+**Phase:** FIFA/WIZ P0 · **Importance:** Critical · **Difficulty:** Medium–High · **Status:** Shipped (Phase 1 + Phase 2 OAuth)
+
+> Moved out of active P0 backlog — see [shipped-baseline](../shipped-baseline.md) and [demo/README](./README.md#already-shipped--covered-no-new-p0-work).
 
 **Client idea:** #5 · **EverRest:** “Killer feature”
 
@@ -14,9 +16,20 @@ Wiz developers store translation keys on Confluence pages (BMA/PMA/SEQ). transla
 
 ## Current state
 
-- Keys created via UI, API, bulk JSON import, localization object materialize
-- No Confluence connector, no HTML table parser for Wiz page format
-- No scope concept matching client’s Confluence hierarchy (may map to key prefix or tags)
+**Phase 1 (shipped):**
+
+- `integration` module with Confluence HTML/CSV/ZIP + paste parsers ([ADR 0016](../../adr/0016-external-import.md))
+- Import wizard: upload or paste → preview diff → apply; `ImportSession` staging
+- Scope and hints stored in `TranslationKey.context`; hints column on Translations grid
+- E2e: fixture CSV/HTML + 850-key perf demo (&lt;30s, no AI)
+
+**Phase 2 (shipped):**
+
+- Atlassian OAuth 3LO connect per project (`ConfluenceConnection`)
+- Live page fetch + parse via `integration.confluence.sync` queue
+- Settings → Integrations → Confluence: connect, pick pages, sync now
+- Optional auto-apply or preview via Import session
+- When OAuth env vars are missing: UI shows `setupHint` (Atlassian app steps, scopes, env vars, docs link); Connect/Sync disabled; **Import** tab file upload still works
 
 ## Proposed fit
 
@@ -45,16 +58,16 @@ Hints containing "%%…%% must be kept" → flag key context for QA
 
 ## Acceptance criteria
 
-- [ ] **Phase 1:** Upload Confluence HTML export → keys + source text imported with scope preserved
-- [ ] **Phase 2:** OAuth connect; sync specified pages; idempotent upsert
-- [ ] Demo script: ≥800 keys from sample export in <30s (no AI)
-- [ ] Hints column stored and visible in key detail / translation grid
-- [ ] ADR: `0016-confluence-import.md`
-- [ ] E2e: fixture HTML → expected key count and paths
+- [x] **Phase 1:** Upload Confluence HTML export → keys + source text imported with scope preserved
+- [x] **Phase 2:** OAuth connect; sync specified pages; idempotent upsert
+- [x] Demo script: ≥800 keys from sample export in <30s (no AI)
+- [x] Hints column stored and visible in key detail / translation grid
+- [x] ADR: `0016-external-import.md`
+- [x] E2e: fixture HTML → expected key count and paths
 
 ## Notes
 
-Start with file import to unblock demo without Atlassian app review; live API is phase 2.
+Phase 1 (file import) and Phase 2 (OAuth live sync) are both shipped. Historical planning detail below.
 
 ---
 

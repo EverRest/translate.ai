@@ -206,7 +206,9 @@ export function ProjectObjectsPage() {
           {isLoading && <p className="text-slate-400">Loading entities…</p>}
           {error && (
             <p className="text-red-400">
-              {error instanceof Error ? error.message : 'Failed to load entities.'}
+              {error instanceof Error
+                ? error.message
+                : 'Failed to load entities.'}
             </p>
           )}
 

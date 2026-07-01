@@ -4,6 +4,7 @@ import { LoginPage } from '../../features/auth/pages/LoginPage';
 import { RegisterPage } from '../../features/auth/pages/RegisterPage';
 import { DashboardPage } from '../../features/dashboard/pages/DashboardPage';
 import { ProjectExportPage } from '../../features/export/pages/ProjectExportPage';
+import { ProjectImportPage } from '../../features/import/pages/ProjectImportPage';
 import { ProjectSettingsPage } from '../../features/project-settings/pages/ProjectSettingsPage';
 import { ProjectApprovalsPage } from '../../features/approvals/pages/ProjectApprovalsPage';
 import { ProjectDetailLayout } from '../../features/projects/pages/ProjectDetailLayout';
@@ -29,10 +30,7 @@ function EntityObjectRedirect() {
     objectId: string;
   }>();
   return (
-    <Navigate
-      to={`/projects/${projectId}/entities/${objectId}`}
-      replace
-    />
+    <Navigate to={`/projects/${projectId}/entities/${objectId}`} replace />
   );
 }
 
@@ -57,7 +55,10 @@ export function AppRouter() {
               path="entities/:objectId"
               element={<ProjectObjectDetailPage />}
             />
-            <Route path="objects" element={<Navigate to="entities" replace />} />
+            <Route
+              path="objects"
+              element={<Navigate to="entities" replace />}
+            />
             <Route
               path="objects/:objectId"
               element={<EntityObjectRedirect />}
@@ -67,6 +68,7 @@ export function AppRouter() {
             <Route path="jobs" element={<ProjectJobsPage />} />
             <Route path="approvals" element={<ProjectApprovalsPage />} />
             <Route path="export" element={<ProjectExportPage />} />
+            <Route path="import" element={<ProjectImportPage />} />
             <Route path="settings" element={<ProjectSettingsPage />} />
           </Route>
           <Route path="/jobs" element={<JobsPage />} />

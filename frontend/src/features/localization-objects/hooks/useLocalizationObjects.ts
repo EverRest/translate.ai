@@ -29,7 +29,14 @@ export function useLocalizationObjects(
   collectionId?: string,
 ) {
   return useQuery({
-    queryKey: ['localization-objects', projectId, page, limit, search, collectionId],
+    queryKey: [
+      'localization-objects',
+      projectId,
+      page,
+      limit,
+      search,
+      collectionId,
+    ],
     queryFn: () =>
       listLocalizationObjects(projectId!, page, limit, search, collectionId),
     enabled: Boolean(projectId),

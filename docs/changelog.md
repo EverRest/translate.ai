@@ -4,6 +4,46 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Changed — backlog
+
+- **Backlog:** P0-03 Confluence import (Phase 1 + Phase 2) removed from active FIFA/WIZ P0 table and Wave 2 — moved to [shipped-baseline](./backlog/shipped-baseline.md) and [demo/README](./backlog/demo/README.md#already-shipped--covered-no-new-p0-work)
+
+### Added — Confluence file import (P0-03 Phase 1)
+
+Per [ADR 0016](./adr/0016-external-import.md):
+
+- **Module:** `integration` bounded context — `ImportParser` registry, staging via `ImportSession` / `ImportSessionItem`
+- **Parsers:** Confluence HTML table, CSV, ZIP export, paste HTML; scope + hints encoded in `TranslationKey.context`
+- **Queues:** `integration.import.parse`, `integration.import.apply` — sync when ≤200 rows; async for large files
+- **API:** `POST .../import/sessions`, paste, preview, apply under `/projects/:id/import`
+- **UI:** Project **Import** tab — upload/paste, diff preview, apply with conflict strategy
+- **UI:** Hints column on Translations grid (parsed from key context)
+- **Tests:** unit parsers + `import-confluence.e2e-spec.ts` (850-key demo fixture, &lt;30s)
+
+### Added — Confluence live sync (P0-03 Phase 2)
+
+Per [ADR 0016](./adr/0016-external-import.md):
+
+- **Schema:** `ConfluenceConnection`, `ConfluenceSyncConfig` — encrypted OAuth tokens per project
+- **OAuth:** Atlassian 3LO connect/callback; token refresh; `TokenEncryptionService`
+- **API client:** Confluence REST v2 (spaces, pages, page body); 429 retry
+- **Queue:** `integration.confluence.sync` — fetch → parse → diff → optional auto-apply
+- **API:** `/projects/:id/integrations/confluence/*` — connect, config, spaces/pages, sync, disconnect
+- **UI:** Project **Settings → Integrations** — Confluence connect, page picker, sync now, last sync stats
+- **UX:** `oauthAvailable` + `setupHint` on integration status when `ATLASSIAN_CLIENT_*` env vars are unset — Connect/Sync disabled; admin setup steps shown; file import still available
+- **Tests:** `token-encryption`, `confluence-api.client`, `confluence-fetch` unit specs
+
+### Added — Confluence hardening (P0-03b)
+
+Per [P0-03b](./backlog/demo/P0-03b-confluence-hardening.md) and [ADR 0016](./adr/0016-external-import.md):
+
+- **OAuth:** Multi-site picker after callback; `connect/pending-sites`, `connect/complete`
+- **Sync config:** `labelFilter`, `parseRulesJson` column mapping, `syncEnabled` + `syncIntervalMinutes`
+- **Scheduler:** Worker polls due configs every 5 min → `integration.confluence.sync` (webhook substitute)
+- **BYO OAuth:** `TenantAtlassianOAuthApp`; `GET/PUT/DELETE /tenant/integrations/atlassian`; Settings UI (admin)
+- **Import:** Optional column mapping on file upload / paste; shared `ColumnMappingFields` component
+- **Tests:** `import-confluence-oauth.e2e-spec.ts` (mocked Atlassian); `wiz-fixtures.spec.ts` (skipped until client files)
+
 ### Added — Entities, collections, OpenAPI import
 
 Per [ADR 0017](./adr/0017-entity-collections.md):

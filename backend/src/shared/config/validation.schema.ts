@@ -47,6 +47,13 @@ export const validationSchema = Joi.object({
   TRANSLATION_QA_VALIDATORS_ENABLED: Joi.boolean().default(true),
   EXPORT_ASYNC_THRESHOLD: Joi.number().integer().min(1).default(1000),
   EXPORT_STORAGE_DIR: Joi.string().default('.exports'),
+  IMPORT_ASYNC_THRESHOLD: Joi.number().integer().min(1).default(200),
+  IMPORT_STORAGE_DIR: Joi.string().default('.imports'),
+  ATLASSIAN_CLIENT_ID: Joi.string().allow('').optional(),
+  ATLASSIAN_CLIENT_SECRET: Joi.string().allow('').optional(),
+  ATLASSIAN_REDIRECT_URI: Joi.string().uri().optional(),
+  ATLASSIAN_SCOPES: Joi.string().optional(),
+  CONFLUENCE_TOKEN_ENCRYPTION_KEY: Joi.string().optional(),
   EXPORT_JOB_TTL_HOURS: Joi.number().integer().min(1).max(168).default(24),
   GLOSSARY_ANALYZE_MIN_TRANSLATIONS: Joi.number().integer().min(1).default(100),
   GLOSSARY_ANALYZE_MAX_SUGGESTIONS: Joi.number()

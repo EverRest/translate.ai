@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Modal } from '../../../shared/ui/Modal';
 import { TEMPLATE_TYPE_OPTIONS } from '../types';
-import type { CreateLocalizationObjectInput, EntityCollectionSummary } from '../types';
+import type {
+  CreateLocalizationObjectInput,
+  EntityCollectionSummary,
+} from '../types';
 
 type CreateObjectModalProps = {
   open: boolean;

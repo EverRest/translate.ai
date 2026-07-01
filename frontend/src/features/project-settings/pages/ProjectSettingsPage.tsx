@@ -4,12 +4,14 @@ import type { Project } from '../../projects/types';
 import { ApiKeysPanel } from '../components/ApiKeysPanel';
 import { LanguagesPanel } from '../components/LanguagesPanel';
 import { WebhooksPanel } from '../components/WebhooksPanel';
+import { ConfluenceIntegrationsPanel } from '../components/ConfluenceIntegrationsPanel';
 import type { SettingsTab } from '../types';
 
 const tabs: Array<{ id: SettingsTab; label: string }> = [
   { id: 'languages', label: 'Languages' },
   { id: 'api-keys', label: 'API Keys' },
   { id: 'webhooks', label: 'Webhooks' },
+  { id: 'integrations', label: 'Integrations' },
 ];
 
 export function ProjectSettingsPage() {
@@ -37,7 +39,7 @@ export function ProjectSettingsPage() {
       <div>
         <h2 className="text-lg font-medium text-white">Project settings</h2>
         <p className="mt-1 text-sm text-slate-400">
-          Languages, API keys, and webhook endpoints for this project.
+          Languages, API keys, webhooks, and integrations for this project.
         </p>
       </div>
 
@@ -66,6 +68,9 @@ export function ProjectSettingsPage() {
         )}
         {tab === 'webhooks' && (
           <WebhooksPanel projectId={projectId} projectName={project.name} />
+        )}
+        {tab === 'integrations' && (
+          <ConfluenceIntegrationsPanel projectId={projectId} />
         )}
       </div>
     </section>

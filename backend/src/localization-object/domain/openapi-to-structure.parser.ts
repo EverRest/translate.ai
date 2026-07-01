@@ -69,7 +69,10 @@ function slugify(value: string): string {
 }
 
 function pathToSlug(path: string): string {
-  const trimmed = path.replace(/^\//, '').replace(/\//g, '_').replace(/[{}]/g, '');
+  const trimmed = path
+    .replace(/^\//, '')
+    .replace(/\//g, '_')
+    .replace(/[{}]/g, '');
   return slugify(trimmed || 'root');
 }
 
@@ -114,7 +117,13 @@ function buildOperationNodes(
         sourceText: param.description ?? param.name ?? '',
         contentType: 'technical',
         children: param.description
-          ? [{ slug: 'label', nodeType: 'label', sourceText: param.description }]
+          ? [
+              {
+                slug: 'label',
+                nodeType: 'label',
+                sourceText: param.description,
+              },
+            ]
           : undefined,
       }));
     if (paramNodes.length > 0) {

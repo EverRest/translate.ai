@@ -7,6 +7,9 @@ export const QUEUES = {
   GLOSSARY_ANALYZE: 'glossary.analyze',
   LOCALIZATION_OBJECT_GENERATE: 'localization-object.generate',
   INTEGRATION_OPENAPI_IMPORT: 'integration.openapi.import',
+  INTEGRATION_IMPORT_PARSE: 'integration.import.parse',
+  INTEGRATION_IMPORT_APPLY: 'integration.import.apply',
+  INTEGRATION_CONFLUENCE_SYNC: 'integration.confluence.sync',
   WEBHOOK_SEND: 'webhook.send',
 } as const;
 

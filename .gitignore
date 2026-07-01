@@ -47,5 +47,8 @@ Thumbs.db
 .cursor/
 docs/backlog/raw.md
 
+# Runtime import uploads (local dev)
+**/.imports/
+
 # Keep lockfiles — required for npm ci in Docker and CI
 # (do not ignore package-lock.json)
