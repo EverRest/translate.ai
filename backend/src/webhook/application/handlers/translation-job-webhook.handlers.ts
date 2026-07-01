@@ -8,6 +8,7 @@ import {
   TranslationJobFailedEvent,
 } from '../../../translation/domain/events/translation-job.events';
 import { buildJobFailureSummary } from '../../../translation/application/utils/job-failure-summary';
+import { buildJobPlaceholderSummary } from '../../../translation/application/utils/job-placeholder-summary';
 import { WebhookQueueService } from '../../infrastructure/webhook-queue.service';
 
 @Injectable()
@@ -65,6 +66,25 @@ export class TranslationJobCompletedWebhookHandler implements IEventHandler<Tran
   ) {}
 
   async handle(event: TranslationJobCompletedEvent): Promise<void> {
+    const job = await this.prisma.translationJob.findUnique({
+      where: { id: event.jobId },
+      include: {
+        items: {
+          include: {
+            translationKey: { select: { sourceText: true } },
+          },
+        },
+      },
+    });
+
+    const placeholderSummary = buildJobPlaceholderSummary(
+      job?.items.map((item) => ({
+        translationKeyId: item.translationKeyId,
+        status: item.status,
+        sourceText: item.translationKey.sourceText,
+      })) ?? [],
+    );
+
     const webhooks = await this.prisma.webhook.findMany({
       where: { projectId: event.projectId, enabled: true },
     });
@@ -79,6 +99,7 @@ export class TranslationJobCompletedWebhookHandler implements IEventHandler<Tran
           jobId: event.jobId,
           projectId: event.projectId,
           status: 'completed',
+          ...(placeholderSummary ? { placeholderSummary } : {}),
         },
       });
     }
@@ -98,26 +119,35 @@ export class TranslationJobFailedWebhookHandler implements IEventHandler<Transla
       where: { id: event.jobId },
       include: {
         items: {
-          where: { status: JobItemStatus.failed },
           include: {
-            translationKey: { select: { key: true } },
+            translationKey: { select: { key: true, sourceText: true } },
           },
         },
       },
     });
 
     const failedItems =
-      job?.items.map((item) => ({
-        key: item.translationKey.key,
-        language: item.language,
-        errorMessage: item.errorMessage,
-      })) ?? [];
+      job?.items
+        .filter((item) => item.status === JobItemStatus.failed)
+        .map((item) => ({
+          key: item.translationKey.key,
+          language: item.language,
+          errorMessage: item.errorMessage,
+        })) ?? [];
 
     const failures = buildJobFailureSummary(
       failedItems
         .map((item) => item.errorMessage)
         .filter((message): message is string => Boolean(message)),
       job?.provider ?? null,
+    );
+
+    const placeholderSummary = buildJobPlaceholderSummary(
+      job?.items.map((item) => ({
+        translationKeyId: item.translationKeyId,
+        status: item.status,
+        sourceText: item.translationKey.sourceText,
+      })) ?? [],
     );
 
     const webhooks = await this.prisma.webhook.findMany({
@@ -136,6 +166,7 @@ export class TranslationJobFailedWebhookHandler implements IEventHandler<Transla
           status: 'failed',
           failures,
           failedItems,
+          ...(placeholderSummary ? { placeholderSummary } : {}),
         },
       });
     }

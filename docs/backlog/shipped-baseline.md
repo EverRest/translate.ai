@@ -22,5 +22,6 @@ Reference only — do **not** re-implement. Details live in `docs/domain/`, `doc
 | Confluence file import (P0-03 Phase 1) | ADR 0016, `integration` module, `ImportSession`, Confluence HTML/CSV/ZIP parsers, project Import tab |
 | Confluence live sync (P0-03 Phase 2) | OAuth 3LO, `ConfluenceConnection`, `integration.confluence.sync` queue, Settings → Integrations; `oauthAvailable` UX when OAuth not configured |
 | Confluence hardening (P0-03b) | Site picker, label filter, column mapping, scheduled sync, tenant BYO OAuth, OAuth e2e mocks |
+| Placeholder protection + job summary (P0-S02) | `PlaceholderValidator` (ADR 0008); optional `placeholderSummary` on `GET /jobs/:id` and `job.completed` / `job.failed` webhooks |
 
 When extending the platform, **build on these modules** — do not fork parallel implementations.

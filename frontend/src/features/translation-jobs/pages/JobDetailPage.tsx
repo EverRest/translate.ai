@@ -92,6 +92,18 @@ export function JobDetailPage() {
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
+            {job.status === 'completed' && job.placeholderSummary && (
+              <div className="mt-3 space-y-2 rounded-lg border border-emerald-900/40 bg-emerald-950/20 p-3">
+                <p className="text-sm text-emerald-300">
+                  {job.placeholderSummary.placeholdersPreserved} of{' '}
+                  {job.placeholderSummary.placeholdersTotal} placeholder
+                  {job.placeholderSummary.placeholdersTotal === 1
+                    ? ''
+                    : 's'}{' '}
+                  preserved across translated keys.
+                </p>
+              </div>
+            )}
             {job.progress.failed > 0 && (
               <div className="mt-3 space-y-2 rounded-lg border border-red-900/40 bg-red-950/20 p-3">
                 <p className="text-sm text-red-300">

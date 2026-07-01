@@ -14,6 +14,11 @@ export type JobFailureSummary = {
   sampleErrors: string[];
 };
 
+export type JobPlaceholderSummary = {
+  placeholdersTotal: number;
+  placeholdersPreserved: number;
+};
+
 export type FailedJobItem = {
   key: string;
   language: string;
@@ -31,6 +36,7 @@ export type JobDetail = {
     failed: number;
   };
   failures: JobFailureSummary | null;
+  placeholderSummary?: JobPlaceholderSummary;
   failedItems?: FailedJobItem[];
   createdAt: string;
 };

@@ -36,7 +36,7 @@ AI видит что это объект (например филд) и пере
 → [P0-02](demo/P0-02-excel-delta-import.md)
 
 ## 11. Placeholder Protection (must have)
-→ [P0-S02](demo/P0-S02-placeholder-protection.md) — shipped
+→ [P0-S02](demo/P0-S02-placeholder-protection.md) — shipped (validator + job summary metric)
 
 ## 12. Stale Translation Detection (must have)
 → [P0-04](demo/P0-04-stale-translation-detection.md)

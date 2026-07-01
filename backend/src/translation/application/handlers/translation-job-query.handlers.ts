@@ -4,6 +4,7 @@ import { JobItemStatus } from '@prisma/client';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { GetJobStatusQuery, ListTranslationJobsQuery } from '../job.commands';
 import { buildJobFailureSummary } from '../utils/job-failure-summary';
+import { buildJobPlaceholderSummary } from '../utils/job-placeholder-summary';
 
 @Injectable()
 @QueryHandler(ListTranslationJobsQuery)
@@ -67,7 +68,7 @@ export class GetJobStatusHandler implements IQueryHandler<GetJobStatusQuery> {
       include: {
         items: {
           include: {
-            translationKey: { select: { key: true } },
+            translationKey: { select: { key: true, sourceText: true } },
           },
         },
         project: { select: { id: true } },
@@ -99,6 +100,14 @@ export class GetJobStatusHandler implements IQueryHandler<GetJobStatusQuery> {
       errorMessage: item.errorMessage,
     }));
 
+    const placeholderSummary = buildJobPlaceholderSummary(
+      job.items.map((item) => ({
+        translationKeyId: item.translationKeyId,
+        status: item.status,
+        sourceText: item.translationKey.sourceText,
+      })),
+    );
+
     return {
       id: job.id,
       projectId: job.projectId,
@@ -107,6 +116,7 @@ export class GetJobStatusHandler implements IQueryHandler<GetJobStatusQuery> {
       progress: { total, completed, failed },
       failures,
       failedItems: failedItemDetails,
+      ...(placeholderSummary ? { placeholderSummary } : {}),
       createdAt: job.createdAt,
     };
   }

@@ -213,6 +213,14 @@ Archive project (soft delete).
 
 #### DELETE `/api/v1/projects/{projectId}/keys/{keyId}`
 
+#### POST `/api/v1/projects/{projectId}/keys/bulk-import`
+
+Bulk upsert translation keys.
+
+**Request:** `{ keys: [{ key, sourceText, description?, context? }] }`
+
+**Response:** `{ created, total }`
+
 ---
 
 ### Translations
@@ -299,11 +307,27 @@ List jobs. **Query:** `projectId`, `status`, `page`, `limit`
       "completed": 6,
       "failed": 0
     },
+    "placeholderSummary": {
+      "placeholdersTotal": 134,
+      "placeholdersPreserved": 134
+    },
     "createdAt": "2026-06-25T12:00:00Z",
     "completedAt": "2026-06-25T12:00:05Z"
   }
 }
 ```
+
+`placeholderSummary` is **optional** — present only when `placeholdersTotal` > 0 (computed per unique key from source text; counts `{{…}}` and `%%…%%` tokens). Omitted when zero.
+
+When `progress.failed` > 0, response also includes `failures` (grouped error summary) and `failedItems` (per key/language).
+
+#### GET `/api/v1/jobs/{jobId}/stream`
+
+Server-Sent Events stream for real-time job progress (dashboard). **Public** endpoint — JWT passed as `token` query param (EventSource cannot send `Authorization` header).
+
+**Query:** `projectId` (required), `token` (required, JWT access token)
+
+**Events:** `progress` — `{ completed, total, failed }`; stream closes when job reaches terminal status.
 
 #### POST `/api/v1/jobs/{jobId}/retry`
 
@@ -523,12 +547,22 @@ Requires `ATLASSIAN_CLIENT_ID`, `ATLASSIAN_CLIENT_SECRET`, `ATLASSIAN_REDIRECT_U
 |--------|------|-------------|
 | GET | `/api/v1/projects/{projectId}/integrations/confluence` | Connection + sync config status; `oauthAvailable`, `setupHint` when OAuth not configured |
 | GET | `/api/v1/projects/{projectId}/integrations/confluence/connect` | OAuth authorize URL |
+| GET | `/api/v1/projects/{projectId}/integrations/confluence/connect/pending-sites` | List Confluence sites after OAuth callback (multi-site picker); **Query:** `pendingToken` |
+| POST | `/api/v1/projects/{projectId}/integrations/confluence/connect/complete` | Complete OAuth after site selection — `{ pendingToken, cloudId }` |
 | GET | `/api/v1/integrations/confluence/oauth/callback` | Public OAuth redirect (no auth) |
-| PUT | `/api/v1/projects/{projectId}/integrations/confluence/config` | `{ pageIds, spaceKey?, autoApply? }` |
+| PUT | `/api/v1/projects/{projectId}/integrations/confluence/config` | `{ pageIds, spaceKey?, autoApply?, labelFilter?, parseRulesJson?, syncEnabled?, syncIntervalMinutes? }` |
 | GET | `/api/v1/projects/{projectId}/integrations/confluence/spaces` | List spaces |
 | GET | `/api/v1/projects/{projectId}/integrations/confluence/spaces/{spaceId}/pages` | List pages |
 | POST | `/api/v1/projects/{projectId}/integrations/confluence/sync` | `{ autoApply? }` → enqueues `integration.confluence.sync` |
 | DELETE | `/api/v1/projects/{projectId}/integrations/confluence` | Disconnect |
+
+**Tenant BYO OAuth (admin JWT only):**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/tenant/integrations/atlassian` | Get tenant Atlassian OAuth app config (no secrets) |
+| PUT | `/api/v1/tenant/integrations/atlassian` | Upsert `{ clientId, clientSecret, redirectUri?, scopes? }` |
+| DELETE | `/api/v1/tenant/integrations/atlassian` | Remove tenant OAuth app |
 
 **Dashboard:** Project → **Settings → Integrations** — connect Confluence, select pages, sync now. If OAuth is not configured on the server, Connect/Sync are disabled and admin setup instructions are shown; file import via **Import** tab remains available.
 
@@ -640,6 +674,26 @@ Not OpenAPI paths — documented for integrators. See [../workflows/webhooks.md]
 | `job.failed` | Job failed or partially failed |
 | `translation.approved` | Translation published |
 | `project.created` | New project created |
+
+**`job.completed` / `job.failed` payload (excerpt):**
+
+```json
+{
+  "event": "job.completed",
+  "timestamp": "2026-06-25T12:00:00Z",
+  "data": {
+    "jobId": "uuid",
+    "projectId": "uuid",
+    "status": "completed",
+    "placeholderSummary": {
+      "placeholdersTotal": 134,
+      "placeholdersPreserved": 134
+    }
+  }
+}
+```
+
+`placeholderSummary` is **optional** on `job.completed` and `job.failed` — included only when `placeholdersTotal` > 0 (same semantics as `GET /jobs/{jobId}`). `job.failed` also includes `failures` and `failedItems`.
 
 ---
 
