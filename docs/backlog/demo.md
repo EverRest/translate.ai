@@ -33,7 +33,7 @@ AI видит что это объект (например филд) и пере
 → [P0-01](demo/P0-01-sport-domain-ai-context.md) — shipped (`domainProfile`, presets API, copy-settings, FIFA glossary, Domain context UI, post-create onboarding)
 
 ## 10. Excel Round-Trip Compatibility (must have)
-→ [P0-02](demo/P0-02-excel-delta-import.md)
+→ [P0-02](demo/P0-02-excel-delta-import.md) — shipped (Wiz Classic preset, delta fill, same-layout download; #17 merged)
 
 ## 11. Placeholder Protection (must have)
 → [P0-S02](demo/P0-S02-placeholder-protection.md) — shipped (validator + job summary metric)
@@ -62,7 +62,7 @@ See [fifa-wiz/README.md](demo/README.md) deferred and shipped sections.
 | 9 | Easy win; will be done |
 | 11 | Ok |
 | 14 | Implementation ready; improvements later |
-| 17 | Planned (merged with #10 → P0-02) |
+| 17 | Shipped (merged with #10 → P0-02) |
 | 19 | Postponed — horizontal scaling |
 | 20 | Agree — expensive |
 | 25 | Doable — extra models/controller |

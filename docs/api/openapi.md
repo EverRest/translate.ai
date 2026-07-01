@@ -685,6 +685,182 @@ Session status and diff summary.
 
 **Dashboard:** Project → **Import** tab — upload or paste → preview → apply.
 
+### Excel round-trip (P0-02)
+
+Client Excel export in → AI fills **empty target cells only** → same-layout `.xlsx` out. Parse/compose on BullMQ (`integration.excel.parse`, `integration.excel.compose`); translation via standard `translation.create` / `translation.process`. Controller: `ExcelImportController` — all routes have `@ApiOperation`.
+
+**Session status flow** (`sourceType: excel_delta`):
+
+```text
+pending → parsing → preview_ready → translating → composing → download_ready
+                                                              ↘ failed
+```
+
+| Status | Meaning |
+|--------|---------|
+| `pending` | Session created; file stored |
+| `parsing` | Worker parsing workbook |
+| `preview_ready` | Stats + sample rows available; ready for `delta-translate` |
+| `translating` | Translation job running for empty cells |
+| `composing` | Merging AI results into original workbook |
+| `download_ready` | Output file available via download endpoint |
+| `failed` | Parse, translate, or compose error (`errorMessage` set) |
+
+Other `ImportSessionStatus` values (`applying`, `completed`, `cancelled`) apply to Confluence import sessions, not Excel.
+
+#### POST `/api/v1/projects/{projectId}/import/excel/preview`
+
+**Content-Type:** `multipart/form-data`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `file` | file | yes | `.xlsx` / `.xls` client export |
+| `parseRulesJson` | string | no | JSON string of `ExcelParseRules` (see below) |
+
+**`parseRulesJson` shape:**
+
+```json
+{
+  "preset": "wiz_classic",
+  "columnMapping": {
+    "fieldId": "Field ID",
+    "scope": "Scope",
+    "key": "Key",
+    "sourceLang": "EN",
+    "targetLangColumns": { "fr": "FR", "es": "ES" }
+  }
+}
+```
+
+When omitted, uses saved `Project.excelImportProfile` or Wiz Classic defaults.
+
+**Response `200`:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "session-uuid",
+    "projectId": "project-uuid",
+    "sourceType": "excel_delta",
+    "status": "preview_ready",
+    "queued": false,
+    "stats": {
+      "totalRows": 847,
+      "validRows": 845,
+      "emptyCellsByLang": { "fr": 312, "es": 401 },
+      "filledCellsByLang": { "fr": 533, "es": 444 },
+      "sourceLanguage": "en",
+      "targetLanguages": ["fr", "es"],
+      "columns": ["Field ID", "Scope", "Key", "EN", "FR", "ES"]
+    },
+    "warnings": [],
+    "sampleRows": [
+      {
+        "rowIndex": 2,
+        "fieldId": "fld_001",
+        "scope": "accreditation",
+        "key": "title",
+        "sourceText": "Accreditation",
+        "translations": { "fr": null, "es": "Acreditación" }
+      }
+    ],
+    "originalFilename": "wiz-export.xlsx",
+    "translationJobId": null,
+    "errorMessage": null,
+    "createdAt": "2026-07-01T12:00:00.000Z",
+    "completedAt": null
+  }
+}
+```
+
+Large files: `queued: true` — poll `GET .../import/excel/{sessionId}` until `status` is `preview_ready` or `failed`.
+
+#### GET `/api/v1/projects/{projectId}/import/excel/profile`
+
+Returns saved import profile or Wiz Classic default.
+
+**Response `200`:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "preset": "wiz_classic",
+    "columnMapping": {
+      "fieldId": "Field ID",
+      "scope": "Scope",
+      "key": "Key",
+      "sourceLang": "EN",
+      "targetLangColumns": { "fr": "FR", "es": "ES" }
+    }
+  }
+}
+```
+
+#### PUT `/api/v1/projects/{projectId}/import/excel/profile`
+
+**Request:**
+
+```json
+{
+  "preset": "wiz_classic",
+  "columnMapping": {
+    "fieldId": "Field ID",
+    "scope": "Scope",
+    "key": "Key",
+    "sourceLang": "EN",
+    "targetLangColumns": { "fr": "FR", "es": "ES" }
+  }
+}
+```
+
+`preset`: `wiz_classic` | `custom`. **Response:** same profile object.
+
+#### GET `/api/v1/projects/{projectId}/import/excel/{sessionId}`
+
+Poll session status. **Response:** same shape as preview response (`stats`, `sampleRows`, `translationJobId` when translating).
+
+#### POST `/api/v1/projects/{projectId}/import/excel/{sessionId}/delta-translate`
+
+Requires `status: preview_ready`.
+
+**Request:**
+
+```json
+{
+  "languages": ["fr", "es"],
+  "provider": "gemini"
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `languages` | Optional target language codes; default all languages with empty cells |
+| `provider` | Optional AI provider override |
+
+**Response `200`:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "sessionId": "session-uuid",
+    "jobId": "job-uuid",
+    "itemCount": 713,
+    "status": "translating"
+  }
+}
+```
+
+Poll session until `download_ready` or `failed`. Linked translation job available via `GET /jobs/{jobId}`.
+
+#### GET `/api/v1/projects/{projectId}/import/excel/{sessionId}/download`
+
+Requires `status: download_ready`. **Response:** binary `.xlsx` (`Content-Disposition: attachment`). Filename derived from `originalFilename` (e.g. `wiz-export-translated.xlsx`).
+
+**Dashboard:** Project → **Import** → **Excel round-trip** tab (`ExcelImportPanel`).
+
 #### Confluence live sync (Phase 2)
 
 Requires `ATLASSIAN_CLIENT_ID`, `ATLASSIAN_CLIENT_SECRET`, `ATLASSIAN_REDIRECT_URI` on the API. When credentials are not set, `GET .../integrations/confluence` returns `oauthAvailable: false` and `setupHint` (no secrets).

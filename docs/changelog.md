@@ -4,6 +4,17 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Excel round-trip + delta import (P0-02)
+
+Per [ADR 0016](./adr/0016-external-import.md):
+
+- **Parser:** `exceljs` workbook parse on worker; Wiz Classic preset (`Field ID | Scope | Key | EN | FR | ES…`); empty-cell detection per language
+- **Queues:** `integration.excel.parse`, `integration.excel.compose` — parse preview + merge AI results into stored original workbook
+- **API:** `POST .../import/excel/preview`, `POST .../:sessionId/delta-translate`, `GET .../:sessionId/download`, profile GET/PUT
+- **Schema:** `ImportSession.translationJobId`, `outputStoragePath`, `excelLayoutJson`; `Project.excelImportProfile`
+- **UI:** Import tab → **Excel round-trip** — upload → empty-cell stats → translate → download (same column layout)
+- **Tests:** `excel.parser.spec.ts`, `import-excel.e2e-spec.ts` (mock translations)
+
 ### Shipped — FIFA/WIZ wave 1 + terminology drift MVP
 
 - **P0-01 Sport-domain AI context** — `Project.domainProfile`; domain presets API; `copy-settings`; FIFA glossary preset; domain block in prompts; Domain context UI; post-create onboarding modal
@@ -13,7 +24,8 @@ All notable changes to translate.ai documentation and project.
 
 ### Changed — backlog
 
-- Active P0 table and Wave 1 section updated: P0-01, P0-S02, P0-07, P0-03 removed from active work; **Wave 1 complete**; Wave 2 starts with P0-02 Excel
+- **P0-02 Excel round-trip** removed from active P0 table; added to [shipped-baseline](./backlog/shipped-baseline.md) and demo “Already shipped” (#10, #17); Wave 2 now P0-04 + P0-06 only
+- Prior backlog cleanup: P0-01, P0-S02, P0-07, P0-03 removed from active work; **Wave 1 complete**
 - P2-05 removed from Phase 2 active table — MVP in [shipped-baseline](./backlog/shipped-baseline.md); full scope deferred in [P2-05](./backlog/P2-05-terminology-drift.md)
 - Created [P0-01](./backlog/demo/P0-01-sport-domain-ai-context.md) task file (was missing; links fixed)
 
