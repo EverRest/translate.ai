@@ -67,6 +67,85 @@ enum QualityVerdict {
   inaccurate
 }
 
+enum ExportJobStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+enum ImportSessionStatus {
+  pending
+  parsing
+  preview_ready
+  applying
+  translating
+  composing
+  download_ready
+  completed
+  failed
+  cancelled
+}
+
+enum ImportSessionItemAction {
+  create
+  update
+  unchanged
+  conflict
+  invalid
+  skip
+}
+
+enum GlossarySuggestionStatus {
+  pending
+  approved
+  rejected
+}
+
+enum TerminologyDriftIssueStatus {
+  open
+  resolved
+}
+
+enum LocalizationTemplateType {
+  form
+  page
+  modal
+  email
+  api
+  custom
+}
+
+enum LocalizationObjectStatus {
+  draft
+  materialized
+}
+
+enum LocalizationObjectGenerationStatus {
+  idle
+  queued
+  generating
+  completed
+  failed
+}
+
+enum LocalizationNodeType {
+  section
+  field
+  button
+  label
+  placeholder
+  hint
+  validation
+  error
+  success
+  tooltip
+  email_subject
+  email_body
+  notification
+  text
+}
+
 model Tenant {
   id                String    @id @default(uuid()) @db.Uuid
   name              String
@@ -85,6 +164,10 @@ model Tenant {
   aiUsageLogs        AiUsageLog[]
   apiRequestLogs     ApiRequestLog[]
   qualityMetrics     TranslationQualityMetric[]
+  exportJobs         ExportJob[]
+  importSessions     ImportSession[]
+  confluenceConnections     ConfluenceConnection[]
+  atlassianOAuthApp         TenantAtlassianOAuthApp?
 
   @@map("tenants")
 }
@@ -101,7 +184,9 @@ model User {
   auditLogs    AuditLog[]
   reviews      Review[]
   aiUsageLogs  AiUsageLog[]
-  createdJobs  TranslationJob[] @relation("JobCreatedBy")
+  createdJobs      TranslationJob[] @relation("JobCreatedBy")
+  importSessions   ImportSession[]
+  confluenceConnections ConfluenceConnection[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -109,12 +194,15 @@ model User {
 }
 
 model Project {
-  id          String        @id @default(uuid()) @db.Uuid
-  tenantId    String        @map("tenant_id") @db.Uuid
-  name        String
-  description String?
-  status      ProjectStatus @default(active)
-  createdAt   DateTime      @default(now()) @map("created_at")
+  id            String        @id @default(uuid()) @db.Uuid
+  tenantId      String        @map("tenant_id") @db.Uuid
+  name          String
+  description   String?
+  domainProfile         Json?         @map("domain_profile")
+  excelImportProfile    Json?         @map("excel_import_profile")
+  autoTerminologyScan   Boolean       @default(true) @map("auto_terminology_scan")
+  status                ProjectStatus @default(active)
+  createdAt             DateTime      @default(now()) @map("created_at")
 
   tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   apiKeys          ApiKey[]
@@ -125,9 +213,33 @@ model Project {
   providerConfigs  ProviderConfig[]
   glossary         Glossary?
   branches         ProjectBranch[]
+  exportJobs       ExportJob[]
+  glossarySuggestions      GlossarySuggestion[]
+  terminologyDriftIssues TerminologyDriftIssue[]
+  localizationObjects      LocalizationObject[]
+  entityCollections   EntityCollection[]
+  importSessions      ImportSession[]
+  confluenceConnection ConfluenceConnection?
 
   @@index([tenantId])
   @@map("projects")
+}
+
+model EntityCollection {
+  id          String   @id @default(uuid()) @db.Uuid
+  projectId   String   @map("project_id") @db.Uuid
+  slug        String
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  project             Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  localizationObjects LocalizationObject[]
+
+  @@unique([projectId, slug])
+  @@index([projectId])
+  @@map("entity_collections")
 }
 
 model ProjectBranch {
@@ -190,6 +302,43 @@ model GlossaryTerm {
   @@map("glossary_terms")
 }
 
+model GlossarySuggestion {
+  id             String                   @id @default(uuid()) @db.Uuid
+  projectId      String                   @map("project_id") @db.Uuid
+  sourceTerm     String                   @map("source_term")
+  targetTerm     String?                  @map("target_term")
+  doNotTranslate Boolean                  @default(false) @map("do_not_translate")
+  confidence     Float
+  reason         String?
+  status         GlossarySuggestionStatus @default(pending)
+  createdAt      DateTime                 @default(now()) @map("created_at")
+  reviewedAt     DateTime?                @map("reviewed_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, status])
+  @@index([projectId, sourceTerm])
+  @@map("glossary_suggestions")
+}
+
+model TerminologyDriftIssue {
+  id                   String                      @id @default(uuid()) @db.Uuid
+  projectId            String                      @map("project_id") @db.Uuid
+  sourceTerm           String                      @map("source_term")
+  targetLang           String                      @map("target_lang") @db.VarChar(5)
+  variants             Json
+  status               TerminologyDriftIssueStatus @default(open)
+  canonicalTranslation String?                     @map("canonical_translation")
+  detectedAt           DateTime                    @default(now()) @map("detected_at")
+  resolvedAt           DateTime?                   @map("resolved_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, sourceTerm, targetLang])
+  @@index([projectId, status])
+  @@map("terminology_drift_issues")
+}
+
 model ApiKey {
   id         String  @id @default(uuid()) @db.Uuid
   projectId  String  @map("project_id") @db.Uuid
@@ -237,25 +386,78 @@ model TranslationKey {
   description String?
   context     String?
   contentType String? @map("content_type") @db.VarChar(20)
+  localizationObjectId String? @map("localization_object_id") @db.Uuid
 
   project           Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  localizationObject LocalizationObject? @relation(fields: [localizationObjectId], references: [id], onDelete: SetNull)
+  localizationNode  LocalizationNode?
   translations      Translation[]
   translationJobItems TranslationJobItem[]
   branchTranslations BranchTranslation[]
 
   @@unique([projectId, key])
   @@index([projectId])
+  @@index([localizationObjectId])
   @@map("translation_keys")
 }
 
+model LocalizationObject {
+  id           String                     @id @default(uuid()) @db.Uuid
+  projectId    String                     @map("project_id") @db.Uuid
+  collectionId String?                    @map("collection_id") @db.Uuid
+  slug         String
+  name         String
+  description  String?
+  templateType LocalizationTemplateType   @default(custom) @map("template_type")
+  status       LocalizationObjectStatus   @default(draft)
+  generationStatus LocalizationObjectGenerationStatus @default(idle) @map("generation_status")
+  generationError  String?              @map("generation_error")
+  createdAt    DateTime                   @default(now()) @map("created_at")
+  updatedAt    DateTime                   @updatedAt @map("updated_at")
+
+  project         Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  collection      EntityCollection?  @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  nodes           LocalizationNode[]
+  translationKeys TranslationKey[]
+
+  @@unique([projectId, slug])
+  @@index([projectId])
+  @@index([projectId, collectionId])
+  @@map("localization_objects")
+}
+
+model LocalizationNode {
+  id               String               @id @default(uuid()) @db.Uuid
+  objectId         String               @map("object_id") @db.Uuid
+  parentId         String?              @map("parent_id") @db.Uuid
+  sortOrder        Int                  @default(0) @map("sort_order")
+  nodeType         LocalizationNodeType @map("node_type")
+  slug             String
+  label            String?
+  sourceText       String?              @map("source_text")
+  description      String?
+  context          String?
+  contentType      String?              @map("content_type") @db.VarChar(20)
+  translationKeyId String?              @unique @map("translation_key_id") @db.Uuid
+
+  object         LocalizationObject @relation(fields: [objectId], references: [id], onDelete: Cascade)
+  parent         LocalizationNode?  @relation("LocalizationNodeTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children       LocalizationNode[] @relation("LocalizationNodeTree")
+  translationKey TranslationKey?    @relation(fields: [translationKeyId], references: [id], onDelete: SetNull)
+
+  @@index([objectId, parentId, sortOrder])
+  @@map("localization_nodes")
+}
+
 model Translation {
-  id               String            @id @default(uuid()) @db.Uuid
-  translationKeyId String            @map("translation_key_id") @db.Uuid
-  language         String            @db.VarChar(5)
-  value            String
-  status           TranslationStatus @default(draft)
-  provider         String?
-  version          Int               @default(1)
+  id                  String            @id @default(uuid()) @db.Uuid
+  translationKeyId    String            @map("translation_key_id") @db.Uuid
+  language            String            @db.VarChar(5)
+  value               String
+  status              TranslationStatus @default(draft)
+  provider            String?
+  version             Int               @default(1)
+  sourceTextSnapshot  String?           @map("source_text_snapshot")
 
   translationKey TranslationKey @relation(fields: [translationKeyId], references: [id], onDelete: Cascade)
   reviews        Review[]
@@ -265,13 +467,22 @@ model Translation {
   @@map("translations")
 }
 
+enum TranslationJobMode {
+  standard
+  object_batch
+
+  @@map("translation_job_mode")
+}
+
 model TranslationJob {
-  id          String    @id @default(uuid()) @db.Uuid
-  projectId   String    @map("project_id") @db.Uuid
-  createdById String?   @map("created_by_id") @db.Uuid
-  status      JobStatus @default(pending)
+  id          String             @id @default(uuid()) @db.Uuid
+  projectId   String             @map("project_id") @db.Uuid
+  createdById String?            @map("created_by_id") @db.Uuid
+  status      JobStatus          @default(pending)
+  mode        TranslationJobMode @default(standard)
+  metadata    Json?
   provider    String?
-  createdAt   DateTime  @default(now()) @map("created_at")
+  createdAt   DateTime           @default(now()) @map("created_at")
 
   project   Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
   createdBy User?                @relation("JobCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
@@ -288,6 +499,7 @@ model TranslationJobItem {
   translationKeyId String        @map("translation_key_id") @db.Uuid
   language         String        @db.VarChar(5)
   status           JobItemStatus @default(pending)
+  batchGroupId     String?       @map("batch_group_id") @db.Uuid
   errorMessage     String?       @map("error_message")
 
   job            TranslationJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
@@ -428,4 +640,147 @@ model TranslationQualityMetric {
   @@index([projectId, createdAt])
   @@index([translationId, createdAt])
   @@map("translation_quality_metrics")
+}
+
+model ExportJob {
+  id           String            @id @default(uuid()) @db.Uuid
+  tenantId     String            @map("tenant_id") @db.Uuid
+  projectId    String            @map("project_id") @db.Uuid
+  format       String            @db.VarChar(20)
+  language     String?           @db.VarChar(5)
+  statusFilter TranslationStatus @map("status_filter")
+  exportStatus ExportJobStatus   @default(pending) @map("export_status")
+  rowCount     Int               @default(0) @map("row_count")
+  filename     String?
+  contentType  String?           @map("content_type")
+  storagePath  String?           @map("storage_path")
+  errorMessage String?           @map("error_message")
+  expiresAt    DateTime?         @map("expires_at")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  completedAt  DateTime?         @map("completed_at")
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+  @@index([projectId, createdAt])
+  @@map("export_jobs")
+}
+
+model ImportSession {
+  id              String              @id @default(uuid()) @db.Uuid
+  tenantId        String              @map("tenant_id") @db.Uuid
+  projectId       String              @map("project_id") @db.Uuid
+  userId          String              @map("user_id") @db.Uuid
+  sourceType      String              @map("source_type") @db.VarChar(40)
+  status          ImportSessionStatus @default(pending)
+  statsJson       Json?               @map("stats_json")
+  warningsJson    Json?               @map("warnings_json")
+  diffSummaryJson Json?               @map("diff_summary_json")
+  parseRulesJson  Json?               @map("parse_rules_json")
+  storagePath        String?             @map("storage_path")
+  outputStoragePath  String?             @map("output_storage_path")
+  originalFilename   String?             @map("original_filename")
+  translationJobId   String?             @map("translation_job_id") @db.Uuid
+  excelLayoutJson    Json?               @map("excel_layout_json")
+  errorMessage       String?             @map("error_message")
+  startedAt          DateTime?           @map("started_at")
+  completedAt        DateTime?           @map("completed_at")
+  createdAt          DateTime            @default(now()) @map("created_at")
+
+  tenant  Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items   ImportSessionItem[]
+
+  @@index([tenantId, createdAt])
+  @@index([projectId, createdAt])
+  @@index([translationJobId])
+  @@map("import_sessions")
+}
+
+model ImportSessionItem {
+  id               String                  @id @default(uuid()) @db.Uuid
+  sessionId        String                  @map("session_id") @db.Uuid
+  externalSource   String?                 @map("external_source") @db.VarChar(40)
+  externalId       String?                 @map("external_id")
+  scope            String?
+  key              String
+  sourceText       String                  @map("source_text")
+  hints            String?
+  action           ImportSessionItemAction @default(create)
+  error            String?
+  warning          String?
+  translationKeyId String?                 @map("translation_key_id") @db.Uuid
+  beforeJson       Json?                   @map("before_json")
+  afterJson        Json?                   @map("after_json")
+
+  session ImportSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, action])
+  @@index([sessionId, key])
+  @@map("import_session_items")
+}
+
+model ConfluenceConnection {
+  id               String    @id @default(uuid()) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  projectId        String    @unique @map("project_id") @db.Uuid
+  cloudId          String    @map("cloud_id")
+  siteUrl          String    @map("site_url")
+  siteName         String?   @map("site_name")
+  accessTokenEnc   String    @map("access_token_enc") @db.Text
+  refreshTokenEnc  String?   @map("refresh_token_enc") @db.Text
+  tokenExpiresAt   DateTime? @map("token_expires_at")
+  scopes           String?
+  connectedById      String    @map("connected_by_id") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  tenant     Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project    Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  connectedBy User                 @relation(fields: [connectedById], references: [id], onDelete: Cascade)
+  syncConfig ConfluenceSyncConfig?
+
+  @@index([tenantId])
+  @@map("confluence_connections")
+}
+
+model TenantAtlassianOAuthApp {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String   @unique @map("tenant_id") @db.Uuid
+  clientId        String   @map("client_id")
+  clientSecretEnc String   @map("client_secret_enc") @db.Text
+  redirectUri     String?  @map("redirect_uri")
+  scopes          String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("tenant_atlassian_oauth_apps")
+}
+
+model ConfluenceSyncConfig {
+  id                  String    @id @default(uuid()) @db.Uuid
+  connectionId        String    @unique @map("connection_id") @db.Uuid
+  pageIds             String[]  @map("page_ids")
+  spaceKey            String?   @map("space_key") @db.VarChar(50)
+  labelFilter         String?   @map("label_filter")
+  parseRulesJson      Json?     @map("parse_rules_json")
+  autoApply           Boolean   @default(false) @map("auto_apply")
+  syncEnabled         Boolean   @default(false) @map("sync_enabled")
+  syncIntervalMinutes Int?      @map("sync_interval_minutes")
+  nextSyncAt          DateTime? @map("next_sync_at")
+  lastSyncedAt        DateTime? @map("last_synced_at")
+  lastSyncStatus      String?   @map("last_sync_status") @db.VarChar(20)
+  lastSyncSummaryJson Json?     @map("last_sync_summary_json")
+  lastImportSessionId String?   @map("last_import_session_id") @db.Uuid
+  lastErrorMessage    String?   @map("last_error_message")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  connection ConfluenceConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@map("confluence_sync_configs")
 }

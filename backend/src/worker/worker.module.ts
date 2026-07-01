@@ -8,7 +8,12 @@ import { MonitoringModule } from '../shared/monitoring/monitoring.module';
 import { QueuesModule } from '../shared/queues/queues.module';
 import { SharedModule } from '../shared/shared.module';
 import { validationSchema } from '../shared/config/validation.schema';
+import { buildBullRootConfig } from '../shared/config/bull-root.config';
 import { TranslationModule } from '../translation/translation.module';
+import { ExportModule } from '../export/export.module';
+import { IntegrationModule } from '../integration/integration.module';
+import { GlossaryModule } from '../glossary/glossary.module';
+import { LocalizationObjectModule } from '../localization-object/localization-object.module';
 import { WebhookModule } from '../webhook/webhook.module';
 import {
   TranslationCreateProcessor,
@@ -16,6 +21,21 @@ import {
   TranslationRetryProcessor,
   WebhookSendProcessor,
 } from './processors/translation.processor';
+import { ExportProcessor } from './processors/export.processor';
+import { GlossaryAnalyzeProcessor } from './processors/glossary.processor';
+import { TerminologyScanProcessor } from './processors/terminology.processor';
+import { LocalizationObjectGenerateProcessor } from './processors/localization-object.processor';
+import { OpenApiImportProcessor } from './processors/openapi-import.processor';
+import {
+  ImportApplyProcessor,
+  ImportParseProcessor,
+} from './processors/import.processor';
+import {
+  ExcelComposeProcessor,
+  ExcelParseProcessor,
+} from './processors/excel.processor';
+import { ConfluenceSyncProcessor } from './processors/confluence-sync.processor';
+import { ConfluenceSyncSchedulerService } from './confluence-sync-scheduler.service';
 
 @Module({
   imports: [
@@ -30,14 +50,13 @@ import {
     AiProviderModule,
     TranslationModule,
     WebhookModule,
+    ExportModule,
+    IntegrationModule,
+    GlossaryModule,
+    LocalizationObjectModule,
     BullModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        connection: {
-          host: config.get<string>('REDIS_HOST', 'localhost'),
-          port: config.get<number>('REDIS_PORT', 6379),
-        },
-      }),
+      useFactory: (config: ConfigService) => buildBullRootConfig(config),
     }),
     QueuesModule,
   ],
@@ -46,6 +65,17 @@ import {
     TranslationProcessProcessor,
     TranslationRetryProcessor,
     WebhookSendProcessor,
+    ExportProcessor,
+    GlossaryAnalyzeProcessor,
+    TerminologyScanProcessor,
+    LocalizationObjectGenerateProcessor,
+    OpenApiImportProcessor,
+    ImportParseProcessor,
+    ImportApplyProcessor,
+    ExcelParseProcessor,
+    ExcelComposeProcessor,
+    ConfluenceSyncProcessor,
+    ConfluenceSyncSchedulerService,
   ],
 })
 export class WorkerModule {}

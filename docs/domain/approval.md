@@ -26,13 +26,13 @@ Reviewer notes on a translation or key.
 
 ```text
 Draft
-  │
-  ▼
+ │
+ ▼
 In Review
-  │
-  ├── Approve ──► Approved ──► Published
-  │
-  └── Reject ──► Rejected (back to Draft or re-translate)
+ │
+ ├── Approve ──► Approved ──► Published
+ │
+ └── Reject ──► Rejected (back to Draft or re-translate)
 ```
 
 ## Reviewer actions

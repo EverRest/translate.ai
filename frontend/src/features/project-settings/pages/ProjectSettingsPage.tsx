@@ -4,12 +4,18 @@ import type { Project } from '../../projects/types';
 import { ApiKeysPanel } from '../components/ApiKeysPanel';
 import { LanguagesPanel } from '../components/LanguagesPanel';
 import { WebhooksPanel } from '../components/WebhooksPanel';
+import { ConfluenceIntegrationsPanel } from '../components/ConfluenceIntegrationsPanel';
+import { ConsistencySettingsPanel } from '../components/ConsistencySettingsPanel';
+import { DomainContextPanel } from '../components/DomainContextPanel';
 import type { SettingsTab } from '../types';
 
 const tabs: Array<{ id: SettingsTab; label: string }> = [
+  { id: 'domain', label: 'Domain context' },
+  { id: 'consistency', label: 'Consistency' },
   { id: 'languages', label: 'Languages' },
   { id: 'api-keys', label: 'API Keys' },
   { id: 'webhooks', label: 'Webhooks' },
+  { id: 'integrations', label: 'Integrations' },
 ];
 
 export function ProjectSettingsPage() {
@@ -37,7 +43,8 @@ export function ProjectSettingsPage() {
       <div>
         <h2 className="text-lg font-medium text-white">Project settings</h2>
         <p className="mt-1 text-sm text-slate-400">
-          Languages, API keys, and webhook endpoints for this project.
+          Domain context, languages, API keys, webhooks, and integrations for
+          this project.
         </p>
       </div>
 
@@ -60,12 +67,19 @@ export function ProjectSettingsPage() {
       </div>
 
       <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-6">
+        {tab === 'domain' && <DomainContextPanel project={project} />}
+        {tab === 'consistency' && (
+          <ConsistencySettingsPanel project={project} />
+        )}
         {tab === 'languages' && <LanguagesPanel projectId={projectId} />}
         {tab === 'api-keys' && (
           <ApiKeysPanel projectId={projectId} projectName={project.name} />
         )}
         {tab === 'webhooks' && (
           <WebhooksPanel projectId={projectId} projectName={project.name} />
+        )}
+        {tab === 'integrations' && (
+          <ConfluenceIntegrationsPanel projectId={projectId} />
         )}
       </div>
     </section>

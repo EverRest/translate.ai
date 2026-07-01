@@ -6,19 +6,19 @@ Abstraction over external and local LLM translation APIs.
 
 ```typescript
 interface AiProvider {
-  translate(
-    text: string,
-    sourceLang: string,
-    targetLang: string,
-    options?: TranslateOptions,
-  ): Promise<string>;
+ translate(
+ text: string,
+ sourceLang: string,
+ targetLang: string,
+ options?: TranslateOptions,
+ ): Promise<string>;
 }
 
 interface TranslateOptions {
-  context?: string;       // key description, UI context
-  tone?: 'formal' | 'friendly' | 'technical';
-  glossary?: GlossaryTerm[];
-  contentType?: ContentType;  // ui | email | legal | marketing | article | chat | technical | general
+ context?: string; // key description, UI context
+ tone?: 'formal' | 'friendly' | 'technical';
+ glossary?: GlossaryTerm[];
+ contentType?: ContentType; // ui | email | legal | marketing | article | chat | technical | general
 }
 ```
 
@@ -26,10 +26,10 @@ interface TranslateOptions {
 
 | Provider | Class | Use case |
 |----------|-------|----------|
-| OpenAI | `OpenAiProvider` | Production default (GPT-4o) |
-| Google Gemini | `GeminiProvider` | Fallback, cost balance |
-| Anthropic Claude | `ClaudeProvider` | Quality alternative |
+| Google Gemini | `GeminiProvider` | **Primary** (cloud default: `gemini-2.5-flash-lite`) |
+| OpenAI | `OpenAiProvider` | **Cross-provider fallback** (`gpt-4.1-mini` → optional `gpt-4.1`) |
 | Ollama | `OllamaProvider` | Local/dev, privacy, zero API cost |
+| Anthropic Claude | `ClaudeProvider` | Quality alternative (not implemented) |
 
 Recommended local model: `qwen2.5:7b` (best multilingual accuracy via Ollama).
 
@@ -57,17 +57,38 @@ Optional AI classifier (`OLLAMA_ROUTING_MODE`) and polish pass (`OLLAMA_POLISH_E
 
 ## Fallback chain
 
+Cloud testing / production default (`AI_PROVIDER_FALLBACK=openai`):
+
 ```text
-Primary (e.g. OpenAI)
-  │ fail (timeout, rate limit, error)
-  ▼
-Secondary (e.g. Gemini)
-  │ fail
-  ▼
-Tertiary (Ollama local)
+Primary (Gemini: gemini-2.5-flash-lite)
+ │ transient retry (ADR 0010)
+ │ optional GEMINI_MODEL_FALLBACK tier (ADR 0011)
+ │ fail (timeout, rate limit, error)
+ ▼
+Secondary (OpenAI: gpt-4.1-mini)
+ │ transient retry
+ │ optional OPENAI_MODEL_FALLBACK tier (ADR 0013)
+ │ fail
+ ▼
+Job item failed (no Ollama in cloud chain)
 ```
 
-Log every fallback in audit + cost analytics.
+Local Ollama dev may use `AI_PROVIDER_FALLBACK=gemini,ollama` or `ollama` only.
+
+Env vars:
+
+| Variable | Purpose |
+|----------|---------|
+| `AI_PROVIDER` | Default job provider when API/UI omit `provider` (default `gemini`) |
+| `AI_PROVIDER_FALLBACK` | Comma-separated cross-provider chain on failure |
+| `GEMINI_MODEL` / `GEMINI_MODEL_FALLBACK` | Primary + optional in-provider Gemini tier |
+| `OPENAI_MODEL` / `OPENAI_MODEL_FALLBACK` | Primary + optional in-provider OpenAI tier |
+
+## Dashboard and API defaults
+
+- **Dashboard:** Create Job does not send `provider`; server `AI_PROVIDER` applies.
+- **API:** `GET /config/ai` exposes `defaultProvider`, `supportedProviders`, and `providerFallback` for clients.
+- **Override:** `POST /jobs` optional `provider` field for programmatic per-job choice.
 
 ## Prompt rules
 
@@ -88,10 +109,10 @@ System prompt must instruct model to:
 
 ```text
 Pre-process (chunk, sanitize HTML)
-  → Memory lookup
-  → LLM translate
-  → Optional post-edit pass (second model)
-  → Store + cache
+ → Memory lookup
+ → LLM translate
+ → Optional post-edit pass (second model)
+ → Store + cache
 ```
 
 ## Commands / services
@@ -104,6 +125,9 @@ Pre-process (chunk, sanitize HTML)
 - Never import OpenAI SDK directly outside `ai-provider/infrastructure/`.
 - All provider errors mapped to domain exceptions (`ProviderUnavailableException`).
 - Timeouts required on every external call.
+- Gemini retries transient HTTP 502/503/429 in-process before fallback (ADR 0010).
+- Optional `GEMINI_MODEL_FALLBACK` tries a second Gemini model tier after primary transient exhaustion (ADR 0011).
+- Optional `OPENAI_MODEL_FALLBACK` tries a second OpenAI model tier after primary transient exhaustion (ADR 0013).
 
 ## Related
 

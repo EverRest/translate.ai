@@ -2,6 +2,7 @@ import { useAuth } from '../../auth/hooks/useAuth';
 import { ProfileSection } from '../components/ProfileSection';
 import { TenantSection } from '../components/TenantSection';
 import { AccountUsageSection } from '../components/AccountUsageSection';
+import { TenantAtlassianOAuthSection } from '../components/TenantAtlassianOAuthSection';
 import { useAccountUsage } from '../../analytics/hooks/useAnalytics';
 
 export function SettingsPage() {
@@ -27,6 +28,7 @@ export function SettingsPage() {
         <div className="space-y-6">
           <ProfileSection user={user} />
           <TenantSection user={user} />
+          {user.role === 'admin' && <TenantAtlassianOAuthSection />}
           {accountUsage.isLoading && (
             <p className="text-slate-400">Loading usage statistics…</p>
           )}

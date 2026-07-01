@@ -19,14 +19,21 @@ import {
 import { parsePagination } from '../../shared/utils/string.utils';
 import {
   ArchiveProjectCommand,
+  CopyProjectSettingsCommand,
   CreateProjectCommand,
   UpdateProjectCommand,
 } from '../application/commands/project.commands';
 import {
   GetProjectQuery,
+  ListDomainPresetsQuery,
   ListProjectsQuery,
 } from '../application/queries/project.queries';
-import { CreateProjectDto, UpdateProjectDto } from './dto/project.dto';
+import {
+  CreateProjectDto,
+  CopyProjectSettingsDto,
+  UpdateProjectDto,
+} from './dto/project.dto';
+import { parseDomainProfile } from '../../shared/domain/domain-profile.utils';
 
 @ApiTags('projects')
 @ApiBearerAuth()
@@ -54,7 +61,44 @@ export class ProjectsController {
   @ApiOperation({ summary: 'Create project' })
   async create(@CurrentUser() user: AuthUser, @Body() dto: CreateProjectDto) {
     const data = await this.commandBus.execute(
-      new CreateProjectCommand(user.tenantId, dto.name, dto.description),
+      new CreateProjectCommand(
+        user.tenantId,
+        dto.name,
+        dto.description,
+        parseDomainProfile(dto.domainProfile),
+      ),
+    );
+    return successResponse(data);
+  }
+
+  @Get(':projectId/domain-presets')
+  @ApiOperation({ summary: 'List domain context presets for a project' })
+  async listDomainPresets(
+    @CurrentUser() user: AuthUser,
+    @Param('projectId') projectId: string,
+  ) {
+    const data = await this.queryBus.execute(
+      new ListDomainPresetsQuery(user.tenantId, projectId),
+    );
+    return successResponse(data);
+  }
+
+  @Post(':projectId/copy-settings')
+  @ApiOperation({
+    summary: 'Copy domain profile and/or glossary from another project',
+  })
+  async copySettings(
+    @CurrentUser() user: AuthUser,
+    @Param('projectId') projectId: string,
+    @Body() dto: CopyProjectSettingsDto,
+  ) {
+    const data = await this.commandBus.execute(
+      new CopyProjectSettingsCommand(
+        user.tenantId,
+        projectId,
+        dto.sourceProjectId,
+        dto.include,
+      ),
     );
     return successResponse(data);
   }
@@ -84,6 +128,10 @@ export class ProjectsController {
         projectId,
         dto.name,
         dto.description,
+        dto.domainProfile !== undefined
+          ? parseDomainProfile(dto.domainProfile)
+          : undefined,
+        dto.autoTerminologyScan,
       ),
     );
     return successResponse(data);

@@ -1,4 +1,5 @@
 import { ProviderTranslateResult } from '../infrastructure/prompt.builder';
+import { DomainProfile } from '../../shared/domain/domain-profile.types';
 
 export interface AiProvider {
   translate(
@@ -26,14 +27,21 @@ export interface GlossaryTermOption {
   doNotTranslate: boolean;
 }
 
+export interface ReferenceTranslationOption {
+  language: string;
+  value: string;
+}
+
 export interface TranslateOptions {
   context?: string;
   keyDescription?: string;
   projectName?: string;
   projectDescription?: string;
+  domainProfile?: DomainProfile | null;
   tone?: 'formal' | 'friendly' | 'technical';
   glossary?: GlossaryTermOption[];
   contentType?: ContentType;
+  referenceTranslations?: ReferenceTranslationOption[];
   retryHint?: string;
 }
 

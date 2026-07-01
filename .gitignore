@@ -9,12 +9,6 @@ build/
 **/build/
 *.tsbuildinfo
 
-# Docs folders
-docs/backlog
-docs/issues
-docs/database
-docs/api
-
 # Test & coverage artifacts
 coverage/
 **/coverage/
@@ -50,11 +44,11 @@ Thumbs.db
 *~
 
 # Local tooling / agent notes (not for version control)
-AGENTS.MD
 .cursor/
-./docs
-./docs/*
-CHANGELOG.md
+docs/backlog/raw.md
+
+# Runtime import uploads (local dev)
+**/.imports/
 
 # Keep lockfiles — required for npm ci in Docker and CI
 # (do not ignore package-lock.json)

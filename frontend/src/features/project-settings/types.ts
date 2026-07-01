@@ -25,4 +25,10 @@ export type WebhookCreated = Webhook & {
   secret: string;
 };
 
-export type SettingsTab = 'languages' | 'api-keys' | 'webhooks';
+export type SettingsTab =
+  | 'domain'
+  | 'consistency'
+  | 'languages'
+  | 'api-keys'
+  | 'webhooks'
+  | 'integrations';

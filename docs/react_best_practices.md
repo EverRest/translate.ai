@@ -8,9 +8,9 @@ Here are **50 React.js best practices** grouped by category, with practical exam
 
 ```jsx
 class User extends React.Component {
-    render() {
-        return <div>{this.props.name}</div>;
-    }
+ render() {
+ return <div>{this.props.name}</div>;
+ }
 }
 ```
 
@@ -18,7 +18,7 @@ class User extends React.Component {
 
 ```jsx
 function User({ name }) {
-    return <div>{name}</div>;
+ return <div>{name}</div>;
 }
 ```
 
@@ -36,7 +36,7 @@ Benefits:
 
 ```jsx
 function Dashboard() {
-   // 500 lines of code
+ // 500 lines of code
 }
 ```
 
@@ -44,13 +44,13 @@ function Dashboard() {
 
 ```jsx
 function Dashboard() {
-   return (
-      <>
-         <Header />
-         <Sidebar />
-         <Content />
-      </>
-   );
+ return (
+ <>
+ <Header />
+ <Sidebar />
+ <Content />
+ </>
+ );
 }
 ```
 
@@ -66,7 +66,7 @@ Rule:
 
 ```jsx
 function User(props) {
-    return <h1>{props.name}</h1>;
+ return <h1>{props.name}</h1>;
 }
 ```
 
@@ -74,7 +74,7 @@ function User(props) {
 
 ```jsx
 function User({ name }) {
-    return <h1>{name}</h1>;
+ return <h1>{name}</h1>;
 }
 ```
 
@@ -130,9 +130,9 @@ return (
 
 ```jsx
 return (
-  <section>
-    <h1>Hello</h1>
-  </section>
+ <section>
+ <h1>Hello</h1>
+ </section>
 );
 ```
 
@@ -144,10 +144,10 @@ return (
 
 ```jsx
 return (
-  <div>
-    <Header />
-    <Content />
-  </div>
+ <div>
+ <Header />
+ <Content />
+ </div>
 );
 ```
 
@@ -155,10 +155,10 @@ return (
 
 ```jsx
 return (
-  <>
-    <Header />
-    <Content />
-  </>
+ <>
+ <Header />
+ <Content />
+ </>
 );
 ```
 
@@ -170,7 +170,7 @@ return (
 
 ```jsx
 items.map(item =>
-   <Button onClick={() => deleteItem(item.id)} />
+ <Button onClick={() => deleteItem(item.id)} />
 )
 ```
 
@@ -178,11 +178,11 @@ items.map(item =>
 
 ```jsx
 const handleDelete = useCallback((id) => {
-   deleteItem(id);
+ deleteItem(id);
 }, []);
 
 items.map(item =>
-   <Button onClick={() => handleDelete(item.id)} />
+ <Button onClick={() => handleDelete(item.id)} />
 )
 ```
 
@@ -194,7 +194,7 @@ items.map(item =>
 
 ```jsx
 items.map((item, index) =>
-   <Item key={index} />
+ <Item key={index} />
 )
 ```
 
@@ -202,7 +202,7 @@ items.map((item, index) =>
 
 ```jsx
 items.map(item =>
-   <Item key={item.id} />
+ <Item key={item.id} />
 )
 ```
 
@@ -242,7 +242,7 @@ Repeated 20 times.
 
 ```jsx
 function PrimaryButton(props) {
-  return <button className="primary" {...props} />;
+ return <button className="primary" {...props} />;
 }
 ```
 
@@ -258,13 +258,13 @@ Duplicated fetch logic everywhere.
 
 ```jsx
 function useUsers() {
-   const [users, setUsers] = useState([]);
+ const [users, setUsers] = useState([]);
 
-   useEffect(() => {
-      fetchUsers().then(setUsers);
-   }, []);
+ useEffect(() => {
+ fetchUsers().then(setUsers);
+ }, []);
 
-   return users;
+ return users;
 }
 ```
 
@@ -276,7 +276,7 @@ function useUsers() {
 
 ```jsx
 if (show) {
-   useEffect(() => {});
+ useEffect(() => {});
 }
 ```
 
@@ -284,7 +284,7 @@ if (show) {
 
 ```jsx
 useEffect(() => {
-   if(show) {}
+ if(show) {}
 }, [show]);
 ```
 
@@ -296,7 +296,7 @@ useEffect(() => {
 
 ```jsx
 useEffect(() => {
-   fetchUser(id);
+ fetchUser(id);
 }, []);
 ```
 
@@ -304,7 +304,7 @@ useEffect(() => {
 
 ```jsx
 useEffect(() => {
-   fetchUser(id);
+ fetchUser(id);
 }, [id]);
 ```
 
@@ -314,7 +314,7 @@ useEffect(() => {
 
 ```jsx
 const total = useMemo(() => {
-   return calculateTotal(items);
+ return calculateTotal(items);
 }, [items]);
 ```
 
@@ -324,7 +324,7 @@ const total = useMemo(() => {
 
 ```jsx
 const handleSave = useCallback(() => {
-   save();
+ save();
 }, []);
 ```
 
@@ -348,7 +348,7 @@ Measure first.
 
 ```jsx
 const UserCard = React.memo(({ user }) => {
-   return <div>{user.name}</div>;
+ return <div>{user.name}</div>;
 });
 ```
 
@@ -440,7 +440,7 @@ const userCount = users.length;
 ```jsx
 users: [
  {
-   posts:[]
+ posts:[]
  }
 ]
 ```
@@ -488,8 +488,8 @@ const [form, setForm] = useState({});
 
 ```tsx
 type User = {
-  id:number;
-  name:string;
+ id:number;
+ name:string;
 }
 ```
 
@@ -501,7 +501,7 @@ Huge reduction in bugs.
 
 ```tsx
 interface UserCardProps {
-   user: User;
+ user: User;
 }
 ```
 
@@ -541,7 +541,7 @@ user && user.profile && user.profile.name
 
 ```jsx
 if (loading) {
-   return <Spinner />;
+ return <Spinner />;
 }
 ```
 
@@ -551,7 +551,7 @@ if (loading) {
 
 ```jsx
 if(error){
-   return <ErrorMessage />;
+ return <ErrorMessage />;
 }
 ```
 
@@ -561,7 +561,7 @@ if(error){
 
 ```jsx
 <ErrorBoundary>
-   <Dashboard />
+ <Dashboard />
 </ErrorBoundary>
 ```
 
@@ -571,7 +571,7 @@ if(error){
 
 ```jsx
 const Dashboard = lazy(() =>
-  import("./Dashboard")
+ import("./Dashboard")
 );
 ```
 
@@ -581,7 +581,7 @@ const Dashboard = lazy(() =>
 
 ```jsx
 <Suspense fallback={<Loader />}>
-   <Dashboard />
+ <Dashboard />
 </Suspense>
 ```
 
@@ -619,8 +619,8 @@ userService.getUsers();
 
 ```jsx
 export const userService = {
-   getUsers,
-   createUser
+ getUsers,
+ createUser
 };
 ```
 
@@ -630,8 +630,8 @@ export const userService = {
 
 ```jsx
 const { data } = useQuery({
-   queryKey:['users'],
-   queryFn:getUsers
+ queryKey:['users'],
+ queryFn:getUsers
 });
 ```
 
@@ -696,9 +696,9 @@ npm install prettier
 ```text
 src/
  ├── features/
- │   ├── users/
- │   ├── auth/
- │   └── products/
+ │ ├── users/
+ │ ├── auth/
+ │ └── products/
 ```
 
 instead of:
@@ -730,7 +730,7 @@ Example:
 
 ```jsx
 test("renders user", () => {
-  render(<User name="John" />);
+ render(<User name="John" />);
 });
 ```
 
@@ -752,7 +752,7 @@ Test behavior, not implementation.
 
 ```jsx
 function User() {
-   // 100 lines of business logic
+ // 100 lines of business logic
 }
 ```
 
@@ -777,25 +777,25 @@ A scalable structure:
 ```text
 src/
 ├── app/
-│   ├── router
-│   ├── providers
-│   └── store
+│ ├── router
+│ ├── providers
+│ └── store
 │
 ├── features/
-│   ├── auth/
-│   │   ├── api
-│   │   ├── hooks
-│   │   ├── components
-│   │   ├── pages
-│   │   └── types
-│   │
-│   └── users/
+│ ├── auth/
+│ │ ├── api
+│ │ ├── hooks
+│ │ ├── components
+│ │ ├── pages
+│ │ └── types
+│ │
+│ └── users/
 │
 ├── shared/
-│   ├── components
-│   ├── hooks
-│   ├── utils
-│   └── types
+│ ├── components
+│ ├── hooks
+│ ├── utils
+│ └── types
 │
 └── main.tsx
 ```

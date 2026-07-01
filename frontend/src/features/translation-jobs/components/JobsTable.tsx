@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { TranslationJob } from '../types';
+import { useAiConfig } from '../hooks/useAiConfig';
 import { JobStatusBadge } from './JobStatusBadge';
 
 type JobsTableProps = {
@@ -7,6 +8,8 @@ type JobsTableProps = {
 };
 
 export function JobsTable({ jobs }: JobsTableProps) {
+  const { data: aiConfig } = useAiConfig();
+  const defaultProvider = aiConfig?.defaultProvider ?? 'gemini';
   return (
     <div className="overflow-hidden rounded-xl border border-slate-800">
       <table className="min-w-full divide-y divide-slate-800">
@@ -48,7 +51,7 @@ export function JobsTable({ jobs }: JobsTableProps) {
                 {job.itemCount}
               </td>
               <td className="px-4 py-4 text-sm capitalize text-slate-400">
-                {job.provider ?? 'openai'}
+                {job.provider ?? defaultProvider}
               </td>
               <td className="px-4 py-4 text-sm text-slate-400">
                 {new Date(job.createdAt).toLocaleString()}

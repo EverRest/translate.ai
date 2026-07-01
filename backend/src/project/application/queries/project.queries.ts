@@ -33,3 +33,10 @@ export class ListWebhooksQuery {
     public readonly projectId: string,
   ) {}
 }
+
+export class ListDomainPresetsQuery {
+  constructor(
+    public readonly tenantId: string,
+    public readonly projectId: string,
+  ) {}
+}

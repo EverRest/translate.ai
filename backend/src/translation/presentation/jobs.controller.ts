@@ -12,7 +12,12 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
 import type { AuthUser } from '../../shared/auth/auth-user.interface';
@@ -33,6 +38,10 @@ import {
 } from '../application/job.commands';
 import { TranslationSseService } from '../application/services/translation-sse.service';
 import { CreateJobDto } from './dto/create-job.dto';
+import {
+  TranslationJobCreatedResponseDto,
+  TranslationJobStatusDto,
+} from './dto/job-status.dto';
 
 function scopedProjectId(user: AuthUser): string | undefined {
   return user.authMethod === 'api_key' ? user.projectId : undefined;
@@ -71,6 +80,7 @@ export class JobsController {
 
   @Post()
   @ApiOperation({ summary: 'Create translation job' })
+  @ApiOkResponse({ type: TranslationJobCreatedResponseDto })
   async create(@CurrentUser() user: AuthUser, @Body() dto: CreateJobDto) {
     const projectId = resolveProjectId(user, dto.projectId);
     const data = await this.commandBus.execute(
@@ -83,6 +93,7 @@ export class JobsController {
         dto.provider,
         dto.clientRequestId,
         user.authMethod === 'jwt' ? user.userId : undefined,
+        dto.onlyStale,
       ),
     );
     return successResponse(data);
@@ -109,6 +120,7 @@ export class JobsController {
 
   @Get(':jobId')
   @ApiOperation({ summary: 'Get translation job status' })
+  @ApiOkResponse({ type: TranslationJobStatusDto })
   async get(@CurrentUser() user: AuthUser, @Param('jobId') jobId: string) {
     const data = await this.queryBus.execute(
       new GetJobStatusQuery(user.tenantId, jobId, scopedProjectId(user)),

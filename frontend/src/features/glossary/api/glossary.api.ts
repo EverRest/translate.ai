@@ -7,7 +7,9 @@ import {
 } from '../../../shared/api/client';
 import type { PaginatedData } from '../../../shared/api/types';
 import type {
+  AnalyzeGlossaryResult,
   CreateGlossaryTermInput,
+  GlossarySuggestion,
   GlossaryTerm,
   UpdateGlossaryTermInput,
 } from '../types';
@@ -58,6 +60,44 @@ export async function updateGlossaryTerm(
 export async function deleteGlossaryTerm(projectId: string, termId: string) {
   const response = await apiDelete<ApiSuccess<{ deleted: boolean }>>(
     `/projects/${projectId}/glossary/terms/${termId}`,
+  );
+  return response.data;
+}
+
+export async function listGlossarySuggestions(
+  projectId: string,
+  status: GlossarySuggestion['status'] = 'pending',
+) {
+  const params = new URLSearchParams({ status });
+  const response = await apiGet<ApiSuccess<{ items: GlossarySuggestion[] }>>(
+    `/projects/${projectId}/glossary/suggestions?${params.toString()}`,
+  );
+  return response.data.items;
+}
+
+export async function analyzeGlossary(projectId: string) {
+  const response = await apiPost<ApiSuccess<AnalyzeGlossaryResult>>(
+    `/projects/${projectId}/glossary/suggestions/analyze`,
+  );
+  return response.data;
+}
+
+export async function approveGlossarySuggestion(
+  projectId: string,
+  suggestionId: string,
+) {
+  const response = await apiPost<
+    ApiSuccess<{ suggestion: GlossarySuggestion; term: GlossaryTerm }>
+  >(`/projects/${projectId}/glossary/suggestions/${suggestionId}/approve`);
+  return response.data;
+}
+
+export async function rejectGlossarySuggestion(
+  projectId: string,
+  suggestionId: string,
+) {
+  const response = await apiPost<ApiSuccess<{ rejected: boolean }>>(
+    `/projects/${projectId}/glossary/suggestions/${suggestionId}/reject`,
   );
   return response.data;
 }

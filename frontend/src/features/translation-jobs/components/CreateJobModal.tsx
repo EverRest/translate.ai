@@ -4,10 +4,9 @@ import { Modal } from '../../../shared/ui/Modal';
 import { useProjectsList } from '../../projects/hooks/useProjects';
 import { useTranslationKeys } from '../../translation-keys/hooks/useTranslationKeys';
 import { useProjectLanguages } from '../hooks/useTranslationJobs';
+import { useAiConfig } from '../hooks/useAiConfig';
 import { parseInlineKeyItems } from '../utils/parseInlineKeyItems';
 import type { CreateJobInput } from '../types';
-
-const PROVIDERS = ['openai', 'gemini', 'ollama'] as const;
 
 type KeySource = 'catalog' | 'inline';
 
@@ -40,8 +39,9 @@ export function CreateJobModal({
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [keySource, setKeySource] = useState<KeySource>('catalog');
   const [inlineKeys, setInlineKeys] = useState('');
-  const [provider, setProvider] = useState<string>('openai');
+  const [onlyStale, setOnlyStale] = useState(false);
   const [formError, setFormError] = useState<string>();
+  const { data: aiConfig } = useAiConfig();
 
   const { data: languagesData } = useProjectLanguages(projectId || undefined);
   const { data: keysData } = useTranslationKeys(projectId || undefined, 1, 200);
@@ -57,7 +57,7 @@ export function CreateJobModal({
       setSelectedKeys([]);
       setKeySource('catalog');
       setInlineKeys('');
-      setProvider('openai');
+      setOnlyStale(false);
       setFormError(undefined);
     }
   }, [open, defaultProjectId, projects]);
@@ -120,6 +120,18 @@ export function CreateJobModal({
       return;
     }
 
+    if (onlyStale) {
+      onSubmit({
+        projectId,
+        languages,
+        onlyStale: true,
+        ...(keySource === 'catalog' && selectedKeys.length > 0
+          ? { keys: selectedKeys }
+          : {}),
+      });
+      return;
+    }
+
     if (keySource === 'catalog') {
       if (selectedKeys.length === 0) {
         setFormError('Select at least one translation key.');
@@ -129,7 +141,6 @@ export function CreateJobModal({
         projectId,
         languages,
         keys: selectedKeys,
-        provider: provider || undefined,
       });
       return;
     }
@@ -144,7 +155,6 @@ export function CreateJobModal({
         projectId,
         languages,
         keyItems,
-        provider: provider || undefined,
       });
     } catch (parseError) {
       setFormError(
@@ -333,23 +343,27 @@ export function CreateJobModal({
           )}
         </div>
 
-        <div>
-          <label className="block text-sm text-slate-300" htmlFor="provider">
-            AI provider
-          </label>
-          <select
-            id="provider"
-            value={provider}
-            onChange={(event) => setProvider(event.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-sky-500"
-          >
-            {PROVIDERS.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </div>
+        <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-300">
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={onlyStale}
+            onChange={(event) => setOnlyStale(event.target.checked)}
+          />
+          <span>
+            Stale keys only — re-translate translations whose source text
+            changed since last job (optional key selection limits scope).
+          </span>
+        </label>
+
+        <p className="text-xs text-slate-500">
+          Uses server AI provider (
+          <span className="capitalize text-slate-400">
+            {aiConfig?.defaultProvider ?? 'gemini'}
+          </span>
+          ). Override via API with optional{' '}
+          <span className="font-mono text-slate-400">provider</span> field.
+        </p>
 
         {(formError || error) && (
           <p className="text-sm text-red-400">{formError ?? error}</p>

@@ -7,6 +7,9 @@ import {
   ListTranslationsQuery,
   LookupTranslationsQuery,
 } from '../translation.queries';
+import { buildTranslationKeyListFilter } from '../utils/translation-key-filter.utils';
+
+import { isTranslationStale } from '../utils/stale-translation.utils';
 
 function mapTranslation(translation: {
   id: string;
@@ -15,6 +18,7 @@ function mapTranslation(translation: {
   status: string;
   provider: string | null;
   version: number;
+  sourceTextSnapshot: string | null;
   translationKey: { key: string; sourceText: string };
 }) {
   return {
@@ -26,6 +30,10 @@ function mapTranslation(translation: {
     status: translation.status,
     provider: translation.provider,
     version: translation.version,
+    isStale: isTranslationStale(
+      translation.sourceTextSnapshot,
+      translation.translationKey.sourceText,
+    ),
   };
 }
 
@@ -43,9 +51,18 @@ export class ListTranslationsHandler implements IQueryHandler<ListTranslationsQu
       query.projectId,
     );
 
+    const keyFilter = buildTranslationKeyListFilter(
+      query.projectId,
+      undefined,
+      {
+        localizationObjectId: query.localizationObjectId,
+        keyPrefix: query.keyPrefix,
+      },
+    );
+
     const where = {
       translationKey: {
-        projectId: query.projectId,
+        ...keyFilter,
         ...(query.keys?.length ? { key: { in: query.keys } } : {}),
       },
       ...(query.language ? { language: query.language } : {}),

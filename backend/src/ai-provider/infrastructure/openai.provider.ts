@@ -7,6 +7,13 @@ import {
   estimateOpenAiCost,
   ProviderTranslateResult,
 } from './prompt.builder';
+import { resolveOpenAiModelChain } from './openai-model-chain.utils';
+import {
+  computeRetryDelayMs,
+  isTransientHttpStatus,
+  parseHttpStatusFromProviderError,
+  sleep,
+} from './provider-http-retry.utils';
 
 @Injectable()
 export class OpenAiProvider implements AiProvider {
@@ -28,7 +35,10 @@ export class OpenAiProvider implements AiProvider {
       );
     }
 
-    const model = this.config.get<string>('OPENAI_MODEL', 'gpt-4o-mini');
+    const primaryModel = this.config.get<string>('OPENAI_MODEL', 'gpt-4o-mini');
+    const fallbackModel = this.config.get<string>('OPENAI_MODEL_FALLBACK', '');
+    const models = resolveOpenAiModelChain(primaryModel, fallbackModel);
+
     const { systemPrompt, userPrompt } = buildTranslationPrompts(
       text,
       sourceLang,
@@ -36,6 +46,108 @@ export class OpenAiProvider implements AiProvider {
       options,
     );
 
+    const maxRetries = this.config.get<number>('GEMINI_TRANSIENT_RETRIES', 2);
+    const baseDelayMs = this.config.get<number>(
+      'GEMINI_TRANSIENT_RETRY_DELAY_MS',
+      1000,
+    );
+
+    let lastError: ProviderUnavailableException | undefined;
+
+    for (let modelIndex = 0; modelIndex < models.length; modelIndex += 1) {
+      const model = models[modelIndex];
+      try {
+        return await this.translateWithModel(
+          apiKey,
+          model,
+          systemPrompt,
+          userPrompt,
+          maxRetries,
+          baseDelayMs,
+        );
+      } catch (error) {
+        if (!(error instanceof ProviderUnavailableException)) {
+          throw error;
+        }
+
+        lastError = error;
+        const status = parseHttpStatusFromProviderError(error.message);
+        const transientExhausted =
+          status !== null && isTransientHttpStatus(status);
+        const hasNextModel = modelIndex < models.length - 1;
+
+        if (transientExhausted && hasNextModel) {
+          this.logger.warn(
+            `OpenAI model fallback: ${model} → ${models[modelIndex + 1]}`,
+          );
+          continue;
+        }
+
+        throw error;
+      }
+    }
+
+    throw (
+      lastError ??
+      new ProviderUnavailableException('openai', 'translation failed')
+    );
+  }
+
+  private async translateWithModel(
+    apiKey: string,
+    model: string,
+    systemPrompt: string,
+    userPrompt: string,
+    maxRetries: number,
+    baseDelayMs: number,
+  ): Promise<ProviderTranslateResult> {
+    const maxAttempts = maxRetries + 1;
+    let lastError: ProviderUnavailableException | undefined;
+
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      try {
+        return await this.requestTranslation(
+          apiKey,
+          model,
+          systemPrompt,
+          userPrompt,
+        );
+      } catch (error) {
+        if (!(error instanceof ProviderUnavailableException)) {
+          throw error;
+        }
+
+        lastError = error;
+        const status = parseHttpStatusFromProviderError(error.message);
+        const canRetry =
+          attempt < maxAttempts - 1 &&
+          status !== null &&
+          isTransientHttpStatus(status);
+
+        if (!canRetry) {
+          throw error;
+        }
+
+        const delayMs = computeRetryDelayMs(attempt, baseDelayMs);
+        this.logger.warn(
+          `OpenAI transient HTTP ${status} on ${model}; retry ${attempt + 1}/${maxRetries} in ${delayMs}ms`,
+        );
+        await sleep(delayMs);
+      }
+    }
+
+    throw (
+      lastError ??
+      new ProviderUnavailableException('openai', 'translation failed')
+    );
+  }
+
+  private async requestTranslation(
+    apiKey: string,
+    model: string,
+    systemPrompt: string,
+    userPrompt: string,
+  ): Promise<ProviderTranslateResult> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 60_000);
 

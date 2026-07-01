@@ -3,6 +3,12 @@ import {
   GlossaryTermOption,
   TranslateOptions,
 } from '../domain/ai-provider.interface';
+import {
+  cyrillicScriptHint,
+  isCyrillicTargetLang,
+} from '../../shared/utils/language-script.utils';
+import { formatReferenceTranslationsPrompt } from '../../shared/utils/reference-translation-prompt.utils';
+import { formatDomainProfilePrompt } from '../../shared/domain/domain-profile.utils';
 
 export interface ProviderUsageMetrics {
   model: string;
@@ -74,6 +80,13 @@ function buildUserPromptParts(
     parts.push(`Context: ${options.context.trim()}`);
   }
 
+  const referenceHint = options?.referenceTranslations
+    ? formatReferenceTranslationsPrompt(options.referenceTranslations)
+    : '';
+  if (referenceHint) {
+    parts.push(referenceHint.trim());
+  }
+
   if (options?.retryHint?.trim()) {
     parts.push(`Note: ${options.retryHint.trim()}`);
   }
@@ -99,13 +112,20 @@ export function buildTranslationPrompts(
     CONTENT_TYPE_HINTS[options.contentType]
       ? `\n${CONTENT_TYPE_HINTS[options.contentType]}`
       : '';
+  const domainHint = formatDomainProfilePrompt(
+    options?.domainProfile,
+    targetLang,
+  );
   const glossaryHint = options?.glossary
     ? formatGlossaryPrompt(options.glossary)
+    : '';
+  const scriptHint = isCyrillicTargetLang(targetLang)
+    ? `\n${cyrillicScriptHint(targetLang)}`
     : '';
 
   const systemPrompt = `You are a professional translator. Translate from ${sourceLang} to ${targetLang}.
 Preserve formatting, template placeholders (e.g. {{...}}, %%...%%), and HTML tags exactly as-is — do not translate or alter them.
-Return only the translated text without explanations or surrounding quotation marks.${toneHint}${contentHint}${contentTypeGuidance}${glossaryHint}`;
+Return only the translated text without explanations or surrounding quotation marks.${toneHint}${contentHint}${contentTypeGuidance}${domainHint}${glossaryHint}${scriptHint}`;
 
   const userPrompt = buildUserPromptParts(text, options);
 
@@ -122,6 +142,8 @@ export function estimateOpenAiCost(
   outputTokens: number,
 ): number {
   const rates: Record<string, { input: number; output: number }> = {
+    'gpt-4.1-mini': { input: 0.4 / 1_000_000, output: 1.6 / 1_000_000 },
+    'gpt-4.1': { input: 2.0 / 1_000_000, output: 8.0 / 1_000_000 },
     'gpt-4o-mini': { input: 0.15 / 1_000_000, output: 0.6 / 1_000_000 },
     'gpt-4o': { input: 2.5 / 1_000_000, output: 10 / 1_000_000 },
   };
@@ -135,6 +157,10 @@ export function estimateGeminiCost(
   outputTokens: number,
 ): number {
   const rates: Record<string, { input: number; output: number }> = {
+    'gemini-2.5-flash-lite': {
+      input: 0.075 / 1_000_000,
+      output: 0.3 / 1_000_000,
+    },
     'gemini-2.0-flash': { input: 0.1 / 1_000_000, output: 0.4 / 1_000_000 },
     'gemini-1.5-flash': { input: 0.075 / 1_000_000, output: 0.3 / 1_000_000 },
   };

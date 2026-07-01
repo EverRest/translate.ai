@@ -1,8 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  analyzeGlossary,
+  approveGlossarySuggestion,
   createGlossaryTerm,
   deleteGlossaryTerm,
+  listGlossarySuggestions,
   listGlossaryTerms,
+  rejectGlossarySuggestion,
   updateGlossaryTerm,
 } from '../api/glossary.api';
 import type {
@@ -59,6 +63,60 @@ export function useDeleteGlossaryTerm(projectId: string) {
     mutationFn: (termId: string) => deleteGlossaryTerm(projectId, termId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['glossary', projectId] });
+    },
+  });
+}
+
+export function useGlossarySuggestions(
+  projectId: string | undefined,
+  pollWhileWaiting = false,
+) {
+  return useQuery({
+    queryKey: ['glossary-suggestions', projectId],
+    queryFn: () => listGlossarySuggestions(projectId!, 'pending'),
+    enabled: Boolean(projectId),
+    refetchInterval: pollWhileWaiting ? 3000 : false,
+  });
+}
+
+export function useAnalyzeGlossary(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => analyzeGlossary(projectId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['glossary-suggestions', projectId],
+      });
+    },
+  });
+}
+
+export function useApproveGlossarySuggestion(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (suggestionId: string) =>
+      approveGlossarySuggestion(projectId, suggestionId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['glossary', projectId] });
+      void queryClient.invalidateQueries({
+        queryKey: ['glossary-suggestions', projectId],
+      });
+    },
+  });
+}
+
+export function useRejectGlossarySuggestion(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (suggestionId: string) =>
+      rejectGlossarySuggestion(projectId, suggestionId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['glossary-suggestions', projectId],
+      });
     },
   });
 }

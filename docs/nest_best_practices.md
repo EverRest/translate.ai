@@ -19,10 +19,10 @@ repositories/
 ```text
 src/
 ├── users/
-│   ├── users.module.ts
-│   ├── users.controller.ts
-│   ├── users.service.ts
-│   └── dto/
+│ ├── users.module.ts
+│ ├── users.controller.ts
+│ ├── users.service.ts
+│ └── dto/
 ├── auth/
 ├── payments/
 ```
@@ -382,427 +382,427 @@ secret: process.env.JWT_SECRET,
 ```ts
 interface UserRepository {
 create(dto: CreateUserDto): Promise<User>;
-    }
-    ```
+ }
+ ```
 
-    ---
+ ---
 
-    # 25. Hide ORM Behind Repositories
+ # 25. Hide ORM Behind Repositories
 
-    Service should not know:
+ Service should not know:
 
-    ```ts
-    Prisma
-    TypeORM
-    Sequelize
-    ```
+ ```ts
+ Prisma
+ TypeORM
+ Sequelize
+ ```
 
-    ---
+ ---
 
-    # 26. Prefer Prisma for New Projects
+ # 26. Prefer Prisma for New Projects
 
-    Prisma ORM provides:
+ Prisma ORM provides:
 
-    * Type safety
-    * Better migrations
-    * Better DX
+ * Type safety
+ * Better migrations
+ * Better DX
 
-    ---
+ ---
 
-    # 27. Avoid Fat Services
+ # 27. Avoid Fat Services
 
-    Split:
+ Split:
 
-    ```ts
-    CreateUserUseCase
-    DeleteUserUseCase
-    UpdateUserUseCase
-    ```
+ ```ts
+ CreateUserUseCase
+ DeleteUserUseCase
+ UpdateUserUseCase
+ ```
 
-    ---
+ ---
 
-    # 28. Use CQRS for Complex Domains
+ # 28. Use CQRS for Complex Domains
 
-    Use NestJS CQRS
+ Use NestJS CQRS
 
-    ```ts
-    Command
-    Handler
-    Query
-    Handler
-    ```
+ ```ts
+ Command
+ Handler
+ Query
+ Handler
+ ```
 
-    ---
+ ---
 
-    # 29. Use Events
+ # 29. Use Events
 
-    ```ts
-    eventBus.publish(
-    new UserCreatedEvent()
-    );
-    ```
+ ```ts
+ eventBus.publish(
+ new UserCreatedEvent()
+ );
+ ```
 
-    ---
+ ---
 
-    # 30. Implement Outbox Pattern
+ # 30. Implement Outbox Pattern
 
-    For reliable messaging.
+ For reliable messaging.
 
-    ```text
-    DB Transaction
-    → Outbox
-    → Kafka/RabbitMQ
-    ```
+ ```text
+ DB Transaction
+ → Outbox
+ → Kafka/RabbitMQ
+ ```
 
-    ---
+ ---
 
-    # 31. Use Sagas for Distributed Transactions
+ # 31. Use Sagas for Distributed Transactions
 
-    Example:
+ Example:
 
-    ```text
-    Create Order
-    → Reserve Funds
-    → Confirm Order
-    ```
+ ```text
+ Create Order
+ → Reserve Funds
+ → Confirm Order
+ ```
 
-    Compensations:
+ Compensations:
 
-    ```text
-    Refund Funds
-    Cancel Order
-    ```
+ ```text
+ Refund Funds
+ Cancel Order
+ ```
 
-    ---
+ ---
 
-    # 32. Use Async Queues
+ # 32. Use Async Queues
 
-    For:
+ For:
 
-    * Emails
-    * Reports
-    * Notifications
+ * Emails
+ * Reports
+ * Notifications
 
-    Example:
+ Example:
 
-    ```ts
-    BullMQ
-    ```
+ ```ts
+ BullMQ
+ ```
 
-    ---
+ ---
 
-    # 33. Never Send Emails in Request Thread
+ # 33. Never Send Emails in Request Thread
 
-    ❌
+ ❌
 
-    ```ts
-    await sendEmail();
-    ```
+ ```ts
+ await sendEmail();
+ ```
 
-    ✅
+ ✅
 
-    ```ts
-    await queue.add();
-    ```
+ ```ts
+ await queue.add();
+ ```
 
-    ---
+ ---
 
-    # 34. Rate Limit APIs
+ # 34. Rate Limit APIs
 
-    ```ts
-    ThrottlerModule.forRoot()
-    ```
+ ```ts
+ ThrottlerModule.forRoot()
+ ```
 
-    Example:
+ Example:
 
-    ```ts
-    10 req/sec
-    ```
+ ```ts
+ 10 req/sec
+ ```
 
-    ---
+ ---
 
-    # 35. Use Helmet
+ # 35. Use Helmet
 
-    ```ts
-    app.use(helmet());
-    ```
+ ```ts
+ app.use(helmet());
+ ```
 
-    ---
+ ---
 
-    # 36. Configure CORS Properly
+ # 36. Configure CORS Properly
 
-    ```ts
-    app.enableCors({
-    origin: ['https://app.com'],
-    });
-    ```
+ ```ts
+ app.enableCors({
+ origin: ['https://app.com'],
+ });
+ ```
 
-    Avoid:
+ Avoid:
 
-    ```ts
-    origin: '*'
-    ```
+ ```ts
+ origin: '*'
+ ```
 
-    ---
+ ---
 
-    # 37. Hash Passwords Properly
+ # 37. Hash Passwords Properly
 
-    Use:
+ Use:
 
-    ```ts
-    argon2
-    ```
+ ```ts
+ argon2
+ ```
 
-    or
+ or
 
-    ```ts
-    bcrypt
-    ```
+ ```ts
+ bcrypt
+ ```
 
-    ```ts
-    await argon.hash(password);
-    ```
+ ```ts
+ await argon.hash(password);
+ ```
 
-    ---
+ ---
 
-    # 38. Store Refresh Tokens Hashed
+ # 38. Store Refresh Tokens Hashed
 
-    Never plain text.
+ Never plain text.
 
-    ---
+ ---
 
-    # 39. Use JWT Rotation
+ # 39. Use JWT Rotation
 
-    ```text
-    Access Token
-    Refresh Token
-    ```
+ ```text
+ Access Token
+ Refresh Token
+ ```
 
-    Rotate refresh token each login.
+ Rotate refresh token each login.
 
-    ---
+ ---
 
-    # 40. Implement Authorization Guards
+ # 40. Implement Authorization Guards
 
-    ```ts
-    @UseGuards(JwtAuthGuard)
-    ```
+ ```ts
+ @UseGuards(JwtAuthGuard)
+ ```
 
-    ---
+ ---
 
-    # 41. Add RBAC
+ # 41. Add RBAC
 
-    ```ts
-    @Roles('admin')
-    ```
+ ```ts
+ @Roles('admin')
+ ```
 
-    Custom guard:
+ Custom guard:
 
-    ```ts
-    RolesGuard
-    ```
+ ```ts
+ RolesGuard
+ ```
 
-    ---
+ ---
 
-    # 42. Version Your API
+ # 42. Version Your API
 
-    ```ts
-    app.enableVersioning({
-    type: VersioningType.URI,
-    });
-    ```
+ ```ts
+ app.enableVersioning({
+ type: VersioningType.URI,
+ });
+ ```
 
-    Example:
+ Example:
 
-    ```text
-    /v1/users
-    /v2/users
-    ```
+ ```text
+ /v1/users
+ /v2/users
+ ```
 
-    ---
+ ---
 
-    # 43. Use Swagger
+ # 43. Use Swagger
 
-    Official package:
+ Official package:
 
-    ```ts
-    SwaggerModule.setup()
-    ```
+ ```ts
+ SwaggerModule.setup()
+ ```
 
-    Generates docs automatically.
+ Generates docs automatically.
 
-    ---
+ ---
 
-    # 44. Write E2E Tests
+ # 44. Write E2E Tests
 
-    ```ts
-    describe('Users')
-    ```
+ ```ts
+ describe('Users')
+ ```
 
-    Use:
+ Use:
 
-    ```ts
-    supertest
-    ```
+ ```ts
+ supertest
+ ```
 
-    ---
+ ---
 
-    # 45. Test Use Cases Separately
+ # 45. Test Use Cases Separately
 
-    ```ts
-    describe(CreateUserUseCase)
-    ```
+ ```ts
+ describe(CreateUserUseCase)
+ ```
 
-    Mock repositories.
+ Mock repositories.
 
-    ---
+ ---
 
-    # 46. Add Health Checks
+ # 46. Add Health Checks
 
-    Use Terminus
+ Use Terminus
 
-    ```ts
-    /health
-    ```
+ ```ts
+ /health
+ ```
 
-    Checks:
+ Checks:
 
-    * DB
-    * Redis
-    * Queue
+ * DB
+ * Redis
+ * Queue
 
-    ---
+ ---
 
-    # 47. Add Metrics
+ # 47. Add Metrics
 
-    Use:
+ Use:
 
-    ```ts
-    Prometheus
-    ```
+ ```ts
+ Prometheus
+ ```
 
-    Metrics:
+ Metrics:
 
-    ```text
-    request_count
-    request_duration
-    error_count
-    ```
+ ```text
+ request_count
+ request_duration
+ error_count
+ ```
 
-    ---
+ ---
 
-    # 48. Add Distributed Tracing
+ # 48. Add Distributed Tracing
 
-    Use:
+ Use:
 
-    ```ts
-    OpenTelemetry
-    ```
+ ```ts
+ OpenTelemetry
+ ```
 
-    Track:
+ Track:
 
-    ```text
-    API
-    DB
-    Redis
-    Kafka
-    ```
+ ```text
+ API
+ DB
+ Redis
+ Kafka
+ ```
 
-    ---
+ ---
 
-    # 49. Graceful Shutdown
+ # 49. Graceful Shutdown
 
-    ```ts
-    app.enableShutdownHooks();
-    ```
+ ```ts
+ app.enableShutdownHooks();
+ ```
 
-    Handle:
+ Handle:
 
-    ```ts
-    SIGTERM
-    ```
+ ```ts
+ SIGTERM
+ ```
 
-    Close:
+ Close:
 
-    ```ts
-    DB
-    Redis
-    Queue
-    ```
+ ```ts
+ DB
+ Redis
+ Queue
+ ```
 
-    ---
+ ---
 
-    # 50. Keep NestJS Modules Independent
+ # 50. Keep NestJS Modules Independent
 
-    Bad:
+ Bad:
 
-    ```text
-    UsersModule
-    ↔ PaymentsModule
-    ```
+ ```text
+ UsersModule
+ ↔ PaymentsModule
+ ```
 
-    Good:
+ Good:
 
-    ```text
-    UsersModule
-    PaymentsModule
-    OrdersModule
-    ```
+ ```text
+ UsersModule
+ PaymentsModule
+ OrdersModule
+ ```
 
-    Communicate through:
+ Communicate through:
 
-    ```ts
-    Events
-    Commands
-    Interfaces
-    ```
+ ```ts
+ Events
+ Commands
+ Interfaces
+ ```
 
-    ---
+ ---
 
-    # Recommended Production Stack
+ # Recommended Production Stack
 
-    For a modern enterprise NestJS API:
+ For a modern enterprise NestJS API:
 
-    ```text
-    NestJS
-    Prisma
-    PostgreSQL
-    Redis
-    BullMQ
-    JWT + Refresh Tokens
-    Swagger
-    OpenTelemetry
-    Prometheus
-    Pino
-    CQRS
-    Outbox Pattern
-    Saga Pattern
-    Docker
-    Kubernetes
-    ```
+ ```text
+ NestJS
+ Prisma
+ PostgreSQL
+ Redis
+ BullMQ
+ JWT + Refresh Tokens
+ Swagger
+ OpenTelemetry
+ Prometheus
+ Pino
+ CQRS
+ Outbox Pattern
+ Saga Pattern
+ Docker
+ Kubernetes
+ ```
 
-    A particularly robust architecture for large systems is:
+ A particularly robust architecture for large systems is:
 
-    ```text
-    Controller
-    ↓
-    DTO
-    ↓
-    Command / Query
-    ↓
-    Use Case
-    ↓
-    Repository Interface
-    ↓
-    Prisma Repository
-    ↓
-    PostgreSQL
+ ```text
+ Controller
+ ↓
+ DTO
+ ↓
+ Command / Query
+ ↓
+ Use Case
+ ↓
+ Repository Interface
+ ↓
+ Prisma Repository
+ ↓
+ PostgreSQL
 
-    Events
-    ↓
-    Outbox
-    ↓
-    Kafka/RabbitMQ
-    ```
+ Events
+ ↓
+ Outbox
+ ↓
+ Kafka/RabbitMQ
+ ```
 
-    This structure scales well from a small API to a microservice ecosystem and aligns with DDD, CQRS, Saga, and Outbox patterns.
+ This structure scales well from a small API to a microservice ecosystem and aligns with DDD, CQRS, Saga, and Outbox patterns.

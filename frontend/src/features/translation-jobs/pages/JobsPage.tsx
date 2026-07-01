@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useConfirm } from '../../../shared/ui/ConfirmDialog';
+import { useToast } from '../../../shared/ui/use-toast';
+import { apiDelete } from '../../../shared/api/client';
 import { CreateJobModal } from '../components/CreateJobModal';
 import { JobsTable } from '../components/JobsTable';
 import { useCreateJob, useJobsList } from '../hooks/useTranslationJobs';
@@ -78,13 +81,63 @@ export function JobsListSection({
 }
 
 export function JobsPage() {
+  const confirm = useConfirm();
+  const toast = useToast();
+  const [purging, setPurging] = useState(false);
+
+  const handlePurge = async () => {
+    if (
+      !(await confirm({
+        title: 'Purge all translation queues?',
+        description:
+          "This will remove all waiting, delayed, failed and completed jobs from Redis queues. Active jobs will finish but won't be retried.",
+        danger: true,
+        confirmLabel: 'Purge queues',
+      }))
+    )
+      return;
+
+    setPurging(true);
+    const toastId = toast.loading('Purging queues…');
+    try {
+      const result = await apiDelete<{ purged: Record<string, number> }>(
+        '/admin/queues/purge',
+      );
+      const total = Object.values(result.purged).reduce(
+        (s, n) => s + Math.max(n, 0),
+        0,
+      );
+      toast.update(toastId, `Purged ${total} jobs from queues`, 'success');
+    } catch (err) {
+      toast.update(
+        toastId,
+        err instanceof Error ? err.message : 'Purge failed.',
+        'error',
+      );
+    } finally {
+      setPurging(false);
+    }
+  };
+
   return (
     <section className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-white">Translation jobs</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          Create and monitor AI translation jobs.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-white">
+            Translation jobs
+          </h1>
+          <p className="mt-1 text-sm text-slate-400">
+            Create and monitor AI translation jobs.
+          </p>
+        </div>
+        <button
+          type="button"
+          disabled={purging}
+          onClick={() => void handlePurge()}
+          className="rounded-lg border border-red-800 px-3 py-1.5 text-sm text-red-400 hover:border-red-600 hover:text-red-300 disabled:opacity-50"
+        >
+          {purging ? 'Purging…' : 'Purge queues'}
+        </button>
       </div>
       <JobsListSection />
     </section>

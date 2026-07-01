@@ -18,6 +18,7 @@ export class UpdateTranslationKeyCommand {
     public readonly description?: string,
     public readonly context?: string,
     public readonly contentType?: string | null,
+    public readonly sourceText?: string,
   ) {}
 }
 
@@ -36,5 +37,9 @@ export class ListTranslationKeysQuery {
     public readonly page: number,
     public readonly limit: number,
     public readonly search?: string,
+    public readonly localizationObjectId?: string,
+    public readonly keyPrefix?: string,
+    public readonly staleOnly?: boolean,
+    public readonly scope?: string,
   ) {}
 }

@@ -18,16 +18,16 @@ Feature-based modules under `src/`:
 ```text
 src/
 ├── translation/
-│   ├── domain/
-│   ├── application/
-│   │   ├── commands/
-│   │   ├── queries/
-│   │   └── handlers/
-│   ├── infrastructure/
-│   │   └── repositories/
-│   └── presentation/
-│       ├── translation.controller.ts
-│       └── dto/
+│ ├── domain/
+│ ├── application/
+│ │ ├── commands/
+│ │ ├── queries/
+│ │ └── handlers/
+│ ├── infrastructure/
+│ │ └── repositories/
+│ └── presentation/
+│ ├── translation.controller.ts
+│ └── dto/
 ├── shared/
 └── main.ts
 ```
@@ -39,7 +39,7 @@ Controllers handle HTTP only: validation, auth guards, dispatch command/query, r
 ```typescript
 @Post()
 create(@Body() dto: CreateJobDto) {
-  return this.commandBus.execute(new CreateTranslationJobCommand(dto));
+ return this.commandBus.execute(new CreateTranslationJobCommand(dto));
 }
 ```
 
@@ -109,16 +109,16 @@ Feature-based layout:
 
 ```text
 src/
-├── app/           # router, providers, store
+├── app/ # router, providers, store
 ├── features/
-│   ├── projects/
-│   │   ├── api/
-│   │   ├── hooks/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   └── types/
-│   └── translation-jobs/
-├── shared/        # reusable UI, hooks, utils
+│ ├── projects/
+│ │ ├── api/
+│ │ ├── hooks/
+│ │ ├── components/
+│ │ ├── pages/
+│ │ └── types/
+│ └── translation-jobs/
+├── shared/ # reusable UI, hooks, utils
 └── main.tsx
 ```
 

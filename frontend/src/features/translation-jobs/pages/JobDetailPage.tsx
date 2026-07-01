@@ -1,12 +1,17 @@
 import { Link, useParams } from 'react-router-dom';
+import { useConfirm } from '../../../shared/ui/ConfirmDialog';
 import { useProject } from '../../projects/hooks/useProjects';
 import { JobStatusBadge } from '../components/JobStatusBadge';
 import { useCancelJob, useJob, useRetryJob } from '../hooks/useTranslationJobs';
+import { useAiConfig } from '../hooks/useAiConfig';
 
 export function JobDetailPage() {
+  const confirm = useConfirm();
   const { jobId } = useParams<{ jobId: string }>();
   const { data: job, isLoading, error } = useJob(jobId);
   const { data: project } = useProject(job?.projectId);
+  const { data: aiConfig } = useAiConfig();
+  const defaultProvider = aiConfig?.defaultProvider ?? 'gemini';
   const retry = useRetryJob(jobId ?? '');
   const cancel = useCancelJob(jobId ?? '');
 
@@ -23,14 +28,21 @@ export function JobDetailPage() {
   }
 
   const progressPercent =
-    job.progress.total > 0
-      ? Math.round((job.progress.completed / job.progress.total) * 100)
-      : 0;
+    job.objectProgress && job.objectProgress.objectsTotal > 0
+      ? Math.round(
+          (job.objectProgress.objectsDone / job.objectProgress.objectsTotal) *
+            100,
+        )
+      : job.progress.total > 0
+        ? Math.round((job.progress.completed / job.progress.total) * 100)
+        : 0;
 
   const pendingCount = Math.max(
     0,
     job.progress.total - job.progress.completed - job.progress.failed,
   );
+
+  const isObjectBatchJob = job.mode === 'object_batch' && job.objectProgress;
 
   const canRetry =
     job.status === 'failed' ||
@@ -69,12 +81,31 @@ export function JobDetailPage() {
             <div className="flex justify-between text-sm text-slate-400">
               <span>{progressPercent}% complete</span>
               <span>
-                {job.progress.completed}/{job.progress.total} items
+                {isObjectBatchJob
+                  ? `Field ${job.objectProgress!.objectsDone} of ${job.objectProgress!.objectsTotal}`
+                  : `${job.progress.completed}/${job.progress.total} items`}
               </span>
             </div>
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-              <span>{job.progress.completed} completed</span>
-              {pendingCount > 0 && <span>{pendingCount} pending</span>}
+              {isObjectBatchJob ? (
+                <>
+                  <span>{job.objectProgress!.objectsDone} fields done</span>
+                  {job.objectProgress!.objectsTotal -
+                    job.objectProgress!.objectsDone >
+                    0 && (
+                    <span>
+                      {job.objectProgress!.objectsTotal -
+                        job.objectProgress!.objectsDone}{' '}
+                      remaining
+                    </span>
+                  )}
+                </>
+              ) : (
+                <>
+                  <span>{job.progress.completed} completed</span>
+                  {pendingCount > 0 && <span>{pendingCount} pending</span>}
+                </>
+              )}
               {job.progress.failed > 0 && (
                 <span className="text-red-400">
                   {job.progress.failed} failed
@@ -87,6 +118,18 @@ export function JobDetailPage() {
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
+            {job.status === 'completed' && job.placeholderSummary && (
+              <div className="mt-3 space-y-2 rounded-lg border border-emerald-900/40 bg-emerald-950/20 p-3">
+                <p className="text-sm text-emerald-300">
+                  {job.placeholderSummary.placeholdersPreserved} of{' '}
+                  {job.placeholderSummary.placeholdersTotal} placeholder
+                  {job.placeholderSummary.placeholdersTotal === 1
+                    ? ''
+                    : 's'}{' '}
+                  preserved across translated keys.
+                </p>
+              </div>
+            )}
             {job.progress.failed > 0 && (
               <div className="mt-3 space-y-2 rounded-lg border border-red-900/40 bg-red-950/20 p-3">
                 <p className="text-sm text-red-300">
@@ -156,7 +199,7 @@ export function JobDetailPage() {
             <div>
               <dt className="text-slate-500">Provider</dt>
               <dd className="mt-1 capitalize text-white">
-                {job.provider ?? 'openai'}
+                {job.provider ?? defaultProvider}
               </dd>
             </div>
             <div>
@@ -190,8 +233,15 @@ export function JobDetailPage() {
           <button
             type="button"
             disabled={cancel.isPending}
-            onClick={() => {
-              if (window.confirm('Cancel this job?')) {
+            onClick={async () => {
+              if (
+                await confirm({
+                  title: 'Cancel this job?',
+                  description: 'The job will be stopped and cannot be resumed.',
+                  danger: true,
+                  confirmLabel: 'Cancel job',
+                })
+              ) {
                 cancel.mutate();
               }
             }}

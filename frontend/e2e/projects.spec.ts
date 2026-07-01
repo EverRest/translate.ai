@@ -15,6 +15,8 @@ test.describe('Projects', () => {
     await page.getByLabel('Name').fill(projectName);
     await page.getByRole('button', { name: 'Save' }).click();
 
+    await page.getByRole('button', { name: 'Skip for now' }).click();
+
     await expect(
       page.getByRole('heading', { name: projectName, level: 1 }),
     ).toBeVisible();

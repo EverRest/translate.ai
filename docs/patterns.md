@@ -43,10 +43,10 @@ Multi-step workflows use saga orchestration with compensating actions. No distri
 Example: translation job saga
 
 ```text
-Step 1: Create job record          → compensate: mark job cancelled
-Step 2: Enqueue process jobs       → compensate: remove queue jobs
-Step 3: Process AI translations    → compensate: mark items failed
-Step 4: Notify webhook             → compensate: log failed delivery
+Step 1: Create job record → compensate: mark job cancelled
+Step 2: Enqueue process jobs → compensate: remove queue jobs
+Step 3: Process AI translations → compensate: mark items failed
+Step 4: Notify webhook → compensate: log failed delivery
 ```
 
 Each step must be idempotent. Failures trigger compensation for completed steps only.
@@ -79,10 +79,10 @@ For reliable event delivery (webhooks, cross-service events):
 
 ```text
 DB transaction
-  ├── update domain state
-  └── insert outbox row
-        │
-        ▼
+ ├── update domain state
+ └── insert outbox row
+ │
+ ▼
 Outbox poller → publish to queue / webhook worker
 ```
 
@@ -94,8 +94,8 @@ Before calling any AI provider:
 
 ```text
 hash(source_text + source_lang + target_lang)
-  ├── found in translation_memory → return cached value
-  └── not found → call AI → store in memory
+ ├── found in translation_memory → return cached value
+ └── not found → call AI → store in memory
 ```
 
 This is mandatory for cost control (30–80% savings).
@@ -106,7 +106,7 @@ All AI calls go through `AiProvider` interface:
 
 ```typescript
 interface AiProvider {
-  translate(text: string, sourceLang: string, targetLang: string): Promise<string>;
+ translate(text: string, sourceLang: string, targetLang: string): Promise<string>;
 }
 ```
 

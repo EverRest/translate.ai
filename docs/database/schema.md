@@ -8,13 +8,13 @@ PostgreSQL via Prisma. ~18–22 tables at MVP. All tenant-scoped tables include 
 Tenant
 ├── User
 └── Project
-    ├── ApiKey
-    ├── Webhook
-    ├── TranslationJob
-    │   └── TranslationJobItem
-    └── TranslationKey
-        └── Translation
-            └── Review / Approval / Comment
+ ├── ApiKey
+ ├── Webhook
+ ├── TranslationJob
+ │ └── TranslationJobItem
+ └── TranslationKey
+ └── Translation
+ └── Review / Approval / Comment
 
 TranslationMemory (global per tenant, keyed by hash)
 AuditLog
@@ -52,6 +52,7 @@ Export (metadata)
 | tenant_id | UUID FK | INDEX |
 | name | VARCHAR | |
 | description | TEXT | nullable |
+| domain_profile | JSONB | nullable — AI domain context (see domain/translation.md) |
 | status | ENUM | active, archived |
 | created_at | TIMESTAMP | |
 
@@ -199,6 +200,18 @@ UNIQUE(project_id, key)
 | glossary_terms.source_term | text | Term in source language |
 | glossary_terms.target_term | text? | Preferred translation |
 | glossary_terms.do_not_translate | boolean | Keep term unchanged |
+
+### glossary_suggestions
+
+| Column | Type | Notes |
+|--------|------|-------|
+| glossary_suggestions.project_id | UUID | Scoped to project |
+| glossary_suggestions.source_term | text | Suggested source term |
+| glossary_suggestions.target_term | text? | Preferred translation (null when do-not-translate) |
+| glossary_suggestions.do_not_translate | boolean | Keep term unchanged |
+| glossary_suggestions.confidence | float | Rank score 0–1 |
+| glossary_suggestions.reason | text? | Heuristic id (e.g. `identical_across_languages`) |
+| glossary_suggestions.status | enum | pending, approved, rejected |
 
 ### project_branches / branch_translations
 

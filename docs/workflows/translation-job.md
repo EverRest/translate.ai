@@ -15,14 +15,14 @@ Sources:
 
 ```text
 Controller receives CreateJobDto
-  → Validate project access (tenant + permissions)
-  → CommandBus.execute(CreateTranslationJobCommand)
-  → Handler:
-      - Create TranslationJob (status: pending)
-      - Create TranslationJobItems (key × language matrix)
-      - Publish TranslationJobCreatedEvent
-      - Enqueue BullMQ: translation.create
-  → Return { jobId }
+ → Validate project access (tenant + permissions)
+ → CommandBus.execute(CreateTranslationJobCommand)
+ → Handler:
+ - Create TranslationJob (status: pending)
+ - Create TranslationJobItems (key × language matrix)
+ - Publish TranslationJobCreatedEvent
+ - Enqueue BullMQ: translation.create
+ → Return { jobId }
 ```
 
 HTTP responds immediately. No AI calls in request thread.
@@ -31,26 +31,35 @@ HTTP responds immediately. No AI calls in request thread.
 
 ```text
 Load job + items
-  → Update job status: processing
-  → For each item: enqueue translation.process
+ → Update job status: processing
+ → For each item: enqueue translation.process
 ```
 
 ### 3. Worker — translation.process (per item)
 
 ```text
 Load TranslationJobItem + TranslationKey + Project context
-  → Build prompt options (project name, description, context, content type)
-  → For up to 3 attempts:
-      → Check TranslationMemory (skipped on retry attempts)
-          ├── HIT  → use cached translation
-          └── MISS → AiProvider.translate()
-      → sanitizeTranslationOutput()
-      → TranslationOutputValidator (heuristic)
-          ├── PASS → save draft, record quality metric, complete item
-          └── FAIL → retry with skipMemory + retry hint, or mark failed
-  → If all items done → mark job completed/failed
-  → Publish TranslationJobCompletedEvent (or FailedEvent)
-  → Enqueue webhook.send (job.failed includes failedItems)
+ → Build prompt options (project name, description, context, content type)
+ → For up to 3 attempts:
+ → Check TranslationMemory (skipped on retry attempts)
+ ├── HIT → use cached translation
+ └── MISS → AiProvider.translate()
+ → Gemini: retry transient HTTP 502/503/429 in-provider
+ → then optional GEMINI_MODEL_FALLBACK tier with same retry policy
+ → then OpenAI via AI_PROVIDER_FALLBACK (cloud: openai only)
+ → OpenAI (when primary or fallback): transient retry
+ → then optional OPENAI_MODEL_FALLBACK tier
+ → On attempt ≥ 2 or manual job retry: attach reference translations
+ from sibling locales for the same key (published > approved > draft)
+ → sanitizeTranslationOutput()
+ → TranslationOutputValidator
+ → heuristics (empty, refusal, length, script)
+ → QA chain: placeholders ({{...}}, %%...%%), HTML tag balance
+ ├── PASS → save draft, record quality metric, complete item
+ └── FAIL → retry with skipMemory + retry hint, or mark failed
+ → If all items done → mark job completed/failed
+ → Publish TranslationJobCompletedEvent (or FailedEvent)
+ → Enqueue webhook.send (job.failed includes failedItems)
 ```
 
 ### 4. Retry — translation.retry
@@ -76,15 +85,15 @@ Optional paths:
 
 ```text
 pending → processing → completed
-                    └→ failed
-                    └→ cancelled
+ └→ failed
+ └→ cancelled
 ```
 
 ### Item
 
 ```text
 pending → processing → completed
-                    └→ failed (retryable)
+ └→ failed (retryable)
 ```
 
 ## Idempotency
@@ -103,13 +112,13 @@ pending → processing → completed
 ## Example timeline
 
 ```text
-T+0ms    POST /jobs → 201 { jobId }
-T+50ms   translation.create worker starts
-T+100ms  4 items enqueued (2 keys × 2 languages)
-T+2s     Item 1: memory hit → instant
-T+5s     Item 2: OpenAI call → stored
-T+8s     All items done → job.completed
-T+8.1s   webhook.send → customer endpoint
+T+0ms POST /jobs → 201 { jobId }
+T+50ms translation.create worker starts
+T+100ms 4 items enqueued (2 keys × 2 languages)
+T+2s Item 1: memory hit → instant
+T+5s Item 2: OpenAI call → stored
+T+8s All items done → job.completed
+T+8.1s webhook.send → customer endpoint
 ```
 
 ## Related

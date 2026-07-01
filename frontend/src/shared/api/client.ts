@@ -1,4 +1,5 @@
 import { useAuthStore } from '../../features/auth/store/auth.store';
+import { parseContentDispositionFilename } from './download.utils';
 import { ApiError, type ApiSuccess } from './types';
 
 export { ApiError, type ApiSuccess };
@@ -69,6 +70,21 @@ export async function apiPatch<T, B = unknown>(
   return parseResponse<T>(response);
 }
 
+export async function apiPut<T, B = unknown>(
+  path: string,
+  body: B,
+): Promise<T> {
+  const response = await fetch(`${baseUrl}${path}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders(),
+    },
+    body: JSON.stringify(body),
+  });
+  return parseResponse<T>(response);
+}
+
 export async function apiDelete<T>(path: string): Promise<T> {
   const response = await fetch(`${baseUrl}${path}`, {
     method: 'DELETE',
@@ -77,4 +93,34 @@ export async function apiDelete<T>(path: string): Promise<T> {
     },
   });
   return parseResponse<T>(response);
+}
+
+export async function apiDownload(
+  path: string,
+  fallbackFilename = 'download',
+): Promise<{ blob: Blob; filename: string }> {
+  const response = await fetch(`${baseUrl}${path}`, {
+    headers: {
+      ...authHeaders(),
+    },
+  });
+
+  if (!response.ok) {
+    const body = (await response.json().catch(() => ({}))) as {
+      message?: string;
+      error?: string;
+    };
+    throw new ApiError(
+      body.message ?? body.error ?? `API error: ${response.status}`,
+      response.status,
+    );
+  }
+
+  const blob = await response.blob();
+  const filename = parseContentDispositionFilename(
+    response.headers.get('Content-Disposition'),
+    fallbackFilename,
+  );
+
+  return { blob, filename };
 }

@@ -17,8 +17,8 @@ Read this index first. Each doc is written so an agent can understand the system
 
 | Doc | Purpose |
 |-----|---------|
-| [../AGENTS.md](../AGENTS.md) | Cursor / LLM agent instructions (root) |
-| [important.md](./important.md) | How this docs pack is organized for vibe coding |
+| [../AGENTS.md](../AGENTS.md) | **Canonical agent playbook** — system prompt, TDD workflow, principles, docs map |
+| [important.md](./important.md) | How this docs pack is organized for AI-first development |
 
 ## Implementation guides
 
@@ -72,6 +72,7 @@ Read this index first. Each doc is written so an agent can understand the system
 | [adr/0003-ai-provider-abstraction.md](./adr/0003-ai-provider-abstraction.md) | Multi-provider AI layer |
 | [adr/0004-multi-tenant-isolation.md](./adr/0004-multi-tenant-isolation.md) | Tenant scoping strategy |
 | [adr/0007-ollama-model-router.md](./adr/0007-ollama-model-router.md) | Ollama model routing inside ai-provider |
+| [adr/0008-translation-output-validation.md](./adr/0008-translation-output-validation.md) | Heuristic output validation + auto-retries |
 
 ## Changelog
 
@@ -79,13 +80,20 @@ Read this index first. Each doc is written so an agent can understand the system
 |-----|---------|
 | [changelog.md](./changelog.md) | Project change log |
 
+## Product backlog (LocalizationOps)
+
+| Doc | Purpose |
+|-----|---------|
+| [backlog/README.md](./backlog/README.md) | Phased tasks P1–P3 (VCS, semantic TM, replay, pipeline-as-code) |
+| [backlog/shipped-baseline.md](./backlog/shipped-baseline.md) | Capabilities already shipped |
+
 ## Stack (reference)
 
 ```text
-Frontend:  React, TypeScript, Vite, Tailwind, TanStack Query, Zustand  → frontend/
-Backend:   NestJS, DDD, CQRS, BullMQ, Redis, PostgreSQL, Prisma       → backend/
-AI:        OpenAI, Gemini, Claude, Ollama
-Infra:     Docker Compose (postgres, redis, api, worker, frontend)
+Frontend: React, TypeScript, Vite, Tailwind, TanStack Query, Zustand → frontend/
+Backend: NestJS, DDD, CQRS, BullMQ, Redis, PostgreSQL, Prisma → backend/
+AI: OpenAI, Gemini, Claude, Ollama
+Infra: Docker Compose (postgres, redis, api, worker, frontend)
 ```
 
 ## Local development
@@ -114,8 +122,8 @@ cd frontend && npm install && npm run dev
 ### Docker (full stack)
 
 ```bash
-make docker-env      # copies backend/.env.docker → backend/.env (if missing)
-make docker-app      # postgres + redis + api + worker + frontend
+make docker-env # copies backend/.env.docker → backend/.env (if missing)
+make docker-app # postgres + redis + api + worker + frontend
 # Admin: admin@translate.ai / admin123 (see backend/.env.docker)
 ```
 
@@ -124,18 +132,18 @@ make docker-app      # postgres + redis + api + worker + frontend
 From repo root:
 
 ```bash
-make help          # list all targets
-make install       # npm ci in backend + frontend
+make help # list all targets
+make install # npm ci in backend + frontend
 make hooks-install # git hooks via .husky (after git init)
-make db-seed       # create/update default admin user
-make lint          # ESLint (check mode)
-make format-check  # Prettier check
-make typecheck     # tsc both apps
-make test          # unit tests
-make build         # production build
-make ci            # lint + format + typecheck + test + build
-./scripts/ci-local.sh  # full pipeline incl. backend e2e (needs postgres/redis)
-make dev-infra     # start postgres + redis
+make db-seed # create/update default admin user
+make lint # ESLint (check mode)
+make format-check # Prettier check
+make typecheck # tsc both apps
+make test # unit tests
+make build # production build
+make ci # lint + format + typecheck + test + build
+./scripts/ci-local.sh # full pipeline incl. backend e2e (needs postgres/redis)
+make dev-infra # start postgres + redis
 ```
 
 - API: http://localhost:3000/api/v1

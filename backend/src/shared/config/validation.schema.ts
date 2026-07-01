@@ -27,11 +27,40 @@ export const validationSchema = Joi.object({
   OLLAMA_POLISH_MODEL: Joi.string().default('llama3.1:8b'),
   OLLAMA_TIMEOUT_MS: Joi.number().integer().min(30_000).default(600_000),
   OPENAI_MODEL: Joi.string().default('gpt-4o-mini'),
+  OPENAI_MODEL_FALLBACK: Joi.string().allow('').default(''),
   GEMINI_MODEL: Joi.string().default('gemini-2.0-flash'),
+  GEMINI_MODEL_FALLBACK: Joi.string().allow('').default(''),
+  GEMINI_TRANSIENT_RETRIES: Joi.number().integer().min(0).max(5).default(2),
+  GEMINI_TRANSIENT_RETRY_DELAY_MS: Joi.number()
+    .integer()
+    .min(0)
+    .max(30_000)
+    .default(1000),
+  AI_PROVIDER: Joi.string()
+    .valid('openai', 'gemini', 'ollama')
+    .default('gemini'),
   AI_PROVIDER_FALLBACK: Joi.string().default('gemini,ollama'),
   DEFAULT_SOURCE_LANGUAGE: Joi.string().default('en'),
   MOCK_TRANSLATIONS: Joi.boolean().default(false),
+  BULLMQ_PREFIX: Joi.string().allow('').optional(),
   TRANSLATION_VALIDATION_ENABLED: Joi.boolean().default(true),
+  TRANSLATION_QA_VALIDATORS_ENABLED: Joi.boolean().default(true),
+  EXPORT_ASYNC_THRESHOLD: Joi.number().integer().min(1).default(1000),
+  EXPORT_STORAGE_DIR: Joi.string().default('.exports'),
+  IMPORT_ASYNC_THRESHOLD: Joi.number().integer().min(1).default(200),
+  IMPORT_STORAGE_DIR: Joi.string().default('.imports'),
+  ATLASSIAN_CLIENT_ID: Joi.string().allow('').optional(),
+  ATLASSIAN_CLIENT_SECRET: Joi.string().allow('').optional(),
+  ATLASSIAN_REDIRECT_URI: Joi.string().uri().optional(),
+  ATLASSIAN_SCOPES: Joi.string().optional(),
+  CONFLUENCE_TOKEN_ENCRYPTION_KEY: Joi.string().optional(),
+  EXPORT_JOB_TTL_HOURS: Joi.number().integer().min(1).max(168).default(24),
+  GLOSSARY_ANALYZE_MIN_TRANSLATIONS: Joi.number().integer().min(1).default(100),
+  GLOSSARY_ANALYZE_MAX_SUGGESTIONS: Joi.number()
+    .integer()
+    .min(1)
+    .max(500)
+    .default(50),
   ADMIN_EMAIL: Joi.string().email().default('admin@translate.ai'),
   ADMIN_PASSWORD: Joi.string().min(8).default('admin123'),
   ADMIN_TENANT_NAME: Joi.string().default('Default'),

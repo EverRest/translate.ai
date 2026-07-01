@@ -9,6 +9,10 @@ export class ProjectAccessService {
   async getProjectForTenant(tenantId: string, projectId: string) {
     const project = await this.prisma.project.findFirst({
       where: { id: projectId, tenantId, status: ProjectStatus.active },
+      include: {
+        _count: { select: { translationKeys: true } },
+        languages: { select: { code: true, isDefault: true } },
+      },
     });
     if (!project) {
       throw new NotFoundException('Project not found');

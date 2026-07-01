@@ -57,3 +57,10 @@ export class UpdateGlossaryTermDto {
   @MaxLength(1000)
   note?: string;
 }
+
+export class ApplyGlossaryPresetDto {
+  @ApiProperty({ example: 'fifa_accreditation' })
+  @IsString()
+  @IsNotEmpty()
+  presetId!: string;
+}

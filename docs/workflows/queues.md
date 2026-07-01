@@ -5,11 +5,11 @@ BullMQ + Redis async processing. Separate worker process from NestJS API.
 ## Architecture
 
 ```text
-nestjs-api (producer)     nestjs-worker (consumer)
-        │                          │
-        └──────── Redis ───────────┘
-                    │
-              BullMQ queues
+nestjs-api (producer) nestjs-worker (consumer)
+ │ │
+ └──────── Redis ───────────┘
+ │
+ BullMQ queues
 ```
 
 ## Queue definitions
@@ -21,17 +21,46 @@ nestjs-api (producer)     nestjs-worker (consumer)
 | `translation.retry` | process worker (on fail) | Worker | 5 |
 | `translation.review` | approval module | Worker | 3 |
 | `translation.export` | API / dashboard | Worker | 3 |
+| `integration.openapi.import` | API (large OpenAPI spec) | Worker | 3 |
+| `integration.import.parse` | API (import session upload) | Worker | 3 |
+| `integration.import.apply` | API (import apply) | Worker | 3 |
+| `integration.excel.parse` | API (Excel preview upload) | Worker | 3 |
+| `integration.excel.compose` | translation job finished (excel session) | Worker | 3 |
+| `integration.confluence.sync` | API (Confluence sync) / scheduler | Worker | 3 |
+| `glossary.analyze` | API (suggest terms) | Worker | 3 |
+| `terminology.scan` | API / job-completed event | Worker | 3 |
 | `webhook.send` | event handlers | Worker | 10 |
 
 Tune concurrency per environment.
+
+### Confluence scheduled sync
+
+`ConfluenceSyncSchedulerService` (worker) runs every **5 minutes**:
+
+1. Finds `ConfluenceSyncConfig` where `syncEnabled`, `syncIntervalMinutes` set, and `nextSyncAt <= now`
+2. Skips if a `confluence_live` import session is already `parsing` / `applying`
+3. Enqueues `integration.confluence.sync` via `ConfluenceSyncTriggerService`
+4. Sets `nextSyncAt = now + syncIntervalMinutes`
+
+This replaces Confluence webhooks (not available for OAuth 3LO). See [ADR 0016](../adr/0016-external-import.md).
+
+### Terminology drift scan
+
+`terminology.scan` worker job runs `TerminologyDriftService.runScan`:
+
+1. Clusters translations with identical source text across keys
+2. Compares target-language variants; skips terms already covered by glossary
+3. Upserts open `terminology_drift_issues` rows
+
+**Producers:** `POST /projects/:id/terminology/scan` (idempotent per project via BullMQ `jobId`); `TerminologyScanOnJobCompletedHandler` when `Project.autoTerminologyScan` is `true`. See [P2-05](../backlog/P2-05-terminology-drift.md) and [shipped-baseline](../backlog/shipped-baseline.md) (P0-07).
 
 ## Job payload conventions
 
 ```typescript
 interface TranslationProcessJob {
-  jobItemId: string;
-  tenantId: string;
-  correlationId: string;
+ jobItemId: string;
+ tenantId: string;
+ correlationId: string;
 }
 ```
 
@@ -51,10 +80,10 @@ Default BullMQ options:
 
 ```typescript
 {
-  attempts: 3,
-  backoff: { type: 'exponential', delay: 5000 },
-  removeOnComplete: 1000,
-  removeOnFail: false, // keep for DLQ inspection
+ attempts: 3,
+ backoff: { type: 'exponential', delay: 5000 },
+ removeOnComplete: 1000,
+ removeOnFail: false, // keep for DLQ inspection
 }
 ```
 
@@ -83,11 +112,11 @@ Docker Compose services:
 
 ```yaml
 redis:
-  image: redis:7
+ image: redis:7
 worker:
-  build: ./backend
-  command: npm run worker
-  depends_on: [redis, postgres]
+ build: ./backend
+ command: npm run worker
+ depends_on: [redis, postgres]
 ```
 
 ## Related

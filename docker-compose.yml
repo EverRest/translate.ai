@@ -6,7 +6,8 @@ services:
       POSTGRES_PASSWORD: translate
       POSTGRES_DB: translate_ai
     ports:
-      - '5432:5432'
+      # 5434 on host — avoid clash with kubectl port-forward on 5433 (common locally)
+      - '5434:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:

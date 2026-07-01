@@ -4,6 +4,221 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Context-aware object translation (P0-05 MVP)
+
+- **Schema:** `TranslationJob.mode` (`object_batch`), `metadata`; `TranslationJobItem.batchGroupId`
+- **API:** `POST .../objects/translate-batch` — `{ objectIds[], languages[] }`; single-object translate uses same batch pipeline
+- **Worker:** field-node batching via extended `translation.process`; one AI call per field group (label + placeholder + error); QA validators per output string
+- **Job status:** optional `objectProgress: { objectsDone, objectsTotal }` on `GET /jobs/:id`
+- **UI:** Entities list multi-select + **Translate selected (N fields)**; job detail **Field X of Y** progress
+- **Tests:** `group-field-batches.utils.spec.ts`, `object-batch-prompt.builder.spec.ts`, `object-batch-progress.utils.spec.ts`, `object-batch-translation.e2e-spec.ts`
+
+### Added — Translation coverage heatmap (P0-06 MVP)
+
+- **API:** `GET .../reports/coverage-matrix` — scope × language matrix with RAG (`green` / `yellow` / `red`), `byLanguage` summary, `worstCells`
+- **Query:** `GetCoverageMatrixQuery` + `CoverageMatrixService`; scope from key `context` (`scope: …` via import)
+- **Keys list:** `scope` query filter on `GET .../keys`
+- **UI:** Analytics **Coverage heatmap** sub-tab; CSV export; project overview **Launch readiness** card (worst 3 cells); heatmap cell → translations grid `?scope=&lang=`
+- **Tests:** `coverage-matrix.utils.spec.ts`, `coverage-matrix.service.spec.ts`, `coverage-matrix.e2e-spec.ts`
+
+### Added — Stale translation detection (P0-04 MVP)
+
+- **Schema:** `Translation.sourceTextSnapshot` + backfill migration
+- **Invalidation:** source change on import apply or `PATCH .../keys/:id` (`sourceText`) → non-empty translations set to `review`
+- **API:** `GET .../translations/stale-summary`, `GET .../translations/stale-key-hints`; `isStale` on list translations; `staleOnly` on list keys; `onlyStale` on `POST /jobs`
+- **UI:** edit `sourceText` on Keys page; translations grid stale hints + filter; overview widget; bulk **Retranslate stale**; Create Job **Stale keys only** checkbox
+- **Tests:** `stale-translation.utils.spec.ts`, `stale-translation.service.spec.ts`, `import-apply.service.spec.ts`, `stale-translations.e2e-spec.ts`
+
+### Added — Excel round-trip + delta import (P0-02)
+
+Per [ADR 0016](./adr/0016-external-import.md):
+
+- **Parser:** `exceljs` workbook parse on worker; Classic import preset (`Field ID | Scope | Key | EN | FR | ES…`); empty-cell detection per language
+- **Queues:** `integration.excel.parse`, `integration.excel.compose` — parse preview + merge AI results into stored original workbook
+- **API:** `POST .../import/excel/preview`, `POST .../:sessionId/delta-translate`, `GET .../:sessionId/download`, profile GET/PUT
+- **Schema:** `ImportSession.translationJobId`, `outputStoragePath`, `excelLayoutJson`; `Project.excelImportProfile`
+- **UI:** Import tab → **Excel round-trip** — upload → empty-cell stats → translate → download (same column layout)
+- **Tests:** `excel.parser.spec.ts`, `import-excel.e2e-spec.ts` (mock translations)
+
+### Shipped — Wave 1 + terminology drift MVP
+
+- **P0-01 Sport-domain AI context** — `Project.domainProfile`; domain presets API; `copy-settings`; Domain glossary preset; domain block in prompts; Domain context UI; post-create onboarding modal
+- **P0-S02 Placeholder job summary** — optional `placeholderSummary` on `GET /jobs/:id` and job webhooks; job detail UI banner
+- **P0-07 Consistency check Wave 1** — `autoTerminologyScan` (default true); auto scan after job; Settings → Consistency toggle; post-job toast; translations grid drift hints
+- **P2-05 Terminology drift MVP** — `terminology_drift_issues`; `terminology.scan` queue; scan/list/resolve API; Glossary → Terminology drift tab
+
+### Changed — backlog
+
+- **P0-05 Context-aware object translation** shipped (MVP); active spec → `P0-05-context-aware-object-translation-shipped.md`; Wave 3 focus **P0-09**
+- **P0-06 Translation coverage heatmap** shipped (MVP); active spec → `P0-06-translation-coverage-heatmap-shipped.md`
+- **P0-04 Stale translation detection** shipped (MVP); active specs renamed to `*-shipped.md`; see [shipped-baseline](./backlog/shipped-baseline.md) and [demo shipped tasks](./backlog/demo/README.md#shipped-tasks-reference)
+- **Demo backlog** — shipped shipped demo tasks kept as reference under `docs/backlog/demo/P0-*-shipped.md` (not deleted); code pointers in [shipped-baseline](./backlog/shipped-baseline.md)
+- **P0-02 Excel round-trip** removed from active P0 table; added to [shipped-baseline](./backlog/shipped-baseline.md) and demo “Already shipped” (#10, #17)
+- Prior backlog cleanup: P0-01, P0-S02, P0-07, P0-03 removed from active work; **Wave 1 complete**
+- P2-05 removed from Phase 2 active table — MVP in [shipped-baseline](./backlog/shipped-baseline.md); full scope deferred in [P2-05](./backlog/P2-05-terminology-drift.md)
+
+### Added — Confluence file import (P0-03 Phase 1)
+
+Per [ADR 0016](./adr/0016-external-import.md):
+
+- **Module:** `integration` bounded context — `ImportParser` registry, staging via `ImportSession` / `ImportSessionItem`
+- **Parsers:** Confluence HTML table, CSV, ZIP export, paste HTML; scope + hints encoded in `TranslationKey.context`
+- **Queues:** `integration.import.parse`, `integration.import.apply` — sync when ≤200 rows; async for large files
+- **API:** `POST .../import/sessions`, paste, preview, apply under `/projects/:id/import`
+- **UI:** Project **Import** tab — upload/paste, diff preview, apply with conflict strategy
+- **UI:** Hints column on Translations grid (parsed from key context)
+- **Tests:** unit parsers + `import-confluence.e2e-spec.ts` (850-key demo fixture, &lt;30s)
+
+### Added — Confluence live sync (P0-03 Phase 2)
+
+Per [ADR 0016](./adr/0016-external-import.md):
+
+- **Schema:** `ConfluenceConnection`, `ConfluenceSyncConfig` — encrypted OAuth tokens per project
+- **OAuth:** Atlassian 3LO connect/callback; token refresh; `TokenEncryptionService`
+- **API client:** Confluence REST v2 (spaces, pages, page body); 429 retry
+- **Queue:** `integration.confluence.sync` — fetch → parse → diff → optional auto-apply
+- **API:** `/projects/:id/integrations/confluence/*` — connect, config, spaces/pages, sync, disconnect
+- **UI:** Project **Settings → Integrations** — Confluence connect, page picker, sync now, last sync stats
+- **UX:** `oauthAvailable` + `setupHint` on integration status when `ATLASSIAN_CLIENT_*` env vars are unset — Connect/Sync disabled; admin setup steps shown; file import still available
+- **Tests:** `token-encryption`, `confluence-api.client`, `confluence-fetch` unit specs
+
+### Added — Confluence hardening (P0-03b)
+
+Per [ADR 0016](./adr/0016-external-import.md) and [shipped-baseline](./backlog/shipped-baseline.md) (P0-03b):
+
+- **OAuth:** Multi-site picker after callback; `connect/pending-sites`, `connect/complete`
+- **Sync config:** `labelFilter`, `parseRulesJson` column mapping, `syncEnabled` + `syncIntervalMinutes`
+- **Scheduler:** Worker polls due configs every 5 min → `integration.confluence.sync` (webhook substitute)
+- **BYO OAuth:** `TenantAtlassianOAuthApp`; `GET/PUT/DELETE /tenant/integrations/atlassian`; Settings UI (admin)
+- **Import:** Optional column mapping on file upload / paste; shared `ColumnMappingFields` component
+- **Tests:** `import-confluence-oauth.e2e-spec.ts` (mocked Atlassian); `wiz-fixtures.spec.ts` (skipped until client files)
+
+### Added — Entities, collections, OpenAPI import
+
+Per [ADR 0017](./adr/0017-entity-collections.md):
+
+- **Schema:** `EntityCollection`, `LocalizationObject.collectionId`
+- **API:** `/projects/:id/collections` CRUD; filter objects by `collectionId`
+- **API:** OpenAPI preview + import into collection (`integration.openapi.import` queue for large specs)
+- **UI:** Tab renamed **Entities** (`/entities` routes; `/objects` redirects); collection sidebar; import wizard
+- **Parser:** `openapi-to-structure.parser.ts` — one entity per OpenAPI tag
+
+### Added — Localization objects polish (P3-12 follow-up)
+
+- **API:** `localizationObjectId` / `keyPrefix` filters on keys and translations list
+- **API:** `POST .../materialize?prune=true` removes orphan keys for an object
+- **UI:** Node inspector sidebar, edit object metadata, object filter chip on Keys/Translations
+- **UI:** Materialize prune checkbox, list progress bar, node type icons
+
+### Fixed — E2E test isolation
+
+- **E2E:** `BULLMQ_PREFIX=e2e-{pid}` isolates BullMQ queues from local dev worker
+- **E2E:** `MOCK_TRANSLATIONS=true` via `setupFiles` + test-env fallback in `TranslateTextService`
+- **Tests:** `localization-objects.e2e-spec.ts` — template + materialize smoke (no AI)
+
+### Added — Localization objects AI + templates (P3-12b/c)
+
+- **Queue:** `localization-object.generate` — AI builds node tree from object name/description
+- **API:** `POST .../generate-structure`, `POST .../apply-template`, `GET .../objects/templates`
+- **Templates:** `login_form`, `registration_form` (built-in, no AI)
+- **UI:** **Generate with AI** button + **Apply template** dropdown on object detail
+- **Schema:** `generationStatus`, `generationError` on `LocalizationObject`
+- **Service:** `AiCompletionService` for JSON structure generation (Gemini → OpenAI fallback)
+
+### Added — Localization objects (P3-12a)
+
+Per [adr/0014-localization-objects.md](./adr/0014-localization-objects.md) and [domain/localization-object.md](./domain/localization-object.md):
+
+- **Schema:** `LocalizationObject`, `LocalizationNode`; optional `TranslationKey.localizationObjectId`
+- **API:** CRUD objects/nodes, `materialize`, `translate` under `/projects/:id/objects`
+- **Module:** `localization-object` — flatten tree → dotted keys, idempotent materialize
+- **UI:** Project tab **Objects** — list, tree editor, materialize, translate all
+- **Tests:** `flatten-tree.utils`, `materialize-object.service`, node content-type mapping
+
+### Changed — AI provider UI uses server config
+
+- **API:** `GET /api/v1/config/ai` — `defaultProvider`, `supportedProviders`, `providerFallback` (no secrets)
+- **UI:** Removed hardcoded provider dropdown from Create Job modal; jobs use server `AI_PROVIDER` unless API sets `provider`
+- **UI:** Jobs list/detail show `defaultProvider` from config when job has no stored provider
+- **Docs:** OpenAPI updated for optional `provider` on job create
+
+### Added — Gemini-primary cloud provider stack (P1-07, shipped)
+
+Per [adr/0013-openai-model-fallback.md](./adr/0013-openai-model-fallback.md), [domain/ai-provider.md](./domain/ai-provider.md), and [backlog/shipped-baseline.md](./backlog/shipped-baseline.md):
+
+- **Config:** `AI_PROVIDER` env (default `gemini`) wired in validation schema and job creation when API/UI omit provider
+- **Env:** `AI_PROVIDER_FALLBACK=openai` for cloud testing (Gemini → OpenAI only, no Ollama)
+- **Models:** `GEMINI_MODEL=gemini-2.5-flash-lite`, `OPENAI_MODEL=gpt-4.1-mini`, `OPENAI_MODEL_FALLBACK=gpt-4.1`
+- **OpenAI:** model-tier fallback inside `OpenAiProvider` (mirrors ADR 0011 Gemini pattern)
+- **UI:** Create job modal no longer sends a hardcoded provider; server `AI_PROVIDER` applies
+- **Cost:** analytics rates for `gpt-4.1-mini`, `gpt-4.1`, `gemini-2.5-flash-lite` in `prompt.builder`
+- **Templates:** `backend/.env.example`, `.env.dev.example`, `.env.docker` updated
+- **Tests:** provider registry, model-chain utils, cost estimator unit tests
+
+### Added — Auto glossary suggestions (P1-03)
+
+Per [adr/0012-auto-glossary-suggestions.md](./adr/0012-auto-glossary-suggestions.md):
+
+- **Schema:** `GlossarySuggestion` + `GlossarySuggestionStatus` enum; migration `20260629120000_glossary_suggestions`
+- **Miner:** heuristic corpus scan (identical terms, stable pairs, product codes, capitalized tokens); unit tests for merge/ranking
+- **Queue:** `glossary.analyze` worker job replaces pending suggestions per project
+- **API:** `GET/POST .../glossary/suggestions`, analyze, approve, reject
+- **Config:** `GLOSSARY_ANALYZE_MIN_TRANSLATIONS`, `GLOSSARY_ANALYZE_MAX_SUGGESTIONS`
+- **UI:** Glossary tab — **Suggest terms**, pending suggestions table with approve/reject
+
+### Added — Export UI + async export queue
+
+Per [backlog/shipped-baseline.md](./backlog/shipped-baseline.md):
+
+- **Frontend:** project **Export** tab — format, language, status; polls async jobs until download ready
+- **Sync API:** `GET /projects/:id/export` (unchanged fast path)
+- **Async API:** `POST /projects/:id/exports`, `GET /exports/:id`, `GET /exports/:id/download`
+- **Worker:** `translation.export` processor; `ExportJob` Prisma model; files in `EXPORT_STORAGE_DIR`
+- **Config:** `EXPORT_ASYNC_THRESHOLD` (default 1000), `EXPORT_JOB_TTL_HOURS`, `EXPORT_STORAGE_DIR`
+- **Tests:** `ExportFormatService` unit tests; `RequestExportHandler` async/sync handler tests
+
+### Added — Extended QA validators
+
+Per extended [adr/0008-translation-output-validation.md](./adr/0008-translation-output-validation.md) and [backlog/shipped-baseline.md](./backlog/shipped-baseline.md):
+
+- **PlaceholderValidator** (`translation/application/validators/`): reject output when `{{...}}` or `%%...%%` tokens differ from source
+- **HtmlTagBalanceValidator:** reject unbalanced HTML when source contains tags
+- **Integration:** composable QA chain runs after heuristic checks in `TranslationOutputValidator`; failures retry up to 3 attempts with validator name in job item error
+- **Config:** `TRANSLATION_QA_VALIDATORS_ENABLED` (default `true`; heuristics still controlled by `TRANSLATION_VALIDATION_ENABLED`)
+- **Deferred:** markdown fence validator, link warn-only mode, per-project `qaProfile` (future backlog)
+
+### Added — Gemini model tier fallback
+
+Per [adr/0011-gemini-model-fallback.md](./adr/0011-gemini-model-fallback.md):
+
+- **GeminiProvider:** after primary model exhausts transient retries, try `GEMINI_MODEL_FALLBACK` before provider fallback to Ollama
+- **Config:** `GEMINI_MODEL_FALLBACK` (optional)
+
+### Added — Gemini transient HTTP retry
+
+Per [adr/0010-gemini-transient-http-retry.md](./adr/0010-gemini-transient-http-retry.md):
+
+- **GeminiProvider:** exponential backoff retry on HTTP 502/503/429 before provider fallback
+- **Config:** `GEMINI_TRANSIENT_RETRIES`, `GEMINI_TRANSIENT_RETRY_DELAY_MS`
+
+### Added — Cross-locale reference on retry
+
+Per [features/cross-locale-reference.md](./features/cross-locale-reference.md) and [adr/0009-cross-locale-reference-on-retry.md](./adr/0009-cross-locale-reference-on-retry.md):
+
+- **Reference translations:** on validation retry (attempt ≥ 2) or manual job retry, inject up to 8 sibling locale translations into the AI prompt
+- **Utils:** `reference-translation.utils.ts`, `reference-translation-prompt.utils.ts`
+- **Payload:** `includeReferenceTranslations` on `translation.process` queue jobs from `translation.retry`
+
+### Changed — Agent instructions
+
+- **AGENTS.md:** Full rewrite — agent system prompt, mandatory workflow (understand → plan → TDD → implement → verify), SOLID/DRY/KISS/CQRS/DDD, updated translation pipeline, complete docs/ADR map, definition of done
+
+### Added — Product backlog (LocalizationOps)
+
+- **docs/backlog/:** Restructured from [raw.md](./backlog/raw.md) vision into phased tasks (P1–P3)
+- [shipped-baseline.md](./backlog/shipped-baseline.md) — reference for already-built capabilities
+- Removed completed micro-tasks (context, validation, trimming) — covered in shipped baseline + ADRs
+
 ### Added — Developer tooling
 
 - **Makefile:** `make help`, `install`, `lint`, `format`, `typecheck`, `test`, `build`, `ci`, dev/db/docker targets
@@ -193,15 +408,15 @@ Per [roadmap.md](./roadmap.md) Phase 1 and [domain/tenant.md](./domain/tenant.md
 - Prisma model: `ProjectLanguage`
 
 ### Added — Monorepo scaffold
-  - `backend/` — NestJS API with DDD module skeletons, Prisma schema, BullMQ worker
-  - `frontend/` — React + Vite + Tailwind + TanStack Query feature structure
-  - `docker-compose.yml` — postgres, redis, api, worker, frontend
-  - `backend/.env.example`, `frontend/.env.example`
+ - `backend/` — NestJS API with DDD module skeletons, Prisma schema, BullMQ worker
+ - `frontend/` — React + Vite + Tailwind + TanStack Query feature structure
+ - `docker-compose.yml` — postgres, redis, api, worker, frontend
+ - `backend/.env.example`, `frontend/.env.example`
 - **OpenAPI docs:** `docs/api/openapi.md`
 - **Docs translated to English:** `docs/important.md`
 - AI-optimized docs pack:
-  - `docs/README.md`, `system-overview.md`, `patterns.md`, `coding-standards.md`
-  - `docs/domain/`, `docs/api/`, `docs/database/`, `docs/workflows/`, `docs/adr/`
+ - `docs/README.md`, `system-overview.md`, `patterns.md`, `coding-standards.md`
+ - `docs/domain/`, `docs/api/`, `docs/database/`, `docs/workflows/`, `docs/adr/`
 - `AGENTS.md` — Cursor / LLM agent instructions
 
 ### Backend modules (skeleton)
