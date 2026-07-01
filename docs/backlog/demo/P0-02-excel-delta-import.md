@@ -1,6 +1,8 @@
 # P0-02 — Excel round-trip + delta import
 
-**Phase:** FIFA/WIZ P0 · **Importance:** Critical · **Difficulty:** Medium · **Status:** Backlog
+**Phase:** FIFA/WIZ P0 · **Importance:** Critical · **Difficulty:** Medium · **Status:** Shipped (MVP)
+
+> Moved out of active backlog — see [shipped-baseline](../shipped-baseline.md) and [demo/README](./README.md#already-shipped--covered-no-new-p0-work). Client ideas #10 and #17 merged into this item.
 
 **Client ideas:** #10 Excel round-trip · #17 Delta import from Classic · **EverRest:** “Planned”
 
@@ -10,32 +12,34 @@ Accept the client’s existing Excel export (with Field ID column), fill **empty
 
 **Demo hook:** upload 847-row export → download completed file in 2 minutes; every column preserved.
 
-## Current state
-
-- Frontend exports grid to `.xlsx` via `xlsx` library (generic columns)
-- `POST /projects/:id/keys/bulk-import` accepts JSON keys — not client Excel schema
-- No column-mapping profiles; no “fill empty only” mode
-- Translation jobs operate on in-app keys, not file-in/file-out round-trip
-
-## Proposed fit
+## Shipped (MVP)
 
 | Layer | Change |
 |-------|--------|
-| **Module** | `import` subfolder or extend `translation-key` — `ExcelImportProfile`, parsers |
-| **Schema** | `import_profiles` per project: column map (fieldId, scope, key, sourceLang, targetLang columns) |
-| **API** | `POST /projects/:id/import/excel/preview` — parse, validate, stats (empty cells count) |
-| **API** | `POST /projects/:id/import/excel/delta-translate` — enqueue job for empty cells only |
-| **API** | `GET /projects/:id/import/excel/:jobId/download` — same layout as input |
-| **Queue** | Reuse `translation.job` with `mode: delta-import`, key refs from row IDs |
-| **Frontend** | Import wizard: upload → map columns (or pick Wiz Classic preset) → preview → translate → download |
+| **Parser** | `exceljs` parse + compose; Wiz Classic preset (`Field ID \| Scope \| Key \| EN \| FR \| ES…`); empty-cell detection per language |
+| **Queues** | `integration.excel.parse`, `integration.excel.compose` — parse preview + merge AI results into stored original workbook |
+| **Schema** | `ImportSession.translationJobId`, `outputStoragePath`, `excelLayoutJson`; `Project.excelImportProfile` |
+| **API** | `POST .../import/excel/preview`, profile GET/PUT, session GET, `delta-translate`, `download` |
+| **UI** | Import tab → **Excel round-trip** — upload → empty-cell stats + sample rows → translate → download |
+| **Tests** | `excel.parser.spec.ts`, `import-excel.e2e-spec.ts` (mock translations) |
 
-### Wiz Classic preset (initial)
+## Code locations
 
-```text
-Columns: Field ID | Scope | Key | EN (source) | FR | ES | …
-Rule: never modify Field ID / Scope / Key / source columns
-Fill: only blank target-language cells
-```
+| Area | Path |
+|------|------|
+| Parser + compose | `backend/src/integration/domain/parsers/excel.parser.ts`, `wiz-classic-preset.ts` |
+| Controller + DTOs | `backend/src/integration/presentation/excel-import.controller.ts`, `dto/excel-import.dto.ts` |
+| Handlers | `backend/src/integration/application/handlers/excel.handlers.ts` |
+| Delta translate + compose | `excel-delta-translate.service.ts`, `excel-compose.service.ts`, `excel-job-runner.service.ts` |
+| Queues | `excel-queue.service.ts`, `worker/processors/excel.processor.ts` |
+| Import tab UI | `frontend/src/features/import/components/ExcelImportPanel.tsx`, `pages/ProjectImportPage.tsx` |
+
+## Deferred
+
+- Optional “also import keys to project” checkbox (round-trip demo does not materialize keys)
+- Idempotency: same file hash + profile → skip re-translate unless `force=true`
+- Custom column-mapping wizard UI (API supports `custom` preset; UI ships Wiz Classic only)
+- Before/after diff highlight in preview (sample rows only for MVP)
 
 ## Dependencies
 
@@ -44,12 +48,12 @@ Fill: only blank target-language cells
 
 ## Acceptance criteria
 
-- [ ] Upload client Excel; system detects empty translation cells per language
-- [ ] Delta translate fills empties only; existing human translations untouched
-- [ ] Downloaded file: same sheet structure, column order, and Field ID values as input
-- [ ] Import profile saved per project (Wiz Classic preset ships out of box)
-- [ ] E2e: fixture xlsx → job → output byte-compatible layout (spot-check rows)
-- [ ] ADR if new import bounded context
+- [x] Upload client Excel; system detects empty translation cells per language
+- [x] Delta translate fills empties only; existing human translations untouched
+- [x] Downloaded file: same sheet structure, column order, and Field ID values as input
+- [x] Import profile saved per project (Wiz Classic preset ships out of box)
+- [x] E2e: fixture xlsx → job → output byte-compatible layout (spot-check rows)
+- [x] ADR if new import bounded context (reuses ADR 0016 `integration` module)
 
 ## Notes
 

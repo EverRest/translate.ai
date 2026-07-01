@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added — Excel round-trip + delta import (P0-02)
+
+- Wiz Classic preset; empty-cell-only AI fill; composed `.xlsx` download; Import tab Excel wizard
+
 ### Shipped — FIFA/WIZ wave 1 + terminology drift MVP
 
 - **P0-01 Sport-domain AI context** — `domainProfile`, domain presets, `copy-settings`, FIFA glossary preset, Domain context UI, post-create onboarding
@@ -11,6 +15,7 @@
 
 ### Changed
 
+- **Backlog** — P0-02 Excel shipped (MVP); removed from active P0 table; Wave 2 = P0-04 + P0-06; see `docs/backlog/shipped-baseline.md`
 - **Backlog** — P0-01, P0-S02, P0-07, P0-03 out of active P0 table; Wave 1 complete; P2-05 out of Phase 2 active table (MVP shipped); see `docs/backlog/shipped-baseline.md`
 
 ### Added

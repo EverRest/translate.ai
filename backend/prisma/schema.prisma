@@ -79,6 +79,9 @@ enum ImportSessionStatus {
   parsing
   preview_ready
   applying
+  translating
+  composing
+  download_ready
   completed
   failed
   cancelled
@@ -196,6 +199,7 @@ model Project {
   name          String
   description   String?
   domainProfile         Json?         @map("domain_profile")
+  excelImportProfile    Json?         @map("excel_import_profile")
   autoTerminologyScan   Boolean       @default(true) @map("auto_terminology_scan")
   status                ProjectStatus @default(active)
   createdAt             DateTime      @default(now()) @map("created_at")
@@ -663,12 +667,15 @@ model ImportSession {
   warningsJson    Json?               @map("warnings_json")
   diffSummaryJson Json?               @map("diff_summary_json")
   parseRulesJson  Json?               @map("parse_rules_json")
-  storagePath     String?             @map("storage_path")
-  originalFilename String?            @map("original_filename")
-  errorMessage    String?             @map("error_message")
-  startedAt       DateTime?           @map("started_at")
-  completedAt     DateTime?           @map("completed_at")
-  createdAt       DateTime            @default(now()) @map("created_at")
+  storagePath        String?             @map("storage_path")
+  outputStoragePath  String?             @map("output_storage_path")
+  originalFilename   String?             @map("original_filename")
+  translationJobId   String?             @map("translation_job_id") @db.Uuid
+  excelLayoutJson    Json?               @map("excel_layout_json")
+  errorMessage       String?             @map("error_message")
+  startedAt          DateTime?           @map("started_at")
+  completedAt        DateTime?           @map("completed_at")
+  createdAt          DateTime            @default(now()) @map("created_at")
 
   tenant  Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   project Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -677,6 +684,7 @@ model ImportSession {
 
   @@index([tenantId, createdAt])
   @@index([projectId, createdAt])
+  @@index([translationJobId])
   @@map("import_sessions")
 }
 

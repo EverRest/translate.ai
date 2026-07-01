@@ -3,6 +3,7 @@ import { useOutletContext, useParams } from 'react-router-dom';
 import { useToast } from '../../../shared/ui/use-toast';
 import type { Project } from '../../projects/types';
 import { ColumnMappingFields } from '../components/ColumnMappingFields';
+import { ExcelImportPanel } from '../components/ExcelImportPanel';
 import {
   toParseRulesInput,
   type ColumnMapping,
@@ -20,12 +21,14 @@ import {
 } from '../types';
 
 type WizardStep = 'upload' | 'preview' | 'done';
+type ImportMode = 'confluence' | 'excel';
 
 export function ProjectImportPage() {
   const toast = useToast();
   const { projectId } = useParams<{ projectId: string }>();
   useOutletContext<{ project: Project }>();
 
+  const [importMode, setImportMode] = useState<ImportMode>('confluence');
   const [step, setStep] = useState<WizardStep>('upload');
   const [session, setSession] = useState<ImportSession | null>(null);
   const [pasteHtml, setPasteHtml] = useState('');
@@ -102,13 +105,40 @@ export function ProjectImportPage() {
       <div>
         <h2 className="text-lg font-medium text-white">Import translations</h2>
         <p className="mt-1 text-sm text-slate-400">
-          Upload a Confluence HTML, CSV, or ZIP export. Review the diff, then
-          apply keys and hints to the project. Large files run in the background
-          worker.
+          Confluence documentation import or Excel round-trip for client
+          exports.
         </p>
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            onClick={() => setImportMode('confluence')}
+            className={`rounded-lg px-4 py-2 text-sm font-medium ${
+              importMode === 'confluence'
+                ? 'bg-indigo-600 text-white'
+                : 'border border-slate-700 text-slate-400 hover:bg-slate-800'
+            }`}
+          >
+            Confluence
+          </button>
+          <button
+            type="button"
+            onClick={() => setImportMode('excel')}
+            className={`rounded-lg px-4 py-2 text-sm font-medium ${
+              importMode === 'excel'
+                ? 'bg-indigo-600 text-white'
+                : 'border border-slate-700 text-slate-400 hover:bg-slate-800'
+            }`}
+          >
+            Excel round-trip
+          </button>
+        </div>
       </div>
 
-      {step === 'upload' && (
+      {importMode === 'excel' && projectId && (
+        <ExcelImportPanel projectId={projectId} />
+      )}
+
+      {importMode === 'confluence' && step === 'upload' && (
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-6">
             <h3 className="text-sm font-medium text-slate-200">Upload file</h3>
@@ -172,86 +202,91 @@ export function ProjectImportPage() {
         </div>
       )}
 
-      {step === 'preview' && session && summary && (
-        <div className="space-y-4">
-          <DiffSummaryBar
-            summary={summary}
-            filename={session.originalFilename}
-          />
+      {importMode === 'confluence' &&
+        step === 'preview' &&
+        session &&
+        summary && (
+          <div className="space-y-4">
+            <DiffSummaryBar
+              summary={summary}
+              filename={session.originalFilename}
+            />
 
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="flex items-center gap-2 text-sm text-slate-400">
-              Filter
-              <select
-                value={actionFilter}
-                onChange={(event) => {
-                  setActionFilter(event.target.value as ImportItemAction | '');
-                  setPage(1);
-                }}
-                className="rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-slate-200"
-              >
-                <option value="">All actions</option>
-                {(Object.keys(IMPORT_ACTION_LABELS) as ImportItemAction[]).map(
-                  (action) => (
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="flex items-center gap-2 text-sm text-slate-400">
+                Filter
+                <select
+                  value={actionFilter}
+                  onChange={(event) => {
+                    setActionFilter(
+                      event.target.value as ImportItemAction | '',
+                    );
+                    setPage(1);
+                  }}
+                  className="rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-slate-200"
+                >
+                  <option value="">All actions</option>
+                  {(
+                    Object.keys(IMPORT_ACTION_LABELS) as ImportItemAction[]
+                  ).map((action) => (
                     <option key={action} value={action}>
                       {IMPORT_ACTION_LABELS[action]}
                     </option>
-                  ),
-                )}
-              </select>
-            </label>
-            <button
-              type="button"
-              onClick={() => {
-                setStep('upload');
-                setSession(null);
-              }}
-              className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800"
-            >
-              Start over
-            </button>
-            <button
-              type="button"
-              onClick={() => void handleApply()}
-              disabled={applySession.isPending}
-              className="ml-auto rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
-            >
-              {applySession.isPending ? 'Applying…' : 'Apply import'}
-            </button>
-          </div>
-
-          <PreviewTable
-            items={preview.data?.items ?? []}
-            isLoading={preview.isLoading}
-          />
-
-          {preview.data && preview.data.meta.total > 50 && (
-            <div className="flex items-center justify-center gap-3 text-sm text-slate-400">
+                  ))}
+                </select>
+              </label>
               <button
                 type="button"
-                disabled={page <= 1}
-                onClick={() => setPage((p) => p - 1)}
-                className="rounded border border-slate-700 px-2 py-1 disabled:opacity-40"
+                onClick={() => {
+                  setStep('upload');
+                  setSession(null);
+                }}
+                className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800"
               >
-                Previous
+                Start over
               </button>
-              <span>
-                Page {page} of {Math.ceil(preview.data.meta.total / 50)}
-              </span>
               <button
                 type="button"
-                disabled={page * 50 >= preview.data.meta.total}
-                onClick={() => setPage((p) => p + 1)}
-                className="rounded border border-slate-700 px-2 py-1 disabled:opacity-40"
+                onClick={() => void handleApply()}
+                disabled={applySession.isPending}
+                className="ml-auto rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
               >
-                Next
+                {applySession.isPending ? 'Applying…' : 'Apply import'}
               </button>
             </div>
-          )}
-        </div>
-      )}
 
-      {step === 'done' && session && (
+            <PreviewTable
+              items={preview.data?.items ?? []}
+              isLoading={preview.isLoading}
+            />
+
+            {preview.data && preview.data.meta.total > 50 && (
+              <div className="flex items-center justify-center gap-3 text-sm text-slate-400">
+                <button
+                  type="button"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => p - 1)}
+                  className="rounded border border-slate-700 px-2 py-1 disabled:opacity-40"
+                >
+                  Previous
+                </button>
+                <span>
+                  Page {page} of {Math.ceil(preview.data.meta.total / 50)}
+                </span>
+                <button
+                  type="button"
+                  disabled={page * 50 >= preview.data.meta.total}
+                  onClick={() => setPage((p) => p + 1)}
+                  className="rounded border border-slate-700 px-2 py-1 disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+      {importMode === 'confluence' && step === 'done' && session && (
         <div className="rounded-xl border border-emerald-900/50 bg-emerald-950/30 p-6">
           <h3 className="text-lg font-medium text-emerald-300">
             Import complete

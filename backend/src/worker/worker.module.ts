@@ -30,6 +30,10 @@ import {
   ImportApplyProcessor,
   ImportParseProcessor,
 } from './processors/import.processor';
+import {
+  ExcelComposeProcessor,
+  ExcelParseProcessor,
+} from './processors/excel.processor';
 import { ConfluenceSyncProcessor } from './processors/confluence-sync.processor';
 import { ConfluenceSyncSchedulerService } from './confluence-sync-scheduler.service';
 
@@ -68,6 +72,8 @@ import { ConfluenceSyncSchedulerService } from './confluence-sync-scheduler.serv
     OpenApiImportProcessor,
     ImportParseProcessor,
     ImportApplyProcessor,
+    ExcelParseProcessor,
+    ExcelComposeProcessor,
     ConfluenceSyncProcessor,
     ConfluenceSyncSchedulerService,
   ],

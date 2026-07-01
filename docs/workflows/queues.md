@@ -24,6 +24,8 @@ nestjs-api (producer)     nestjs-worker (consumer)
 | `integration.openapi.import` | API (large OpenAPI spec) | Worker | 3 |
 | `integration.import.parse` | API (import session upload) | Worker | 3 |
 | `integration.import.apply` | API (import apply) | Worker | 3 |
+| `integration.excel.parse` | API (Excel preview upload) | Worker | 3 |
+| `integration.excel.compose` | translation job finished (excel session) | Worker | 3 |
 | `integration.confluence.sync` | API (Confluence sync) / scheduler | Worker | 3 |
 | `glossary.analyze` | API (suggest terms) | Worker | 3 |
 | `terminology.scan` | API / job-completed event | Worker | 3 |
