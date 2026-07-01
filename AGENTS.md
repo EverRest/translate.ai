@@ -300,6 +300,7 @@ Index: [docs/README.md](docs/README.md) · AI-first guide: [docs/important.md](d
 | [0006](docs/adr/0006-project-branching.md) | Branching |
 | [0007](docs/adr/0007-ollama-model-router.md) | Ollama model routing |
 | [0008](docs/adr/0008-translation-output-validation.md) | Output validation + retries |
+| [0016](docs/adr/0016-external-import.md) | External import pipeline (Confluence, Excel) |
 
 New pattern → new ADR before code.
 

@@ -19,5 +19,6 @@ Reference only — do **not** re-implement. Details live in `docs/domain/`, `doc
 | Usage + quality analytics | `billing` module, Analytics UI |
 | Export API (sync) | `export` module — json/yaml/csv/android-xml/ios-strings/po |
 | Export UI + async queue | `ExportJob`, `translation.export` worker, project Export tab |
+| Confluence file import (P0-03 Phase 1) | ADR 0016, `integration` module, `ImportSession`, Confluence HTML/CSV/ZIP parsers, project Import tab |
 
 When extending the platform, **build on these modules** — do not fork parallel implementations.

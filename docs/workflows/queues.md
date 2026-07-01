@@ -21,6 +21,9 @@ nestjs-api (producer)     nestjs-worker (consumer)
 | `translation.retry` | process worker (on fail) | Worker | 5 |
 | `translation.review` | approval module | Worker | 3 |
 | `translation.export` | API / dashboard | Worker | 3 |
+| `integration.openapi.import` | API (large OpenAPI spec) | Worker | 3 |
+| `integration.import.parse` | API (import session upload) | Worker | 3 |
+| `integration.import.apply` | API (import apply) | Worker | 3 |
 | `webhook.send` | event handlers | Worker | 10 |
 
 Tune concurrency per environment.

@@ -177,9 +177,7 @@ describe('Localization objects (e2e)', () => {
     const general = collections.find((item) => item.slug === 'general')!;
 
     const filtered = await request(app.getHttpServer())
-      .get(
-        `/api/v1/projects/${projectId}/objects?collectionId=${general.id}`,
-      )
+      .get(`/api/v1/projects/${projectId}/objects?collectionId=${general.id}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 

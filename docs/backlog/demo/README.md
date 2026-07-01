@@ -55,7 +55,7 @@ Each file follows the standard backlog template: **Goal**, **Current state**, **
 |----|---------|------------|------------|----------|---------------|
 | [P0-01](./P0-01-sport-domain-ai-context.md) | Sport-domain AI context | Critical | **Low** | #9 | Easy win; plus will be done |
 | [P0-02](./P0-02-excel-delta-import.md) | Excel round-trip + delta import | Critical | Medium | #10, #17 | Planned; zero migration friction |
-| [P0-03](./P0-03-confluence-import.md) | Confluence import | Critical | Medium–High | #5 | Killer feature |
+| [P0-03](./P0-03-documentation-import) | Confluence import | Critical | Medium–High | #5 | **Phase 1 shipped** — file import; OAuth = Phase 2 |
 | [P0-04](./P0-04-stale-translation-detection.md) | Stale translation detection | Critical | Medium | #12 | Must have |
 | [P0-05](./P0-05-context-aware-object-translation.md) | Context-aware object translation | Critical | Medium | #1 | Must have; builds on P3-12 |
 | [P0-06](./P0-06-translation-coverage-heatmap.md) | Translation coverage heatmap | High | Medium | #6 | Liked from UX perspective |
@@ -74,7 +74,7 @@ Wave 1 (demo-ready, ≤2 weeks)
   P0-S02 Placeholder count in job summary (demo metric)
 
 Wave 2 (client onboarding, 2–4 weeks)
-  P0-03 Confluence file import (phase 1) — killer demo, no OAuth
+  ~~P0-03 Confluence file import (phase 1)~~ — **shipped**; OAuth remains Wave 4
   P0-02 Excel delta import (Wiz Classic preset)
   P0-04 Stale detection
   P0-06 Coverage heatmap

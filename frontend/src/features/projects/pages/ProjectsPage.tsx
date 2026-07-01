@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useConfirm } from '../../../shared/ui/ConfirmDialog';
-import type { ColumnDef, GridFetchParams, GridRef } from '../../../shared/ui/DataGrid';
+import type {
+  ColumnDef,
+  GridFetchParams,
+  GridRef,
+} from '../../../shared/ui/DataGrid';
 import { DataGrid } from '../../../shared/ui/DataGrid';
 import { Tooltip } from '../../../shared/ui/Tooltip';
 import { ProjectFormModal } from '../components/ProjectFormModal';
@@ -58,116 +62,128 @@ export function ProjectsPage() {
     return { items: data.items, total: data.meta.total };
   }, []);
 
-  const columns = useMemo((): ColumnDef<Project>[] => [
-    {
-      key: 'name',
-      header: 'Name',
-      width: 240,
-      sortable: true,
-      sortValue: (r) => r.name,
-      filterable: true,
-      filterValue: (r) => r.name,
-      render: (r) => (
-        <button
-          type="button"
-          onClick={() => navigate(`/projects/${r.id}`)}
-          className="w-full truncate text-left font-medium text-white hover:text-sky-300 transition-colors"
-          title={r.name}
-        >
-          {r.name}
-        </button>
-      ),
-    },
-    {
-      key: 'description',
-      header: 'Description',
-      width: 300,
-      filterable: true,
-      filterValue: (r) => r.description ?? '',
-      render: (r) => (
-        <span className="truncate text-sm text-slate-400" title={r.description ?? ''}>
-          {r.description ?? <span className="text-slate-600">—</span>}
-        </span>
-      ),
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      width: 100,
-      sortable: true,
-      sortValue: (r) => r.status,
-      filterable: true,
-      filterValue: (r) => r.status,
-      render: (r) => (
-        <div className="flex justify-center w-full">
-          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs capitalize ${statusStyles[r.status] ?? statusStyles.archived}`}>
-            {r.status}
-          </span>
-        </div>
-      ),
-    },
-    {
-      key: 'keysCount',
-      header: 'Keys',
-      width: 80,
-      sortable: true,
-      sortValue: (r) => r.keysCount,
-      render: (r) => (
-        <div className="flex justify-center w-full">
-          <span className="inline-flex items-center rounded-full bg-slate-700/50 px-2 py-0.5 text-xs tabular-nums text-slate-300">
-            {r.keysCount}
-          </span>
-        </div>
-      ),
-    },
-    {
-      key: 'languages',
-      header: 'Languages',
-      width: 110,
-      sortable: true,
-      sortValue: (r) => r.languages.length,
-      render: (r) => {
-        const nonDefault = r.languages.filter((l) => !l.isDefault);
-        if (nonDefault.length === 0)
-          return <div className="flex justify-center w-full"><span className="text-xs text-slate-600">—</span></div>;
-        return (
-          <div className="flex justify-center w-full">
-            <Tooltip
-              side="bottom"
-              content={
-                <div className="flex flex-wrap gap-1 max-w-[200px]">
-                  {nonDefault.map((l) => (
-                    <span
-                      key={l.code}
-                      className="rounded bg-slate-700 px-1.5 py-0.5 text-[11px] uppercase text-slate-200"
-                    >
-                      {l.code}
-                    </span>
-                  ))}
-                </div>
-              }
-            >
-              <span className="inline-flex cursor-default items-center rounded-full border border-sky-700/40 bg-sky-600/20 px-2 py-0.5 text-xs tabular-nums text-sky-300">
-                {nonDefault.length}
-              </span>
-            </Tooltip>
-          </div>
-        );
+  const columns = useMemo(
+    (): ColumnDef<Project>[] => [
+      {
+        key: 'name',
+        header: 'Name',
+        width: 240,
+        sortable: true,
+        sortValue: (r) => r.name,
+        filterable: true,
+        filterValue: (r) => r.name,
+        render: (r) => (
+          <button
+            type="button"
+            onClick={() => navigate(`/projects/${r.id}`)}
+            className="w-full truncate text-left font-medium text-white hover:text-sky-300 transition-colors"
+            title={r.name}
+          >
+            {r.name}
+          </button>
+        ),
       },
-    },
-    {
-      key: 'createdAt',
-      header: 'Created',
-      width: 110,
-      sortable: true,
-      sortValue: (r) => r.createdAt,
-      render: (r) => (
-        <span className="text-sm text-slate-400">
-          {new Date(r.createdAt).toLocaleDateString()}
-        </span>
-      ),
-    },
-  ], [navigate]);
+      {
+        key: 'description',
+        header: 'Description',
+        width: 300,
+        filterable: true,
+        filterValue: (r) => r.description ?? '',
+        render: (r) => (
+          <span
+            className="truncate text-sm text-slate-400"
+            title={r.description ?? ''}
+          >
+            {r.description ?? <span className="text-slate-600">—</span>}
+          </span>
+        ),
+      },
+      {
+        key: 'status',
+        header: 'Status',
+        width: 100,
+        sortable: true,
+        sortValue: (r) => r.status,
+        filterable: true,
+        filterValue: (r) => r.status,
+        render: (r) => (
+          <div className="flex justify-center w-full">
+            <span
+              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs capitalize ${statusStyles[r.status] ?? statusStyles.archived}`}
+            >
+              {r.status}
+            </span>
+          </div>
+        ),
+      },
+      {
+        key: 'keysCount',
+        header: 'Keys',
+        width: 80,
+        sortable: true,
+        sortValue: (r) => r.keysCount,
+        render: (r) => (
+          <div className="flex justify-center w-full">
+            <span className="inline-flex items-center rounded-full bg-slate-700/50 px-2 py-0.5 text-xs tabular-nums text-slate-300">
+              {r.keysCount}
+            </span>
+          </div>
+        ),
+      },
+      {
+        key: 'languages',
+        header: 'Languages',
+        width: 110,
+        sortable: true,
+        sortValue: (r) => r.languages.length,
+        render: (r) => {
+          const nonDefault = r.languages.filter((l) => !l.isDefault);
+          if (nonDefault.length === 0)
+            return (
+              <div className="flex justify-center w-full">
+                <span className="text-xs text-slate-600">—</span>
+              </div>
+            );
+          return (
+            <div className="flex justify-center w-full">
+              <Tooltip
+                side="bottom"
+                content={
+                  <div className="flex flex-wrap gap-1 max-w-[200px]">
+                    {nonDefault.map((l) => (
+                      <span
+                        key={l.code}
+                        className="rounded bg-slate-700 px-1.5 py-0.5 text-[11px] uppercase text-slate-200"
+                      >
+                        {l.code}
+                      </span>
+                    ))}
+                  </div>
+                }
+              >
+                <span className="inline-flex cursor-default items-center rounded-full border border-sky-700/40 bg-sky-600/20 px-2 py-0.5 text-xs tabular-nums text-sky-300">
+                  {nonDefault.length}
+                </span>
+              </Tooltip>
+            </div>
+          );
+        },
+      },
+      {
+        key: 'createdAt',
+        header: 'Created',
+        width: 110,
+        sortable: true,
+        sortValue: (r) => r.createdAt,
+        render: (r) => (
+          <span className="text-sm text-slate-400">
+            {new Date(r.createdAt).toLocaleDateString()}
+          </span>
+        ),
+      },
+    ],
+    [navigate],
+  );
 
   const toolbar = (
     <button

@@ -35,7 +35,7 @@ Show badge “Preview: FR (draft)” in corner
 
 ## Dependencies
 
-- Stable key naming aligned with [P0-03](./P0-03-confluence-import.md) / Evo Core
+- Stable key naming aligned with [P0-03](./P0-03-documentation-import) / Evo Core
 - [P0-D01](./P0-D01-runtime-translation-api.md) long-term production path; extension is preview-only
 
 ## Acceptance criteria

@@ -37,7 +37,7 @@ Red:    <70% or blocking missing keys for launch language
 
 ## Dependencies
 
-- [P0-03](./P0-03-confluence-import.md) or key prefix convention for meaningful scopes
+- [P0-03](./P0-03-documentation-import) or key prefix convention for meaningful scopes
 - Translation statuses (shipped)
 
 ## Acceptance criteria

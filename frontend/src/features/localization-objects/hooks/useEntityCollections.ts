@@ -58,7 +58,10 @@ export function usePreviewOpenApiImport(
   });
 }
 
-export function useImportOpenApi(projectId: string, collectionId: string | undefined) {
+export function useImportOpenApi(
+  projectId: string,
+  collectionId: string | undefined,
+) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: {

@@ -4,6 +4,20 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Confluence file import (P0-03 Phase 1)
+
+Per [ADR 0016](./adr/0016-external-import.md):
+
+- **Module:** `integration` bounded context — `ImportParser` registry, staging via `ImportSession` / `ImportSessionItem`
+- **Parsers:** Confluence HTML table, CSV, ZIP export, paste HTML; scope + hints encoded in `TranslationKey.context`
+- **Queues:** `integration.import.parse`, `integration.import.apply` — sync when ≤200 rows; async for large files
+- **API:** `POST .../import/sessions`, paste, preview, apply under `/projects/:id/import`
+- **UI:** Project **Import** tab — upload/paste, diff preview, apply with conflict strategy
+- **UI:** Hints column on Translations grid (parsed from key context)
+- **Tests:** unit parsers + `import-confluence.e2e-spec.ts` (850-key demo fixture, &lt;30s)
+
+Phase 2 (Atlassian OAuth live sync) remains backlog.
+
 ### Added — Entities, collections, OpenAPI import
 
 Per [ADR 0017](./adr/0017-entity-collections.md):

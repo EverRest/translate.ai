@@ -6,7 +6,11 @@ type CreateCollectionModalProps = {
   loading?: boolean;
   error?: string;
   onClose: () => void;
-  onSubmit: (values: { name: string; slug: string; description?: string }) => void;
+  onSubmit: (values: {
+    name: string;
+    slug: string;
+    description?: string;
+  }) => void;
 };
 
 function slugify(name: string): string {

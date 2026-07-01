@@ -78,9 +78,9 @@ describe('parseOpenApiSpec', () => {
     expect(usersPath?.children?.some((child) => child.slug === 'get')).toBe(
       true,
     );
-    expect(usersPath?.children?.some((child) => child.slug === 'create_user')).toBe(
-      true,
-    );
+    expect(
+      usersPath?.children?.some((child) => child.slug === 'create_user'),
+    ).toBe(true);
   });
 
   it('filters by selected tags', () => {

@@ -11,7 +11,11 @@ type ImportOpenApiModalProps = {
   error?: string;
   onClose: () => void;
   onPreview: (spec: string, selectedTags: string[]) => void;
-  onImport: (spec: string, selectedTags: string[], materialize: boolean) => void;
+  onImport: (
+    spec: string,
+    selectedTags: string[],
+    materialize: boolean,
+  ) => void;
 };
 
 export function ImportOpenApiModal({
@@ -56,7 +60,8 @@ export function ImportOpenApiModal({
       <div className="space-y-4">
         {collectionName && (
           <p className="text-sm text-slate-400">
-            Target collection: <span className="text-white">{collectionName}</span>
+            Target collection:{' '}
+            <span className="text-white">{collectionName}</span>
           </p>
         )}
 
@@ -145,7 +150,12 @@ export function ImportOpenApiModal({
           </button>
           <button
             type="button"
-            disabled={!spec.trim() || !preview || selectedTags.length === 0 || loadingImport}
+            disabled={
+              !spec.trim() ||
+              !preview ||
+              selectedTags.length === 0 ||
+              loadingImport
+            }
             onClick={() => onImport(spec, selectedTags, materialize)}
             className="rounded-lg bg-sky-600 px-4 py-2 text-sm text-white hover:bg-sky-500 disabled:opacity-50"
           >

@@ -97,11 +97,7 @@ export class EntityCollectionsController {
     @Param('collectionId') collectionId: string,
   ) {
     const data = await this.commandBus.execute(
-      new DeleteEntityCollectionCommand(
-        user.tenantId,
-        projectId,
-        collectionId,
-      ),
+      new DeleteEntityCollectionCommand(user.tenantId, projectId, collectionId),
     );
     return successResponse(data);
   }

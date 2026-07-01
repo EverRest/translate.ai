@@ -15,10 +15,33 @@ function pct(a: number, b: number) {
 }
 
 function colorMeta(p: number) {
-  if (p === 100) return { bar: 'bg-emerald-500', text: 'text-emerald-400', stroke: '#10b981', glow: 'rgba(16,185,129,0.3)' };
-  if (p >= 70)   return { bar: 'bg-sky-500',     text: 'text-sky-400',     stroke: '#0ea5e9', glow: 'rgba(14,165,233,0.3)' };
-  if (p >= 30)   return { bar: 'bg-amber-500',   text: 'text-amber-400',   stroke: '#f59e0b', glow: 'rgba(245,158,11,0.3)' };
-  return                { bar: 'bg-red-500',     text: 'text-red-400',     stroke: '#ef4444', glow: 'rgba(239,68,68,0.3)' };
+  if (p === 100)
+    return {
+      bar: 'bg-emerald-500',
+      text: 'text-emerald-400',
+      stroke: '#10b981',
+      glow: 'rgba(16,185,129,0.3)',
+    };
+  if (p >= 70)
+    return {
+      bar: 'bg-sky-500',
+      text: 'text-sky-400',
+      stroke: '#0ea5e9',
+      glow: 'rgba(14,165,233,0.3)',
+    };
+  if (p >= 30)
+    return {
+      bar: 'bg-amber-500',
+      text: 'text-amber-400',
+      stroke: '#f59e0b',
+      glow: 'rgba(245,158,11,0.3)',
+    };
+  return {
+    bar: 'bg-red-500',
+    text: 'text-red-400',
+    stroke: '#ef4444',
+    glow: 'rgba(239,68,68,0.3)',
+  };
 }
 
 // ─── Donut ────────────────────────────────────────────────────────────────────
@@ -29,21 +52,52 @@ function Donut({ value, size = 128 }: { value: number; size?: number }) {
   const dash = (value / 100) * circ;
   const cx = size / 2;
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}
-      style={{ filter: `drop-shadow(0 0 10px ${glow})` }}>
-      <circle cx={cx} cy={cx} r={r} fill="none" stroke="#1e293b" strokeWidth={12} />
-      <circle cx={cx} cy={cx} r={r} fill="none" stroke={stroke} strokeWidth={12}
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      style={{ filter: `drop-shadow(0 0 10px ${glow})` }}
+    >
+      <circle
+        cx={cx}
+        cy={cx}
+        r={r}
+        fill="none"
+        stroke="#1e293b"
+        strokeWidth={12}
+      />
+      <circle
+        cx={cx}
+        cy={cx}
+        r={r}
+        fill="none"
+        stroke={stroke}
+        strokeWidth={12}
         strokeLinecap="round"
         strokeDasharray={`${dash} ${circ}`}
         strokeDashoffset={circ / 4}
         style={{ transition: 'stroke-dasharray 0.7s cubic-bezier(.4,0,.2,1)' }}
       />
-      <text x={cx} y={cx - 6} textAnchor="middle" dominantBaseline="middle"
-        fill="white" fontSize={size * 0.2} fontWeight="700" fontFamily="ui-monospace,monospace">
+      <text
+        x={cx}
+        y={cx - 6}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fill="white"
+        fontSize={size * 0.2}
+        fontWeight="700"
+        fontFamily="ui-monospace,monospace"
+      >
         {value}%
       </text>
-      <text x={cx} y={cx + 14} textAnchor="middle"
-        fill="#64748b" fontSize={size * 0.1} fontFamily="ui-sans-serif,system-ui,sans-serif">
+      <text
+        x={cx}
+        y={cx + 14}
+        textAnchor="middle"
+        fill="#64748b"
+        fontSize={size * 0.1}
+        fontFamily="ui-sans-serif,system-ui,sans-serif"
+      >
         overall
       </text>
     </svg>
@@ -51,33 +105,50 @@ function Donut({ value, size = 128 }: { value: number; size?: number }) {
 }
 
 // ─── LangBar ─────────────────────────────────────────────────────────────────
-function LangBar({ code, count, total }: { code: string; count: number; total: number }) {
+function LangBar({
+  code,
+  count,
+  total,
+}: {
+  code: string;
+  count: number;
+  total: number;
+}) {
   const p = pct(count, total);
   const { bar, text } = colorMeta(p);
   return (
     <div className="flex items-center gap-3">
-      <span className="w-10 shrink-0 text-[11px] font-semibold uppercase tracking-wider text-slate-400">{code}</span>
+      <span className="w-10 shrink-0 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+        {code}
+      </span>
       <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-slate-800">
-        <div className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${bar}`} style={{ width: `${p}%` }} />
+        <div
+          className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${bar}`}
+          style={{ width: `${p}%` }}
+        />
       </div>
-      <span className={`w-9 shrink-0 text-right text-xs font-bold tabular-nums ${text}`}>{p}%</span>
-      <span className="w-16 shrink-0 text-right text-[11px] text-slate-600 tabular-nums">{count} / {total}</span>
-    </div>
-  );
-}
-
-// ─── MetaRow ─────────────────────────────────────────────────────────────────
-function MetaRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-start gap-3">
-      <span className="w-24 shrink-0 text-xs text-slate-500 pt-0.5">{label}</span>
-      <div className="flex-1 min-w-0">{children}</div>
+      <span
+        className={`w-9 shrink-0 text-right text-xs font-bold tabular-nums ${text}`}
+      >
+        {p}%
+      </span>
+      <span className="w-16 shrink-0 text-right text-[11px] text-slate-600 tabular-nums">
+        {count} / {total}
+      </span>
     </div>
   );
 }
 
 // ─── StatBox ─────────────────────────────────────────────────────────────────
-function StatBox({ label, value, color = 'text-white' }: { label: string; value: number; color?: string }) {
+function StatBox({
+  label,
+  value,
+  color = 'text-white',
+}: {
+  label: string;
+  value: number;
+  color?: string;
+}) {
   return (
     <div className="flex flex-col gap-0.5">
       <span className={`text-xl font-bold tabular-nums ${color}`}>{value}</span>
@@ -87,16 +158,16 @@ function StatBox({ label, value, color = 'text-white' }: { label: string; value:
 }
 
 const STATUS_BADGE: Record<string, string> = {
-  active:   'bg-emerald-500/15 text-emerald-300 border border-emerald-700/40',
+  active: 'bg-emerald-500/15 text-emerald-300 border border-emerald-700/40',
   archived: 'bg-slate-700/30 text-slate-400 border border-slate-700/40',
 };
 
 const JOB_STATUS_COLOR: Record<string, string> = {
-  pending:    'text-amber-400',
+  pending: 'text-amber-400',
   processing: 'text-sky-400',
-  completed:  'text-emerald-400',
-  failed:     'text-red-400',
-  cancelled:  'text-slate-500',
+  completed: 'text-emerald-400',
+  failed: 'text-red-400',
+  cancelled: 'text-slate-500',
 };
 
 // ─── ProjectOverviewTab ───────────────────────────────────────────────────────
@@ -123,11 +194,15 @@ export function ProjectOverviewTab() {
     if (!byKey.has(t.key)) byKey.set(t.key, {});
     byKey.get(t.key)![t.language] = t;
   }
-  const langStats = targetLangs.map((lang) => {
-    let count = 0;
-    byKey.forEach((m) => { if (m[lang.code]) count++; });
-    return { code: lang.code, count };
-  }).sort((a, b) => pct(b.count, totalKeys) - pct(a.count, totalKeys));
+  const langStats = targetLangs
+    .map((lang) => {
+      let count = 0;
+      byKey.forEach((m) => {
+        if (m[lang.code]) count++;
+      });
+      return { code: lang.code, count };
+    })
+    .sort((a, b) => pct(b.count, totalKeys) - pct(a.count, totalKeys));
   const totalTranslated = langStats.reduce((s, l) => s + l.count, 0);
   const totalPossible = totalKeys * targetLangs.length;
   const overallPct = pct(totalTranslated, totalPossible);
@@ -148,10 +223,10 @@ export function ProjectOverviewTab() {
   for (const r of allReviews) {
     reviewsByStatus[r.status] = (reviewsByStatus[r.status] ?? 0) + 1;
   }
-  const pendingCount     = pendingReviews?.meta.total ?? 0;
-  const approvedCount    = approvedReviews?.meta.total ?? 0;
-  const rejectedCount    = reviewsByStatus['rejected'] ?? 0;
-  const draftCount       = reviewsByStatus['draft'] ?? 0;
+  const pendingCount = pendingReviews?.meta.total ?? 0;
+  const approvedCount = approvedReviews?.meta.total ?? 0;
+  const rejectedCount = reviewsByStatus['rejected'] ?? 0;
+  const draftCount = reviewsByStatus['draft'] ?? 0;
   const retranslateCount = reviewsByStatus['retranslated'] ?? 0;
 
   return (
@@ -162,11 +237,17 @@ export function ProjectOverviewTab() {
           <div className="flex-1 min-w-0">
             {/* Name + status + edit */}
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-white leading-none">{project.name}</h1>
-              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] capitalize font-medium ${STATUS_BADGE[project.status] ?? STATUS_BADGE.archived}`}>
+              <h1 className="text-2xl font-bold text-white leading-none">
+                {project.name}
+              </h1>
+              <span
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] capitalize font-medium ${STATUS_BADGE[project.status] ?? STATUS_BADGE.archived}`}
+              >
                 {project.status}
               </span>
-              <span className="font-mono text-[11px] text-slate-600 select-all">{project.id}</span>
+              <span className="font-mono text-[11px] text-slate-600 select-all">
+                {project.id}
+              </span>
               <div className="flex-1" />
               <button
                 type="button"
@@ -177,7 +258,9 @@ export function ProjectOverviewTab() {
               </button>
             </div>
             {project.description && (
-              <p className="mt-1.5 text-xs text-slate-400 max-w-2xl">{project.description}</p>
+              <p className="mt-1.5 text-xs text-slate-400 max-w-2xl">
+                {project.description}
+              </p>
             )}
           </div>
         </div>
@@ -189,11 +272,16 @@ export function ProjectOverviewTab() {
             {defaultLang && (
               <span className="inline-flex items-center gap-1 rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-[11px] font-medium uppercase text-slate-300">
                 {defaultLang.code}
-                <span className="text-[9px] text-slate-500 normal-case">default</span>
+                <span className="text-[9px] text-slate-500 normal-case">
+                  default
+                </span>
               </span>
             )}
             {targetLangs.map((l) => (
-              <span key={l.code} className="inline-flex items-center rounded-full border border-slate-700/60 bg-slate-800/60 px-2 py-0.5 text-[11px] font-medium uppercase text-slate-400">
+              <span
+                key={l.code}
+                className="inline-flex items-center rounded-full border border-slate-700/60 bg-slate-800/60 px-2 py-0.5 text-[11px] font-medium uppercase text-slate-400"
+              >
                 {l.code}
               </span>
             ))}
@@ -203,21 +291,34 @@ export function ProjectOverviewTab() {
           </div>
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] text-slate-500">Keys</span>
-            <span className="text-[11px] text-slate-300 tabular-nums">{totalKeys}</span>
+            <span className="text-[11px] text-slate-300 tabular-nums">
+              {totalKeys}
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] text-slate-500">Jobs</span>
-            <span className="text-[11px] text-slate-300 tabular-nums">{jobs.length}</span>
-            {(jobsByStatus['pending'] ?? 0) + (jobsByStatus['processing'] ?? 0) > 0 && (
+            <span className="text-[11px] text-slate-300 tabular-nums">
+              {jobs.length}
+            </span>
+            {(jobsByStatus['pending'] ?? 0) +
+              (jobsByStatus['processing'] ?? 0) >
+              0 && (
               <span className="text-[11px] text-amber-400">
-                ({(jobsByStatus['pending'] ?? 0) + (jobsByStatus['processing'] ?? 0)} active)
+                (
+                {(jobsByStatus['pending'] ?? 0) +
+                  (jobsByStatus['processing'] ?? 0)}{' '}
+                active)
               </span>
             )}
           </div>
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] text-slate-500">Created</span>
             <span className="text-[11px] text-slate-300">
-              {new Date(project.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              {new Date(project.createdAt).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              })}
             </span>
           </div>
         </div>
@@ -226,32 +327,47 @@ export function ProjectOverviewTab() {
       {/* ── Translation coverage ──────────────────────────────────────────── */}
       {targetLangs.length > 0 && totalKeys > 0 && (
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6 shrink-0">
-          <h2 className="mb-5 text-xs font-semibold uppercase tracking-wider text-slate-500">Translation coverage</h2>
+          <h2 className="mb-5 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Translation coverage
+          </h2>
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
             <div className="flex flex-col items-center gap-3 shrink-0">
               <Donut value={overallPct} size={140} />
               <div className="flex gap-4 text-center">
                 <div>
                   <p className="text-xs text-slate-500">Translated</p>
-                  <p className="mt-0.5 text-base font-bold text-white tabular-nums">{totalTranslated}</p>
+                  <p className="mt-0.5 text-base font-bold text-white tabular-nums">
+                    {totalTranslated}
+                  </p>
                 </div>
                 <div className="w-px bg-slate-800" />
                 <div>
                   <p className="text-xs text-slate-500">Missing</p>
-                  <p className="mt-0.5 text-base font-bold text-slate-500 tabular-nums">{totalPossible - totalTranslated}</p>
+                  <p className="mt-0.5 text-base font-bold text-slate-500 tabular-nums">
+                    {totalPossible - totalTranslated}
+                  </p>
                 </div>
                 <div className="w-px bg-slate-800" />
                 <div>
                   <p className="text-xs text-slate-500">Total</p>
-                  <p className="mt-0.5 text-base font-bold text-slate-500 tabular-nums">{totalPossible}</p>
+                  <p className="mt-0.5 text-base font-bold text-slate-500 tabular-nums">
+                    {totalPossible}
+                  </p>
                 </div>
               </div>
             </div>
             <div className="hidden w-px bg-slate-800 self-stretch sm:block" />
             <div className="flex-1 flex flex-col gap-3 min-w-0">
-              <p className="text-xs font-medium uppercase tracking-wider text-slate-500 mb-1">Per language</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-500 mb-1">
+                Per language
+              </p>
               {langStats.map((l) => (
-                <LangBar key={l.code} code={l.code} count={l.count} total={totalKeys} />
+                <LangBar
+                  key={l.code}
+                  code={l.code}
+                  count={l.count}
+                  total={totalKeys}
+                />
               ))}
             </div>
           </div>
@@ -264,7 +380,13 @@ export function ProjectOverviewTab() {
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <svg className="h-4 w-4 text-slate-400" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <svg
+                className="h-4 w-4 text-slate-400"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
                 <path d="M8 1v6l3 3M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14z" />
               </svg>
               <h2 className="text-sm font-semibold text-slate-200">Jobs</h2>
@@ -281,10 +403,21 @@ export function ProjectOverviewTab() {
             <p className="text-sm text-slate-600">No jobs yet</p>
           ) : (
             <div className="flex flex-wrap gap-6">
-              {['pending','processing','completed','failed','cancelled'].map((s) =>
+              {[
+                'pending',
+                'processing',
+                'completed',
+                'failed',
+                'cancelled',
+              ].map((s) =>
                 (jobsByStatus[s] ?? 0) > 0 ? (
-                  <StatBox key={s} label={s} value={jobsByStatus[s]} color={JOB_STATUS_COLOR[s]} />
-                ) : null
+                  <StatBox
+                    key={s}
+                    label={s}
+                    value={jobsByStatus[s]}
+                    color={JOB_STATUS_COLOR[s]}
+                  />
+                ) : null,
               )}
             </div>
           )}
@@ -294,10 +427,18 @@ export function ProjectOverviewTab() {
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <svg className="h-4 w-4 text-slate-400" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <svg
+                className="h-4 w-4 text-slate-400"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
                 <path d="M2 8l4 4 8-8" />
               </svg>
-              <h2 className="text-sm font-semibold text-slate-200">Approvals</h2>
+              <h2 className="text-sm font-semibold text-slate-200">
+                Approvals
+              </h2>
             </div>
             <button
               type="button"
@@ -307,15 +448,49 @@ export function ProjectOverviewTab() {
               View all →
             </button>
           </div>
-          {pendingCount === 0 && approvedCount === 0 && rejectedCount === 0 && draftCount === 0 && retranslateCount === 0 ? (
+          {pendingCount === 0 &&
+          approvedCount === 0 &&
+          rejectedCount === 0 &&
+          draftCount === 0 &&
+          retranslateCount === 0 ? (
             <p className="text-sm text-slate-600">No reviews yet</p>
           ) : (
             <div className="flex flex-wrap gap-6">
-              {pendingCount > 0     && <StatBox label="pending"      value={pendingCount}     color="text-amber-400" />}
-              {approvedCount > 0    && <StatBox label="approved"     value={approvedCount}    color="text-emerald-400" />}
-              {rejectedCount > 0    && <StatBox label="rejected"     value={rejectedCount}    color="text-red-400" />}
-              {draftCount > 0       && <StatBox label="draft"        value={draftCount}       color="text-slate-400" />}
-              {retranslateCount > 0 && <StatBox label="retranslated" value={retranslateCount} color="text-sky-400" />}
+              {pendingCount > 0 && (
+                <StatBox
+                  label="pending"
+                  value={pendingCount}
+                  color="text-amber-400"
+                />
+              )}
+              {approvedCount > 0 && (
+                <StatBox
+                  label="approved"
+                  value={approvedCount}
+                  color="text-emerald-400"
+                />
+              )}
+              {rejectedCount > 0 && (
+                <StatBox
+                  label="rejected"
+                  value={rejectedCount}
+                  color="text-red-400"
+                />
+              )}
+              {draftCount > 0 && (
+                <StatBox
+                  label="draft"
+                  value={draftCount}
+                  color="text-slate-400"
+                />
+              )}
+              {retranslateCount > 0 && (
+                <StatBox
+                  label="retranslated"
+                  value={retranslateCount}
+                  color="text-sky-400"
+                />
+              )}
             </div>
           )}
         </div>

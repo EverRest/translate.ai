@@ -23,7 +23,7 @@
 
 - Email templates with mixed HTML + GDPR merge fields — validate parser on real Wiz samples
 - Placeholders in **translatable** surrounding prose (lock token only, not whole sentence)
-- Confluence Hints → auto-tag keys with placeholder strict mode ([P0-03](./P0-03-confluence-import.md))
+- Confluence Hints → auto-tag keys with placeholder strict mode ([P0-03](./P0-03-documentation-import))
 
 ## Acceptance criteria (original #11)
 

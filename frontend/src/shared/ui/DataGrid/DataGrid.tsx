@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { createPortal } from 'react-dom';
 import type {
   ColumnDef,
@@ -270,7 +277,7 @@ export function DataGrid<T>({
   columns,
   fetchFn,
   rowKey,
-  rowHeight: _rowHeight = DEFAULT_ROW_HEIGHT,
+  rowHeight = DEFAULT_ROW_HEIGHT,
   chunkSize = DEFAULT_CHUNK,
   searchPlaceholder = 'Search…',
   filterBar,
@@ -281,6 +288,7 @@ export function DataGrid<T>({
   gridId,
   rowContextMenu,
 }: DataGridProps<T>) {
+  void rowHeight;
   // ── Column widths (pixel values, persisted) ───────────────────────────────
   const [colWidths, setColWidths] = useState<Record<string, number>>(() =>
     gridId ? lsGet<Record<string, number>>(`dg:${gridId}:widths`, {}) : {},
@@ -288,7 +296,9 @@ export function DataGrid<T>({
 
   // ── Density & view mode (persisted) ──────────────────────────────────────
   const [density, setDensity] = useState<Density>(() =>
-    gridId ? lsGet<Density>(`dg:${gridId}:density`, 'comfortable') : 'comfortable',
+    gridId
+      ? lsGet<Density>(`dg:${gridId}:density`, 'comfortable')
+      : 'comfortable',
   );
   const [viewMode, setViewMode] = useState<ViewMode>(() =>
     gridId ? lsGet<ViewMode>(`dg:${gridId}:viewMode`, 'default') : 'default',
@@ -322,7 +332,7 @@ export function DataGrid<T>({
       initializedRef.current = true;
       setColWidths((prev) => ({ ...measured, ...prev }));
     }
-  });
+  }, []);
 
   // Debounce localStorage writes — don't write on every resize frame
   const lsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -456,7 +466,10 @@ export function DataGrid<T>({
   useEffect(() => {
     if (!displayPanelOpen) return;
     const h = (e: MouseEvent) => {
-      if (displayPanelRef.current && !displayPanelRef.current.contains(e.target as Node))
+      if (
+        displayPanelRef.current &&
+        !displayPanelRef.current.contains(e.target as Node)
+      )
         setDisplayPanelOpen(false);
     };
     document.addEventListener('mousedown', h);
@@ -862,7 +875,13 @@ export function DataGrid<T>({
               ].join(' ')}
             >
               {/* rows icon */}
-              <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <svg
+                className="h-3.5 w-3.5"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
                 <rect x="1" y="1" width="14" height="14" rx="1" />
                 <line x1="1" y1="5.5" x2="15" y2="5.5" />
                 <line x1="1" y1="10" x2="15" y2="10" />
@@ -876,7 +895,13 @@ export function DataGrid<T>({
                   Row size
                 </div>
                 <div className="flex flex-col gap-0.5 p-2">
-                  {([['compact', 'Small'], ['default', 'Medium'], ['comfortable', 'Large']] as const).map(([d, label]) => (
+                  {(
+                    [
+                      ['compact', 'Small'],
+                      ['default', 'Medium'],
+                      ['comfortable', 'Large'],
+                    ] as const
+                  ).map(([d, label]) => (
                     <button
                       key={d}
                       type="button"
@@ -890,8 +915,18 @@ export function DataGrid<T>({
                     >
                       {label}
                       {density === d && (
-                        <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor">
-                          <path d="M13 4L6 11 3 8" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+                        <svg
+                          className="h-3.5 w-3.5"
+                          viewBox="0 0 16 16"
+                          fill="currentColor"
+                        >
+                          <path
+                            d="M13 4L6 11 3 8"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            fill="none"
+                            strokeLinecap="round"
+                          />
                         </svg>
                       )}
                     </button>
@@ -902,7 +937,13 @@ export function DataGrid<T>({
                   Style
                 </div>
                 <div className="flex flex-col gap-0.5 p-2">
-                  {([['default', 'Default'], ['zebra', 'Zebra'], ['bordered', 'Bordered']] as const).map(([m, label]) => (
+                  {(
+                    [
+                      ['default', 'Default'],
+                      ['zebra', 'Zebra'],
+                      ['bordered', 'Bordered'],
+                    ] as const
+                  ).map(([m, label]) => (
                     <button
                       key={m}
                       type="button"
@@ -916,8 +957,18 @@ export function DataGrid<T>({
                     >
                       {label}
                       {viewMode === m && (
-                        <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor">
-                          <path d="M13 4L6 11 3 8" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+                        <svg
+                          className="h-3.5 w-3.5"
+                          viewBox="0 0 16 16"
+                          fill="currentColor"
+                        >
+                          <path
+                            d="M13 4L6 11 3 8"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            fill="none"
+                            strokeLinecap="round"
+                          />
                         </svg>
                       )}
                     </button>
@@ -1014,7 +1065,10 @@ export function DataGrid<T>({
         >
           <div style={{ minWidth: totalRowWidth }}>
             {/* Sticky header */}
-            <div className="dg-header-row sticky top-0 z-20 flex border-b border-slate-800 bg-slate-900 select-none" style={{ height: ROW_HEIGHT }}>
+            <div
+              className="dg-header-row sticky top-0 z-20 flex border-b border-slate-800 bg-slate-900 select-none"
+              style={{ height: ROW_HEIGHT }}
+            >
               {hasCheckbox && (
                 <div
                   className="sticky left-0 z-30 flex shrink-0 items-center justify-center border-r border-slate-800 bg-slate-900 px-2"
@@ -1038,7 +1092,9 @@ export function DataGrid<T>({
                     data-col={col.key}
                     className={[
                       'relative flex shrink-0 items-center gap-1 last:border-r-0',
-                      viewMode === 'bordered' ? 'border-r border-slate-700' : 'border-r border-slate-800',
+                      viewMode === 'bordered'
+                        ? 'border-r border-slate-700'
+                        : 'border-r border-slate-800',
                       col.noPadding ? '' : 'px-3',
                       col.sticky === 'right' ? 'bg-slate-900' : '',
                     ].join(' ')}
@@ -1155,11 +1211,17 @@ export function DataGrid<T>({
                         key={id}
                         className={[
                           'flex border-b border-slate-800',
-                          viewMode === 'bordered' ? 'border-x border-slate-800' : '',
-                          viewMode === 'zebra' && !isSelected
-                            ? (absoluteIdx % 2 === 1 ? 'bg-slate-800/20' : '')
+                          viewMode === 'bordered'
+                            ? 'border-x border-slate-800'
                             : '',
-                          isSelected ? 'bg-sky-950/20' : 'hover:bg-slate-800/30',
+                          viewMode === 'zebra' && !isSelected
+                            ? absoluteIdx % 2 === 1
+                              ? 'bg-slate-800/20'
+                              : ''
+                            : '',
+                          isSelected
+                            ? 'bg-sky-950/20'
+                            : 'hover:bg-slate-800/30',
                         ].join(' ')}
                         style={{ height: ROW_HEIGHT }}
                         onContextMenu={
@@ -1187,7 +1249,9 @@ export function DataGrid<T>({
                             data-col={col.key}
                             className={[
                               'flex shrink-0 items-center last:border-r-0',
-                              viewMode === 'bordered' ? 'border-r border-slate-700' : 'border-r border-slate-800',
+                              viewMode === 'bordered'
+                                ? 'border-r border-slate-700'
+                                : 'border-r border-slate-800',
                               col.overflow === 'visible'
                                 ? 'overflow-visible'
                                 : 'overflow-hidden',

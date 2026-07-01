@@ -145,7 +145,9 @@ export class DeleteEntityCollectionHandler implements ICommandHandler<DeleteEnti
       command.collectionId,
     );
     if (collection.slug === DEFAULT_COLLECTION_SLUG) {
-      throw new BadRequestException('Cannot delete the default General collection');
+      throw new BadRequestException(
+        'Cannot delete the default General collection',
+      );
     }
 
     const generalId = await ensureDefaultCollection(
@@ -247,7 +249,11 @@ export class ImportOpenApiHandler implements ICommandHandler<ImportOpenApiComman
       command.tenantId,
       command.projectId,
     );
-    await ensureCollection(this.prisma, command.projectId, command.collectionId);
+    await ensureCollection(
+      this.prisma,
+      command.projectId,
+      command.collectionId,
+    );
 
     const parsed = parseOpenApiSpec(command.spec, command.selectedTags);
     if (parsed.entities.length === 0) {
@@ -297,9 +303,13 @@ export class ImportOpenApiHandler implements ICommandHandler<ImportOpenApiComman
 
       await applyStructureTree(this.prisma, object.id, entity.nodes);
       if (command.materialize) {
-        await this.materializeService.materialize(command.projectId, object.id, {
-          prune: false,
-        });
+        await this.materializeService.materialize(
+          command.projectId,
+          object.id,
+          {
+            prune: false,
+          },
+        );
       }
       createdIds.push(object.id);
     }

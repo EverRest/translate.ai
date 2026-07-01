@@ -1,6 +1,6 @@
   # P0-03 — Confluence import
 
-**Phase:** FIFA/WIZ P0 · **Importance:** Critical · **Difficulty:** Medium–High · **Status:** Backlog
+**Phase:** FIFA/WIZ P0 · **Importance:** Critical · **Difficulty:** Medium–High · **Status:** Partial (Phase 1 shipped)
 
 **Client idea:** #5 · **EverRest:** “Killer feature”
 
@@ -14,9 +14,17 @@ Wiz developers store translation keys on Confluence pages (BMA/PMA/SEQ). transla
 
 ## Current state
 
-- Keys created via UI, API, bulk JSON import, localization object materialize
-- No Confluence connector, no HTML table parser for Wiz page format
-- No scope concept matching client’s Confluence hierarchy (may map to key prefix or tags)
+**Phase 1 (shipped):**
+
+- `integration` module with Confluence HTML/CSV/ZIP + paste parsers ([ADR 0016](../../adr/0016-external-import.md))
+- Import wizard: upload or paste → preview diff → apply; `ImportSession` staging
+- Scope and hints stored in `TranslationKey.context`; hints column on Translations grid
+- E2e: fixture CSV/HTML + 850-key perf demo (&lt;30s, no AI)
+
+**Phase 2 (backlog):**
+
+- No Atlassian OAuth connector or live page sync
+- No `confluence_connections` / webhook sync
 
 ## Proposed fit
 
@@ -45,12 +53,12 @@ Hints containing "%%…%% must be kept" → flag key context for QA
 
 ## Acceptance criteria
 
-- [ ] **Phase 1:** Upload Confluence HTML export → keys + source text imported with scope preserved
+- [x] **Phase 1:** Upload Confluence HTML export → keys + source text imported with scope preserved
 - [ ] **Phase 2:** OAuth connect; sync specified pages; idempotent upsert
-- [ ] Demo script: ≥800 keys from sample export in <30s (no AI)
-- [ ] Hints column stored and visible in key detail / translation grid
-- [ ] ADR: `0016-confluence-import.md`
-- [ ] E2e: fixture HTML → expected key count and paths
+- [x] Demo script: ≥800 keys from sample export in <30s (no AI)
+- [x] Hints column stored and visible in key detail / translation grid
+- [x] ADR: `0016-external-import.md`
+- [x] E2e: fixture HTML → expected key count and paths
 
 ## Notes
 

@@ -481,6 +481,42 @@ Download completed export file. **Response:** File download.
 
 **Dashboard:** Project → **Export** tab uses POST + poll + download.
 
+---
+
+### Import (Confluence / external)
+
+See [ADR 0016](../adr/0016-external-import.md). Staging via `ImportSession`; parse/apply on BullMQ for large files.
+
+#### POST `/api/v1/projects/{projectId}/import/sessions`
+
+**Content-Type:** `multipart/form-data` — field `file` (Confluence HTML, CSV, or ZIP export).
+
+**Response:** `{ success, data: ImportSession & { queued?: boolean } }` — sync parse when ≤200 rows and not ZIP; otherwise `integration.import.parse` queue.
+
+#### POST `/api/v1/projects/{projectId}/import/sessions/paste`
+
+**Request:** `{ html: string }` — pasted Confluence table HTML.
+
+#### GET `/api/v1/projects/{projectId}/import/sessions`
+
+List import sessions (paginated).
+
+#### GET `/api/v1/projects/{projectId}/import/sessions/{sessionId}`
+
+Session status and diff summary.
+
+#### GET `/api/v1/projects/{projectId}/import/sessions/{sessionId}/preview`
+
+**Query:** `page`, `limit`, `action?` — preview diff items before apply.
+
+#### POST `/api/v1/projects/{projectId}/import/sessions/{sessionId}/apply`
+
+**Request:** `{ conflictStrategy?: "skip" | "update" }` — upserts keys; scope/hints stored in `TranslationKey.context`.
+
+**Dashboard:** Project → **Import** tab — upload or paste → preview → apply.
+
+---
+
 **Query (GET sync only):**
 
 | Param | Values |

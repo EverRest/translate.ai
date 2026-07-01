@@ -1,0 +1,4 @@
+Scope,Key,Default (EN),Hints
+BMA/Login,login.title,Sign in,Shown on login page header
+BMA/Login,login.submit,Log in,"Keep %%userName%% unchanged"
+PMA/Settings,settings.save,Save changes,Primary action button

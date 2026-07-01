@@ -1,6 +1,5 @@
 import { NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
-import { useConfirm } from '../../../shared/ui/ConfirmDialog';
-import { useArchiveProject, useProject } from '../hooks/useProjects';
+import { useProject } from '../hooks/useProjects';
 
 const TAB_LABELS: Record<string, string> = {
   keys: 'Keys',
@@ -12,15 +11,14 @@ const TAB_LABELS: Record<string, string> = {
   jobs: 'Jobs',
   approvals: 'Approvals',
   export: 'Export',
+  import: 'Import',
   settings: 'Settings',
 };
 
 export function ProjectDetailLayout() {
-  const confirm = useConfirm();
   const { projectId } = useParams<{ projectId: string }>();
   const location = useLocation();
   const { data: project, isLoading, error } = useProject(projectId);
-  const archive = useArchiveProject();
 
   // Derive current tab label from URL
   const segments = location.pathname.split('/').filter(Boolean);
@@ -68,7 +66,6 @@ export function ProjectDetailLayout() {
           </>
         )}
       </nav>
-
 
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         <Outlet context={{ project }} />

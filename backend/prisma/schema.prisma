@@ -74,6 +74,25 @@ enum ExportJobStatus {
   failed
 }
 
+enum ImportSessionStatus {
+  pending
+  parsing
+  preview_ready
+  applying
+  completed
+  failed
+  cancelled
+}
+
+enum ImportSessionItemAction {
+  create
+  update
+  unchanged
+  conflict
+  invalid
+  skip
+}
+
 enum GlossarySuggestionStatus {
   pending
   approved
@@ -138,6 +157,7 @@ model Tenant {
   apiRequestLogs     ApiRequestLog[]
   qualityMetrics     TranslationQualityMetric[]
   exportJobs         ExportJob[]
+  importSessions     ImportSession[]
 
   @@map("tenants")
 }
@@ -154,7 +174,8 @@ model User {
   auditLogs    AuditLog[]
   reviews      Review[]
   aiUsageLogs  AiUsageLog[]
-  createdJobs  TranslationJob[] @relation("JobCreatedBy")
+  createdJobs      TranslationJob[] @relation("JobCreatedBy")
+  importSessions   ImportSession[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -182,6 +203,7 @@ model Project {
   glossarySuggestions GlossarySuggestion[]
   localizationObjects LocalizationObject[]
   entityCollections   EntityCollection[]
+  importSessions      ImportSession[]
 
   @@index([tenantId])
   @@map("projects")
@@ -598,4 +620,55 @@ model ExportJob {
   @@index([tenantId, createdAt])
   @@index([projectId, createdAt])
   @@map("export_jobs")
+}
+
+model ImportSession {
+  id              String              @id @default(uuid()) @db.Uuid
+  tenantId        String              @map("tenant_id") @db.Uuid
+  projectId       String              @map("project_id") @db.Uuid
+  userId          String              @map("user_id") @db.Uuid
+  sourceType      String              @map("source_type") @db.VarChar(40)
+  status          ImportSessionStatus @default(pending)
+  statsJson       Json?               @map("stats_json")
+  warningsJson    Json?               @map("warnings_json")
+  diffSummaryJson Json?               @map("diff_summary_json")
+  parseRulesJson  Json?               @map("parse_rules_json")
+  storagePath     String?             @map("storage_path")
+  originalFilename String?            @map("original_filename")
+  errorMessage    String?             @map("error_message")
+  startedAt       DateTime?           @map("started_at")
+  completedAt     DateTime?           @map("completed_at")
+  createdAt       DateTime            @default(now()) @map("created_at")
+
+  tenant  Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  project Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items   ImportSessionItem[]
+
+  @@index([tenantId, createdAt])
+  @@index([projectId, createdAt])
+  @@map("import_sessions")
+}
+
+model ImportSessionItem {
+  id               String                  @id @default(uuid()) @db.Uuid
+  sessionId        String                  @map("session_id") @db.Uuid
+  externalSource   String?                 @map("external_source") @db.VarChar(40)
+  externalId       String?                 @map("external_id")
+  scope            String?
+  key              String
+  sourceText       String                  @map("source_text")
+  hints            String?
+  action           ImportSessionItemAction @default(create)
+  error            String?
+  warning          String?
+  translationKeyId String?                 @map("translation_key_id") @db.Uuid
+  beforeJson       Json?                   @map("before_json")
+  afterJson        Json?                   @map("after_json")
+
+  session ImportSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, action])
+  @@index([sessionId, key])
+  @@map("import_session_items")
 }
