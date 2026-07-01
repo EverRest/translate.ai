@@ -4,6 +4,8 @@ import { ProjectFormModal } from '../components/ProjectFormModal';
 import { useUpdateProject } from '../hooks/useProjects';
 import { useTranslations } from '../../translations/hooks/useTranslations';
 import { useStaleTranslationSummary } from '../../translations/hooks/useStaleTranslations';
+import { useCoverageMatrix } from '../../coverage/hooks/useCoverageMatrix';
+import { LaunchReadinessCard } from '../../coverage/components/LaunchReadinessCard';
 import { useTranslationKeys } from '../../translation-keys/hooks/useTranslationKeys';
 import { useJobsList } from '../../translation-jobs/hooks/useTranslationJobs';
 import { useProjectReviews } from '../../approvals/hooks/useApprovals';
@@ -185,6 +187,7 @@ export function ProjectOverviewTab() {
   const { data: pendingReviews } = useProjectReviews(projectId, 'pending');
   const { data: approvedReviews } = useProjectReviews(projectId, 'approved');
   const { data: staleSummary } = useStaleTranslationSummary(projectId);
+  const { data: coverageMatrix } = useCoverageMatrix(projectId);
 
   const totalKeys = keysData?.meta.total ?? project.keysCount ?? 0;
   const targetLangs = project.languages.filter((l) => !l.isDefault);
@@ -269,6 +272,13 @@ export function ProjectOverviewTab() {
             View stale
           </button>
         </div>
+      )}
+
+      {coverageMatrix && coverageMatrix.worstCells.length > 0 && projectId && (
+        <LaunchReadinessCard
+          projectId={projectId}
+          worstCells={coverageMatrix.worstCells}
+        />
       )}
 
       {/* ── Hero card ─────────────────────────────────────────────────────── */}

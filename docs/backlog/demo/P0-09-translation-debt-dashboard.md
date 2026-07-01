@@ -35,7 +35,7 @@ Coverage gap — languages below launch threshold
 ## Dependencies
 
 - [P0-04](./P0-04-stale-translation-detection-shipped.md) for stale bucket (shipped — reuse `StaleTranslationService.getStaleSummary`)
-- [P0-06](./P0-06-translation-coverage-heatmap.md) shares reporting infra
+- [P0-06-shipped](./P0-06-translation-coverage-heatmap-shipped.md) shares reporting infra
 
 ## Acceptance criteria
 

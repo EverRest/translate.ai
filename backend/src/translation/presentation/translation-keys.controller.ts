@@ -67,6 +67,7 @@ export class TranslationKeysController {
         query.localizationObjectId,
         query.keyPrefix,
         query.staleOnly === 'true' || query.staleOnly === '1',
+        query.scope,
       ),
     );
     return paginatedResponse(data.items, page, limit, data.meta.total);

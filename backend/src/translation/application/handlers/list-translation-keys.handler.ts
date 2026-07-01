@@ -26,6 +26,7 @@ export class ListTranslationKeysHandler implements IQueryHandler<ListTranslation
       buildTranslationKeyListFilter(query.projectId, query.search, {
         localizationObjectId: query.localizationObjectId,
         keyPrefix: query.keyPrefix,
+        scope: query.scope,
       });
 
     if (query.staleOnly) {

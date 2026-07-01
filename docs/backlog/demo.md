@@ -24,7 +24,7 @@ AI видит что это объект (например филд) и пере
 → [P0-03-shipped](demo/P0-03-documentation-import-shipped.md) — file import + OAuth live sync (+ [P0-03b-shipped](demo/P0-03b-confluence-hardening-shipped.md))
 
 ## 6. Translation Coverage Heatmap
-→ [P0-06](demo/P0-06-translation-coverage-heatmap.md)
+→ [P0-06-shipped](demo/P0-06-translation-coverage-heatmap-shipped.md) — scope × language matrix, RAG heatmap, Launch readiness widget
 
 ## 8. New Keys Alert
 → [P0-11](demo/P0-11-new-keys-alert.md) — conditional

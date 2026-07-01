@@ -12,7 +12,7 @@ Cross-cutting review against [AGENTS.md](../../../AGENTS.md), existing modules, 
 
 ### Agree with overall ordering
 
-Wave 1 complete (P0-01 sport context, P0-S02 placeholder summary, P0-07 consistency UX; P0-03 Confluence import shipped). **P0-02 Excel round-trip shipped (MVP).** **P0-04 stale detection shipped (MVP).** Wave 2 adoption focus: P0-06 coverage heatmap. EverRest’s deferrals (runtime API, multi-model, standalone consistency AI) match platform reality.
+Wave 1 complete (P0-01 sport context, P0-S02 placeholder summary, P0-07 consistency UX; P0-03 Confluence import shipped). **P0-02 Excel round-trip shipped (MVP).** **P0-04 stale detection shipped (MVP).** **P0-06 coverage heatmap shipped (MVP).** Wave 3 adoption focus: P0-05 object translation, P0-09 debt dashboard. EverRest’s deferrals (runtime API, multi-model, standalone consistency AI) match platform reality.
 
 ### Suggested wave changes (disagree partially with README waves)
 
@@ -55,7 +55,6 @@ Each file follows the standard backlog template: **Goal**, **Current state**, **
 | ID | Feature | Importance | Difficulty | Client # | EverRest note |
 |----|---------|------------|------------|----------|---------------|
 | [P0-05](./P0-05-context-aware-object-translation.md) | Context-aware object translation | Critical | Medium | #1 | Must have; builds on P3-12 |
-| [P0-06](./P0-06-translation-coverage-heatmap.md) | Translation coverage heatmap | High | Medium | #6 | Liked from UX perspective |
 | [P0-08](./P0-08-translation-inheritance.md) | Translation inheritance between events | High | Medium–High | #13 | Reuse MC26 → WWC27 |
 | [P0-09](./P0-09-translation-debt-dashboard.md) | Translation debt dashboard | Medium | Medium | #28 | Good for demo |
 | [P0-10](./P0-10-live-browser-injection.md) | Live browser injection (extension) | High | High | #29 | Killer demo feature |
@@ -70,10 +69,10 @@ Wave 1 (demo-ready) — COMPLETE — see Already shipped section below
  P0-07 Auto-scan after translate job + drift UX (shipped)
  P0-03 Confluence import file + OAuth (shipped)
 
-Wave 2 (client onboarding, 2–4 weeks) — NEXT
- P0-06 Coverage heatmap
+Wave 2 (client onboarding) — COMPLETE
+ P0-06 Coverage heatmap (shipped)
 
-Wave 3 (differentiation, 4–8 weeks)
+Wave 3 (differentiation, 4–8 weeks) — NEXT
  P0-05 Object-batch translation + progress by object
  P0-08 Event inheritance
  P0-09 Debt dashboard
@@ -83,7 +82,7 @@ Wave 4 / conditional
  P0-11 New keys alert — only after Client confirms static bundle workflow
 ```
 
-> **Note:** Revised from original README per agent review — Wave 1 complete (P0-01, P0-S02, P0-07, P0-03); P0-02 Excel shipped (MVP); P0-04 stale detection shipped (MVP); P0-11 demoted.
+> **Note:** Revised from original README per agent review — Wave 1 complete (P0-01, P0-S02, P0-07, P0-03); P0-02 Excel shipped (MVP); P0-04 stale detection shipped (MVP); P0-06 coverage heatmap shipped (MVP); P0-11 demoted.
 
 ---
 
@@ -118,6 +117,7 @@ See [shipped-baseline.md](../shipped-baseline.md) for code pointers. Full specs 
 | [P0-03](./P0-03-documentation-import-shipped.md) | Confluence file import + OAuth live sync | #5 |
 | [P0-03b](./P0-03b-confluence-hardening-shipped.md) | Confluence hardening (site picker, scheduled sync, BYO OAuth) | #5 |
 | [P0-04](./P0-04-stale-translation-detection-shipped.md) | Stale translation detection | #12 |
+| [P0-06](./P0-06-translation-coverage-heatmap-shipped.md) | Translation coverage heatmap | #6 |
 | [P0-07](./P0-07-consistency-check-shipped.md) | Consistency check Wave 1 (auto drift scan) | #4 |
 | [P0-S01](./P0-S01-glossary-platform-shipped.md) | Glossary / TM platform | #14 |
 | [P0-S02](./P0-S02-placeholder-protection-shipped.md) | Placeholder protection + job summary | #11 |
@@ -128,6 +128,7 @@ See [shipped-baseline.md](../shipped-baseline.md) for code pointers. Full specs 
 |----------|---------|-------|
 | #4 | Consistency check (post-translate) | [P0-07](./P0-07-consistency-check-shipped.md) Wave 1 — auto drift scan, grid hints, settings toggle; Wave 2 LLM reviewer deferred |
 | #10, #17 | Excel round-trip + delta import | [P0-02](./P0-02-excel-delta-import-shipped.md) — Classic import preset, empty-cell fill, same-layout download |
+| #6 | Translation coverage heatmap | [P0-06](./P0-06-translation-coverage-heatmap-shipped.md) — scope × language RAG matrix, Analytics tab, Launch readiness |
 | #12 | Stale translation detection | [P0-04](./P0-04-stale-translation-detection-shipped.md) — snapshot staleness, grid/overview UX, `onlyStale` jobs |
 | #5 | Confluence import | [P0-03](./P0-03-documentation-import-shipped.md) + [P0-03b](./P0-03b-confluence-hardening-shipped.md) |
 | #9 | Sport-domain AI context | [P0-01](./P0-01-sport-domain-ai-context-shipped.md) |

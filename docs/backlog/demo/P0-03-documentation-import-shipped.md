@@ -85,7 +85,7 @@ Phase 1 (file import) and Phase 2 (OAuth live sync) are both shipped. Historical
  ImportRow: { scope, key, sourceText, hints?, externalId? }
  ```
 - Confluence HTML export is messy (merged cells, macros). Phase 1: support **Confluence “Export to Word/HTML” table** + **CSV export** if the client uses it — get **one real page sample** from client before coding parser.
-- Map `scope` → key prefix `{scope}.{key}` **or** store `scope` tag on key (`TranslationKey.context` prefix line `scope:Interface Elements`) — explicit tag beats fragile prefix index ([P0-06](./P0-06-translation-coverage-heatmap.md) depends on this).
+- Map `scope` → key prefix `{scope}.{key}` **or** store `scope` tag on key (`TranslationKey.context` prefix line `scope:Interface Elements`) — explicit tag beats fragile prefix index ([P0-06-shipped](./P0-06-translation-coverage-heatmap-shipped.md) depends on this).
 - Hints column → `TranslationKey.context`; regex-detect `%%…%%` and append `strictPlaceholders: true` hint for QA.
 - Phase 2 OAuth: store tokens encrypted in tenant settings; `integration.confluence.sync` queue — never call Confluence from HTTP handler.
 

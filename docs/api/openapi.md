@@ -303,7 +303,7 @@ Adds preset terms to the project glossary (skips duplicates). Response: `{ prese
 
 #### GET `/api/v1/projects/{projectId}/keys`
 
-**Query:** `page`, `limit`, `search`, `localizationObjectId`, `keyPrefix`, `staleOnly` (boolean — keys with ≥1 stale translation)
+**Query:** `page`, `limit`, `search`, `localizationObjectId`, `keyPrefix`, `scope` (import scope from key context), `staleOnly` (boolean — keys with ≥1 stale translation)
 
 #### POST `/api/v1/projects/{projectId}/keys`
 
@@ -382,6 +382,51 @@ Each item includes `isStale: boolean` when the translation has a snapshot that d
 #### GET `/api/v1/projects/{projectId}/translations/stale-key-hints`
 
 **Response `200`:** `{ "keyIds": ["uuid", "..."] }` — keys with at least one stale translation (for grid row hints).
+
+### Reports
+
+#### GET `/api/v1/projects/{projectId}/reports/coverage-matrix`
+
+Scope × language coverage matrix. Scopes come from `scope: …` line in key `context` (Confluence / Excel import). RAG: green ≥95% approved, yellow 70–94%, red &lt;70%.
+
+**Query:** `scopes` (comma-separated), `languages` (comma-separated) — optional filters.
+
+**Response `200`:**
+
+```json
+{
+ "success": true,
+ "data": {
+ "scopes": ["BMA/Login", "Forms"],
+ "languages": ["de", "fr"],
+ "cells": [
+ {
+ "scope": "Forms",
+ "language": "fr",
+ "total": 120,
+ "translated": 100,
+ "approved": 95,
+ "missing": 20,
+ "draft": 5,
+ "approvedPct": 79,
+ "rag": "yellow"
+ }
+ ],
+ "byLanguage": {
+ "fr": {
+ "total": 240,
+ "approved": 180,
+ "translated": 200,
+ "missing": 40,
+ "approvedPct": 75
+ }
+ },
+ "worstCells": []
+ }
+}
+```
+
+**List keys scope filter:** `GET .../keys?scope=Forms` — keys whose context contains `scope: Forms`.
 
 #### GET `/api/v1/projects/{projectId}/translations/{translationId}`
 
