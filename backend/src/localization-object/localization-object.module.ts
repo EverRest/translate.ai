@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { AiProviderModule } from '../ai-provider/ai-provider.module';
 import { ProjectModule } from '../project/project.module';
+import { TranslationModule } from '../translation/translation.module';
 import {
   ApplyLocalizationObjectTemplateHandler,
   CreateLocalizationNodeHandler,
@@ -14,6 +15,7 @@ import {
   ListLocalizationObjectsHandler,
   MaterializeLocalizationObjectHandler,
   TranslateLocalizationObjectHandler,
+  TranslateObjectsBatchHandler,
   UpdateLocalizationNodeHandler,
   UpdateLocalizationObjectHandler,
 } from './application/handlers/localization-object.handlers';
@@ -26,6 +28,7 @@ import {
   UpdateEntityCollectionHandler,
 } from './application/handlers/entity-collection.handlers';
 import { MaterializeObjectService } from './application/services/materialize-object.service';
+import { ObjectBatchTranslationService } from './application/services/object-batch-translation.service';
 import { StructureGenerateService } from './application/services/structure-generate.service';
 import { LocalizationObjectQueueService } from './infrastructure/localization-object-queue.service';
 import { OpenApiImportQueueService } from './infrastructure/openapi-import-queue.service';
@@ -41,6 +44,7 @@ const commandHandlers = [
   DeleteLocalizationNodeHandler,
   MaterializeLocalizationObjectHandler,
   TranslateLocalizationObjectHandler,
+  TranslateObjectsBatchHandler,
   GenerateLocalizationObjectStructureHandler,
   ApplyLocalizationObjectTemplateHandler,
   CreateEntityCollectionHandler,
@@ -59,13 +63,14 @@ const queryHandlers = [
 
 const services = [
   MaterializeObjectService,
+  ObjectBatchTranslationService,
   StructureGenerateService,
   LocalizationObjectQueueService,
   OpenApiImportQueueService,
 ];
 
 @Module({
-  imports: [CqrsModule, ProjectModule, AiProviderModule],
+  imports: [CqrsModule, ProjectModule, AiProviderModule, TranslationModule],
   controllers: [LocalizationObjectsController, EntityCollectionsController],
   providers: [...commandHandlers, ...queryHandlers, ...services],
   exports: [...services, StructureGenerateService],

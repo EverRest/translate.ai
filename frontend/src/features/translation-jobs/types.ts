@@ -30,10 +30,15 @@ export type JobDetail = {
   projectId: string;
   status: string;
   provider: string | null;
+  mode?: string;
   progress: {
     total: number;
     completed: number;
     failed: number;
+  };
+  objectProgress?: {
+    objectsDone: number;
+    objectsTotal: number;
   };
   failures: JobFailureSummary | null;
   placeholderSummary?: JobPlaceholderSummary;

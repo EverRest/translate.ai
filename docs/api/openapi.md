@@ -504,10 +504,15 @@ List jobs. **Query:** `projectId`, `status`, `page`, `limit`
  "projectId": "550e8400-e29b-41d4-a716-446655440000",
  "status": "completed",
  "provider": "openai",
+ "mode": "object_batch",
  "progress": {
  "total": 6,
  "completed": 6,
  "failed": 0
+ },
+ "objectProgress": {
+ "objectsDone": 12,
+ "objectsTotal": 50
  },
  "placeholderSummary": {
  "placeholdersTotal": 134,
@@ -522,6 +527,8 @@ List jobs. **Query:** `projectId`, `status`, `page`, `limit`
 `placeholderSummary` is **optional** — present only when `placeholdersTotal` > 0 (computed per unique key from source text; counts `{{…}}` and `%%…%%` tokens). Omitted when zero.
 
 When `progress.failed` > 0, response also includes `failures` (grouped error summary) and `failedItems` (per key/language).
+
+For jobs with `mode: "object_batch"`, response includes optional `objectProgress: { objectsDone, objectsTotal }` for entity-level progress (UI: “Field 12 of 50”).
 
 #### GET `/api/v1/jobs/{jobId}/stream`
 
@@ -601,9 +608,15 @@ Deletes tree; materialized translation keys remain.
 
 **Response:** `{ created, updated, pruned, total }`
 
+#### POST `/api/v1/projects/{projectId}/objects/translate-batch`
+
+**Request:** `{ objectIds: string[], languages: string[] }` — materializes each entity, creates one `object_batch` job with field-level AI batching.
+
+**Response `201`:** `{ jobId, status }`
+
 #### POST `/api/v1/projects/{projectId}/objects/{objectId}/translate`
 
-**Request:** `{ languages: ["de", "fr"] }` — materializes then creates translation job.
+**Request:** `{ languages: ["de", "fr"] }` — materializes then creates object-batch translation job (same pipeline as translate-batch for one entity).
 
 #### GET `/api/v1/projects/{projectId}/objects/templates`
 

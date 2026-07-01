@@ -4,6 +4,15 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Context-aware object translation (P0-05 MVP)
+
+- **Schema:** `TranslationJob.mode` (`object_batch`), `metadata`; `TranslationJobItem.batchGroupId`
+- **API:** `POST .../objects/translate-batch` — `{ objectIds[], languages[] }`; single-object translate uses same batch pipeline
+- **Worker:** field-node batching via extended `translation.process`; one AI call per field group (label + placeholder + error); QA validators per output string
+- **Job status:** optional `objectProgress: { objectsDone, objectsTotal }` on `GET /jobs/:id`
+- **UI:** Entities list multi-select + **Translate selected (N fields)**; job detail **Field X of Y** progress
+- **Tests:** `group-field-batches.utils.spec.ts`, `object-batch-prompt.builder.spec.ts`, `object-batch-progress.utils.spec.ts`, `object-batch-translation.e2e-spec.ts`
+
 ### Added — Translation coverage heatmap (P0-06 MVP)
 
 - **API:** `GET .../reports/coverage-matrix` — scope × language matrix with RAG (`green` / `yellow` / `red`), `byLanguage` summary, `worstCells`

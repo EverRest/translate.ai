@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import {
   applyObjectTemplate,
   createLocalizationNode,
@@ -11,6 +12,7 @@ import {
   listObjectTemplates,
   materializeLocalizationObject,
   translateLocalizationObject,
+  translateObjectsBatch,
   updateLocalizationNode,
   updateLocalizationObject,
 } from '../api/localization-objects.api';
@@ -194,6 +196,23 @@ export function useTranslateLocalizationObject(
   return useMutation({
     mutationFn: (languages: string[]) =>
       translateLocalizationObject(projectId, objectId, languages),
+  });
+}
+
+export function useTranslateObjectsBatch(projectId: string) {
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: ({
+      objectIds,
+      languages,
+    }: {
+      objectIds: string[];
+      languages: string[];
+    }) => translateObjectsBatch(projectId, objectIds, languages),
+    onSuccess: (data) => {
+      navigate(`/jobs/${data.jobId}`);
+    },
   });
 }
 

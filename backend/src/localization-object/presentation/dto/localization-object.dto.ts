@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsIn,
   IsInt,
   IsOptional,
@@ -9,6 +10,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 const SLUG_PATTERN = /^[a-z][a-z0-9_]*$/;
 
@@ -157,6 +159,32 @@ export class UpdateLocalizationNodeDto {
 }
 
 export class TranslateLocalizationObjectDto {
+  @ApiProperty({
+    type: [String],
+    example: ['de', 'fr'],
+    description: 'Target language codes',
+  })
+  @IsString({ each: true })
+  @MinLength(2, { each: true })
+  languages!: string[];
+}
+
+export class TranslateObjectsBatchDto {
+  @ApiProperty({
+    type: [String],
+    format: 'uuid',
+    description: 'Localization object IDs to materialize and translate',
+  })
+  @IsArray()
+  @IsUUID('4', { each: true })
+  objectIds!: string[];
+
+  @ApiProperty({
+    type: [String],
+    example: ['de', 'fr'],
+    description: 'Target language codes',
+  })
+  @IsArray()
   @IsString({ each: true })
   @MinLength(2, { each: true })
   languages!: string[];

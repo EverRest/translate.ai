@@ -9,7 +9,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { AuthUser } from '../../shared/auth/auth-user.interface';
 import { AllowApiKey } from '../../shared/auth/decorators/allow-api-key.decorator';
 import { CurrentUser } from '../../shared/auth/decorators/current-user.decorator';
@@ -30,6 +35,7 @@ import {
   ListLocalizationObjectsQuery,
   MaterializeLocalizationObjectCommand,
   TranslateLocalizationObjectCommand,
+  TranslateObjectsBatchCommand,
   UpdateLocalizationNodeCommand,
   UpdateLocalizationObjectCommand,
 } from '../application/localization-object.commands';
@@ -37,10 +43,12 @@ import {
   CreateLocalizationNodeDto,
   CreateLocalizationObjectDto,
   TranslateLocalizationObjectDto,
+  TranslateObjectsBatchDto,
   ApplyLocalizationObjectTemplateDto,
   UpdateLocalizationNodeDto,
   UpdateLocalizationObjectDto,
 } from './dto/localization-object.dto';
+import { TranslationJobCreatedResponseDto } from '../../translation/presentation/dto/job-status.dto';
 
 @ApiTags('localization-objects')
 @ApiBearerAuth()
@@ -249,10 +257,37 @@ export class LocalizationObjectsController {
     return successResponse(data);
   }
 
+  @Post('translate-batch')
+  @ApiOperation({
+    summary: 'Materialize and create object-batch translation job',
+    description:
+      'Materializes each entity, groups field leaves (label, placeholder, error), and enqueues one AI call per field group × language.',
+  })
+  @ApiOkResponse({ type: TranslationJobCreatedResponseDto })
+  async translateBatch(
+    @CurrentUser() user: AuthUser,
+    @Param('projectId') projectId: string,
+    @Body() dto: TranslateObjectsBatchDto,
+  ) {
+    const data = await this.commandBus.execute(
+      new TranslateObjectsBatchCommand(
+        user.tenantId,
+        projectId,
+        dto.objectIds,
+        dto.languages,
+        user.userId,
+      ),
+    );
+    return successResponse(data);
+  }
+
   @Post(':objectId/translate')
   @ApiOperation({
     summary: 'Materialize and create translation job for object',
+    description:
+      'Same object-batch pipeline as translate-batch for a single entity.',
   })
+  @ApiOkResponse({ type: TranslationJobCreatedResponseDto })
   async translate(
     @CurrentUser() user: AuthUser,
     @Param('projectId') projectId: string,

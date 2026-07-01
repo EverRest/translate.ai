@@ -149,6 +149,21 @@ export async function translateLocalizationObject(
   return response.data;
 }
 
+export async function translateObjectsBatch(
+  projectId: string,
+  objectIds: string[],
+  languages: string[],
+) {
+  const response = await apiPost<
+    ApiSuccess<{ jobId: string; status: string }>,
+    { objectIds: string[]; languages: string[] }
+  >(`/projects/${projectId}/objects/translate-batch`, {
+    objectIds,
+    languages,
+  });
+  return response.data;
+}
+
 export async function listObjectTemplates(projectId: string) {
   const response = await apiGet<ApiSuccess<{ items: ObjectTemplateSummary[] }>>(
     `/projects/${projectId}/objects/templates`,
