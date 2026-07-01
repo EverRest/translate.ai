@@ -19,11 +19,22 @@ import {
   ListGlossarySuggestionsHandler,
   RejectGlossarySuggestionHandler,
 } from './application/handlers/glossary-suggestion.handlers';
+import {
+  CountTerminologyDriftIssuesHandler,
+  GetTerminologyDriftKeyHintsHandler,
+  ListTerminologyDriftIssuesHandler,
+  ResolveTerminologyDriftIssueHandler,
+  ScanTerminologyDriftHandler,
+} from './application/handlers/terminology-drift.handlers';
+import { TerminologyScanOnJobCompletedHandler } from './application/handlers/terminology-scan-on-job-completed.handler';
 import { GlossaryService } from './application/glossary.service';
+import { TerminologyDriftService } from './application/terminology-drift.service';
 import { GlossaryQueueService } from './infrastructure/glossary-queue.service';
+import { TerminologyQueueService } from './infrastructure/terminology-queue.service';
 import { GlossaryController } from './presentation/glossary.controller';
 import { GlossaryPresetsController } from './presentation/glossary-presets.controller';
 import { GlossarySuggestionsController } from './presentation/glossary-suggestions.controller';
+import { TerminologyController } from './presentation/terminology.controller';
 
 const commandHandlers = [
   CreateGlossaryTermHandler,
@@ -34,13 +45,20 @@ const commandHandlers = [
   AnalyzeGlossaryHandler,
   ApproveGlossarySuggestionHandler,
   RejectGlossarySuggestionHandler,
+  ScanTerminologyDriftHandler,
+  ResolveTerminologyDriftIssueHandler,
 ];
 
 const queryHandlers = [
   ListGlossaryTermsHandler,
   ListGlossaryPresetsHandler,
   ListGlossarySuggestionsHandler,
+  ListTerminologyDriftIssuesHandler,
+  CountTerminologyDriftIssuesHandler,
+  GetTerminologyDriftKeyHintsHandler,
 ];
+
+const eventHandlers = [TerminologyScanOnJobCompletedHandler];
 
 @Module({
   imports: [CqrsModule, ProjectModule],
@@ -48,14 +66,18 @@ const queryHandlers = [
     GlossaryController,
     GlossaryPresetsController,
     GlossarySuggestionsController,
+    TerminologyController,
   ],
   providers: [
     ...commandHandlers,
     ...queryHandlers,
+    ...eventHandlers,
     GlossaryService,
     GlossaryAnalyzeService,
+    TerminologyDriftService,
     GlossaryQueueService,
+    TerminologyQueueService,
   ],
-  exports: [GlossaryService, GlossaryAnalyzeService],
+  exports: [GlossaryService, GlossaryAnalyzeService, TerminologyDriftService],
 })
 export class GlossaryModule {}

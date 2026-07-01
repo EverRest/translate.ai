@@ -34,6 +34,9 @@ export class UpdateProjectHandler implements ICommandHandler<UpdateProjectComman
       data.domainProfile =
         parsed === null ? Prisma.JsonNull : (parsed as Prisma.InputJsonValue);
     }
+    if (command.autoTerminologyScan !== undefined) {
+      data.autoTerminologyScan = command.autoTerminologyScan;
+    }
 
     const project = await this.prisma.project.update({
       where: { id: command.projectId },

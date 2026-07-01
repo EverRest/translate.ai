@@ -24,5 +24,7 @@ Reference only — do **not** re-implement. Details live in `docs/domain/`, `doc
 | Confluence hardening (P0-03b) | Site picker, label filter, column mapping, scheduled sync, tenant BYO OAuth, OAuth e2e mocks |
 | Placeholder protection + job summary (P0-S02) | `PlaceholderValidator` (ADR 0008); optional `placeholderSummary` on `GET /jobs/:id` and `job.completed` / `job.failed` webhooks |
 | Sport-domain AI context (P0-01) | `Project.domainProfile`; `GET /projects/:id/domain-presets`; `POST .../copy-settings`; domain block in `buildTranslationPrompts`; `fifa_accreditation` glossary preset; Settings → Domain context UI; post-create onboarding modal |
+| Terminology drift detection (P2-05 MVP) | `terminology_drift_issues` table; `terminology.scan` queue; `TerminologyDriftService`; scan/list/count/key-hints/resolve API; Glossary → Terminology drift tab |
+| Consistency check UX Wave 1 (P0-07) | `Project.autoTerminologyScan` (default `true`); `TerminologyScanOnJobCompletedHandler`; Settings → Consistency toggle; post-job toast; translations grid drift hints |
 
 When extending the platform, **build on these modules** — do not fork parallel implementations.

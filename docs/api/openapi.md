@@ -161,6 +161,7 @@ List projects for current tenant.
         "id": "550e8400-e29b-41d4-a716-446655440000",
         "name": "Shop",
         "description": "E-commerce strings",
+        "autoTerminologyScan": true,
         "status": "active",
         "createdAt": "2026-06-25T12:00:00Z"
       }
@@ -183,7 +184,7 @@ List projects for current tenant.
 
 #### GET `/api/v1/projects/{projectId}`
 
-Returns project metadata including optional `domainProfile` (same shape as PATCH).
+Returns project metadata including optional `domainProfile` (same shape as PATCH) and `autoTerminologyScan` (boolean, default `true`).
 
 #### PATCH `/api/v1/projects/{projectId}`
 
@@ -193,6 +194,7 @@ Returns project metadata including optional `domainProfile` (same shape as PATCH
 {
   "name": "FIFA Accred",
   "description": "Accreditation strings",
+  "autoTerminologyScan": true,
   "domainProfile": {
     "domain": "sports",
     "event": "FIFA World Cup 2026",
@@ -208,6 +210,8 @@ Returns project metadata including optional `domainProfile` (same shape as PATCH
 ```
 
 Pass `"domainProfile": null` to clear.
+
+`autoTerminologyScan` — when `true` (default), `TranslationJobCompletedEvent` enqueues `terminology.scan` for the project. Set `false` to disable post-job drift scans (manual scan via `POST .../terminology/scan` still available).
 
 #### POST `/api/v1/projects/{projectId}/copy-settings`
 
@@ -574,6 +578,44 @@ Creates or updates `GlossaryTerm`; marks suggestion `approved`.
 **Response:** `{ success, data: { rejected: true } }`
 
 **Dashboard:** Project → **Glossary** tab — **Suggest terms**, review pending table.
+
+---
+
+### Terminology drift
+
+#### POST `/api/v1/projects/{projectId}/terminology/scan`
+
+Enqueues `terminology.scan` worker job (idempotent per project via BullMQ `jobId`).
+
+**Response:** `{ success, data: { queued: true } }`
+
+#### GET `/api/v1/projects/{projectId}/terminology/issues`
+
+**Query:** `status` — `open` (default), `resolved`, `all`
+
+**Response:** `{ success, data: { items: TerminologyDriftIssue[] } }`
+
+`TerminologyDriftIssue`: `{ id, sourceTerm, targetLang, variants: [{ translation, keyIds, keys }], status, canonicalTranslation, detectedAt, resolvedAt }`
+
+#### GET `/api/v1/projects/{projectId}/terminology/issues/count`
+
+**Response:** `{ success, data: { count: number } }` — open issues only
+
+#### GET `/api/v1/projects/{projectId}/terminology/key-hints`
+
+**Response:** `{ success, data: { keys: string[] } }` — translation key names referenced by open drift issues (for grid hints)
+
+#### POST `/api/v1/projects/{projectId}/terminology/issues/{issueId}/resolve`
+
+**Request:** `{ canonicalTranslation: string }` — must match one variant
+
+Upserts `GlossaryTerm` and marks issue `resolved`.
+
+**Response:** `{ success, data: { issue, term } }`
+
+**Project setting:** see `PATCH /projects/{projectId}` — `autoTerminologyScan` (default `true`).
+
+**Dashboard:** Project → **Glossary** → **Terminology drift** tab; **Settings** → **Consistency** toggle.
 
 ---
 

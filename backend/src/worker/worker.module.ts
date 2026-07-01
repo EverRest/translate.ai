@@ -23,6 +23,7 @@ import {
 } from './processors/translation.processor';
 import { ExportProcessor } from './processors/export.processor';
 import { GlossaryAnalyzeProcessor } from './processors/glossary.processor';
+import { TerminologyScanProcessor } from './processors/terminology.processor';
 import { LocalizationObjectGenerateProcessor } from './processors/localization-object.processor';
 import { OpenApiImportProcessor } from './processors/openapi-import.processor';
 import {
@@ -62,6 +63,7 @@ import { ConfluenceSyncSchedulerService } from './confluence-sync-scheduler.serv
     WebhookSendProcessor,
     ExportProcessor,
     GlossaryAnalyzeProcessor,
+    TerminologyScanProcessor,
     LocalizationObjectGenerateProcessor,
     OpenApiImportProcessor,
     ImportParseProcessor,

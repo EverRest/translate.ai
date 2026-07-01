@@ -39,6 +39,11 @@ export interface GlossaryAnalyzeJobPayload {
   tenantId: string;
 }
 
+export interface TerminologyScanJobPayload {
+  projectId: string;
+  tenantId: string;
+}
+
 export interface LocalizationObjectGenerateJobPayload {
   projectId: string;
   objectId: string;

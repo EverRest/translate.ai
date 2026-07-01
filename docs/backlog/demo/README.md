@@ -12,13 +12,13 @@ Cross-cutting review against [AGENTS.md](../../../AGENTS.md), existing modules, 
 
 ### Agree with overall ordering
 
-P0-02 Excel is the next **adoption** priority (P0-01 sport context and P0-03 Confluence import shipped). EverRest’s deferrals (runtime API, multi-model, standalone consistency AI) match platform reality.
+P0-02 Excel is the next **adoption** priority (Wave 1 complete: P0-01 sport context, P0-S02 placeholder summary, P0-07 consistency UX; P0-03 Confluence import shipped). EverRest’s deferrals (runtime API, multi-model, standalone consistency AI) match platform reality.
 
 ### Suggested wave changes (disagree partially with README waves)
 
 | Current wave | Issue | Suggested change |
 |--------------|-------|------------------|
-| Wave 1: P0-02 Excel | Excel round-trip is **Medium–High** if byte-identical output is required; parsing must run on **backend + queue**, not browser only | **P0-01 sport context shipped**; Wave 1 = P0-07 only; **P0-03 Confluence import shipped** (file + OAuth) |
+| Wave 1: P0-02 Excel | Excel round-trip is **Medium–High** if byte-identical output is required; parsing must run on **backend + queue**, not browser only | **Wave 1 complete** (P0-01, P0-S02, P0-07 shipped); **P0-03 Confluence import shipped** (file + OAuth) |
 | Wave 3: P0-05 objects | Client #1 is “must have” but **P3-12 already covers 60% of demo** (tree + translate all) | Demo can show objects in Wave 2; full object-batch AI (single prompt per field) stays Wave 3 |
 | Wave 3: P0-10 extension | Marked same wave as debt dashboard but difficulty **High** and needs client DOM cooperation | POC only after P0-03 key naming is stable; consider **export preview page** as interim demo (no extension) |
 | P0-11 in P0 list | EverRest: conditional on static bundle model | **Demote to P1** until Wiz confirms import path; do not build snapshots in parallel with P0-02/03 |
@@ -57,7 +57,6 @@ Each file follows the standard backlog template: **Goal**, **Current state**, **
 | [P0-04](./P0-04-stale-translation-detection.md) | Stale translation detection | Critical | Medium | #12 | Must have |
 | [P0-05](./P0-05-context-aware-object-translation.md) | Context-aware object translation | Critical | Medium | #1 | Must have; builds on P3-12 |
 | [P0-06](./P0-06-translation-coverage-heatmap.md) | Translation coverage heatmap | High | Medium | #6 | Liked from UX perspective |
-| [P0-07](./P0-07-consistency-check.md) | Consistency check (post-translate) | High | Low–Medium | #4 | Postponed → glossary + drift scan |
 | [P0-08](./P0-08-translation-inheritance.md) | Translation inheritance between events | High | Medium–High | #13 | Reuse MC26 → WWC27 |
 | [P0-09](./P0-09-translation-debt-dashboard.md) | Translation debt dashboard | Medium | Medium | #28 | Good for demo |
 | [P0-10](./P0-10-live-browser-injection.md) | Live browser injection (extension) | High | High | #29 | Killer demo feature |
@@ -66,8 +65,10 @@ Each file follows the standard backlog template: **Goal**, **Current state**, **
 ### Suggested implementation waves
 
 ```text
-Wave 1 (demo-ready, ≤2 weeks)
-  P0-07 Auto-scan after translate job (event handler)
+Wave 1 (demo-ready, ≤2 weeks) — COMPLETE
+  P0-01 Sport-domain AI context
+  P0-S02 Placeholder summary in job status
+  P0-07 Auto-scan after translate job (event handler) + drift UX
 
 Wave 2 (client onboarding, 2–4 weeks)
   P0-02 Excel delta import (Wiz Classic preset)
@@ -84,7 +85,7 @@ Wave 4 / conditional
   P0-11 New keys alert — only after Wiz confirms static bundle workflow
 ```
 
-> **Note:** Revised from original README per agent review — P0-01 sport context shipped; P0-03 Confluence import shipped; P0-S02 placeholder summary shipped; P0-11 demoted.
+> **Note:** Revised from original README per agent review — Wave 1 complete (P0-01, P0-S02, P0-07); P0-03 Confluence import shipped; P0-11 demoted.
 
 ---
 
@@ -110,14 +111,15 @@ Postponed by product review or blocked on external architecture.
 
 | Client # | Feature | Backlog / code |
 |----------|---------|----------------|
+| #4 | Consistency check (post-translate) | [shipped-baseline](../shipped-baseline.md), [P0-07](./P0-07-consistency-check.md) Wave 1 — auto drift scan, grid hints, settings toggle; Wave 2 LLM reviewer deferred |
 | #5 | Confluence import | [shipped-baseline](../shipped-baseline.md), [P0-03](./P0-03-documentation-import.md) — file import + OAuth live sync |
 | #9 | Sport-domain AI context | [shipped-baseline](../shipped-baseline.md), [P0-01](./P0-01-sport-domain-ai-context.md) — `domainProfile`, presets API, copy-settings, FIFA glossary, Domain context UI, post-create onboarding |
-| #14 | Glossary / TM | [shipped-baseline](../shipped-baseline.md), [P2-05](../P2-05-terminology-drift.md) drift, glossary sets + presets |
+| #14 | Glossary / TM | [shipped-baseline](../shipped-baseline.md), [P0-S01](./P0-S01-glossary-platform.md), [P2-05](../P2-05-terminology-drift.md) drift MVP |
 | #11 | Placeholder protection | [shipped-baseline](../shipped-baseline.md), [P0-S02](./P0-S02-placeholder-protection.md) — validator + job summary metric |
 | #24 | Brand voice training | Glossary + [P2-04](../P2-04-brand-voice.md) brand voice per project |
 | #1 (partial) | Object structure | [P3-12](../P3-12-nested-translation.md) localization objects shipped; tone batching = P0-05 |
 
-See [P0-01](./P0-01-sport-domain-ai-context.md) · [P0-03](./P0-03-documentation-import.md) · [P0-S01](./P0-S01-glossary-platform.md) · [P0-S02](./P0-S02-placeholder-protection.md) for acceptance criteria already met.
+See [P0-01](./P0-01-sport-domain-ai-context.md) · [P0-03](./P0-03-documentation-import.md) · [P0-07](./P0-07-consistency-check.md) · [P0-S01](./P0-S01-glossary-platform.md) · [P0-S02](./P0-S02-placeholder-protection.md) for acceptance criteria already met.
 
 ---
 
@@ -126,7 +128,7 @@ See [P0-01](./P0-01-sport-domain-ai-context.md) · [P0-03](./P0-03-documentation
 | FIFA/WIZ | Existing backlog |
 |----------|------------------|
 | P0-05 Context-aware objects | Extends [P3-12](../P3-12-nested-translation.md) |
-| P0-07 Consistency | [P2-05](../P2-05-terminology-drift.md) + glossary |
+| P0-07 Consistency (Wave 1 shipped) | [P0-07](./P0-07-consistency-check.md), [P2-05](../P2-05-terminology-drift.md) + glossary |
 | P0-01 Sport context (shipped) | [P0-01](./P0-01-sport-domain-ai-context.md), [P2-04](../P2-04-brand-voice.md) tone versioning later |
 | P0-D06 CI/CD | [P3-07](../P3-07-localization-pipeline-as-code.md) |
 | P0-D03 Screenshot | [P3-06](../P3-06-screenshot-regression.md) |

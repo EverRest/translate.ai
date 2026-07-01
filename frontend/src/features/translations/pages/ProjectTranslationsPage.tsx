@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useOutletContext, useParams } from 'react-router-dom';
+import { Link, useOutletContext, useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import * as XLSX from 'xlsx';
 import { useAuthStore } from '../../../features/auth/store/auth.store';
 import { ObjectFilterChip } from '../../localization-objects/components/ObjectFilterChip';
@@ -32,6 +33,11 @@ import {
 import type { Translation } from '../types';
 import { extractHintsFromContext } from '../../import/utils/extract-hints';
 import { useConfirm } from '../../../shared/ui/ConfirmDialog';
+import {
+  pollTerminologyDriftCount,
+  terminologyDriftQueryKey,
+  useTerminologyDriftKeyHints,
+} from '../../glossary/hooks/useTerminologyDrift';
 
 const CHUNK_SIZE = 100;
 const baseUrl = import.meta.env.VITE_API_URL ?? '/api/v1';
@@ -387,6 +393,7 @@ export function ProjectTranslationsPage() {
 
   const toast = useToast();
   const confirm = useConfirm();
+  const queryClient = useQueryClient();
   const { localizationObjectId, objectName, clearFilter } =
     useObjectFilterFromUrl();
   const refetchTranslations = useRefetchTranslations(projectId ?? '');
@@ -395,6 +402,8 @@ export function ProjectTranslationsPage() {
   const { data: langData } = useProjectLanguages(projectId);
   const { data: translationsData } = useTranslations(projectId);
   const deleteKey = useDeleteTranslationKey(projectId ?? '');
+  const { data: driftKeyHints = [] } = useTerminologyDriftKeyHints(projectId);
+  const driftKeySet = useMemo(() => new Set(driftKeyHints), [driftKeyHints]);
 
   const languages = useMemo(
     () => (langData ?? []).filter((l) => !l.isDefault),
@@ -642,8 +651,21 @@ export function ProjectTranslationsPage() {
         );
         activeToastRef.current = null;
       }
+
+      if (projectId) {
+        void pollTerminologyDriftCount(projectId).then((count) => {
+          void queryClient.invalidateQueries({
+            queryKey: terminologyDriftQueryKey(projectId),
+          });
+          if (count > 0) {
+            toast.info(
+              `${count} terminology issue${count === 1 ? '' : 's'} found — review in Glossary → Terminology drift.`,
+            );
+          }
+        });
+      }
     }
-  }, [refetchTranslations, toast]);
+  }, [projectId, queryClient, refetchTranslations, toast]);
 
   const handleError = useCallback(
     (msg: string) => {
@@ -712,11 +734,31 @@ export function ProjectTranslationsPage() {
         filterable: true,
         filterValue: (row: KeyRow) => row.key,
         render: (row: KeyRow) => (
-          <span
-            className="truncate font-mono text-xs text-slate-300"
-            title={row.key}
-          >
-            {row.key}
+          <span className="flex min-w-0 items-center gap-1.5">
+            {driftKeySet.has(row.key) && (
+              <Link
+                to={`/projects/${projectId}/glossary?tab=drift`}
+                title="Terminology drift — inconsistent translations for shared terms"
+                className="shrink-0 text-amber-400 hover:text-amber-300"
+              >
+                <svg
+                  className="h-3.5 w-3.5"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
+                  <path d="M8 1.5l6.5 11.5H1.5L8 1.5z" />
+                  <path d="M8 6v3.5M8 11.5v.5" />
+                </svg>
+              </Link>
+            )}
+            <span
+              className="truncate font-mono text-xs text-slate-300"
+              title={row.key}
+            >
+              {row.key}
+            </span>
           </span>
         ),
       },
@@ -802,7 +844,15 @@ export function ProjectTranslationsPage() {
         },
       })),
     ];
-  }, [defaultLang, languages, byKey, translatingKeys, activeJobId]);
+  }, [
+    defaultLang,
+    languages,
+    byKey,
+    translatingKeys,
+    activeJobId,
+    driftKeySet,
+    projectId,
+  ]);
 
   // ── fetchFn ───────────────────────────────────────────────────────────────
   const fetchFn = useCallback(

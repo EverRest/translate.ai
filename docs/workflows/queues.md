@@ -25,6 +25,8 @@ nestjs-api (producer)     nestjs-worker (consumer)
 | `integration.import.parse` | API (import session upload) | Worker | 3 |
 | `integration.import.apply` | API (import apply) | Worker | 3 |
 | `integration.confluence.sync` | API (Confluence sync) / scheduler | Worker | 3 |
+| `glossary.analyze` | API (suggest terms) | Worker | 3 |
+| `terminology.scan` | API / job-completed event | Worker | 3 |
 | `webhook.send` | event handlers | Worker | 10 |
 
 Tune concurrency per environment.
@@ -39,6 +41,16 @@ Tune concurrency per environment.
 4. Sets `nextSyncAt = now + syncIntervalMinutes`
 
 This replaces Confluence webhooks (not available for OAuth 3LO). See [ADR 0016](../adr/0016-external-import.md).
+
+### Terminology drift scan
+
+`terminology.scan` worker job runs `TerminologyDriftService.runScan`:
+
+1. Clusters translations with identical source text across keys
+2. Compares target-language variants; skips terms already covered by glossary
+3. Upserts open `terminology_drift_issues` rows
+
+**Producers:** `POST /projects/:id/terminology/scan` (idempotent per project via BullMQ `jobId`); `TerminologyScanOnJobCompletedHandler` when `Project.autoTerminologyScan` is `true`. See [P2-05](../backlog/P2-05-terminology-drift.md) and [P0-07](../backlog/demo/P0-07-consistency-check.md).
 
 ## Job payload conventions
 

@@ -3,6 +3,8 @@
 ## [Unreleased]
 
 ### Added
+- **Terminology drift (P2-05 MVP)** — `terminology_drift_issues` table; `terminology.scan` queue; scan/list/resolve API; Glossary drift tab with resolve → glossary upsert
+- **Consistency check UX Wave 1 (P0-07)** — `Project.autoTerminologyScan` (default true); auto scan after job via event handler; Settings → Consistency toggle; post-job toast + translations grid drift hints
 - **Sport-domain AI context (P0-01)** — `Project.domainProfile` JSON; `GET /projects/:id/domain-presets`; `PATCH` accepts `domainProfile`; `POST /projects/:id/copy-settings` (domain profile + glossary from another project); FIFA glossary preset list/apply; domain block in translation prompts; Settings → Domain context UI with prompt preview; post-create onboarding modal (FIFA preset, copy from project, or skip)
 - **Placeholder count in job summary (P0-S02)** — `GET /jobs/:id` includes optional `placeholderSummary` (`placeholdersTotal`, `placeholdersPreserved`); omitted when zero; `job.completed` / `job.failed` webhooks include it when placeholders exist; job detail UI banner
 - **Confluence file import (P0-03 Phase 1)** — upload HTML/CSV/ZIP Confluence export or paste HTML; preview diff; apply keys with scope and hints in context; async parse/apply via BullMQ (ADR 0016)

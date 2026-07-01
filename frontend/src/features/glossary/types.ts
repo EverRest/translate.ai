@@ -36,3 +36,22 @@ export type AnalyzeGlossaryResult = {
   queued: boolean;
   translationCount: number;
 };
+
+export type DriftVariant = {
+  translation: string;
+  keyIds: string[];
+  keys: string[];
+};
+
+export type TerminologyDriftIssue = {
+  id: string;
+  sourceTerm: string;
+  targetLang: string;
+  variants: DriftVariant[];
+  status: 'open' | 'resolved';
+  canonicalTranslation: string | null;
+  detectedAt: string;
+  resolvedAt: string | null;
+};
+
+export type GlossaryPageTab = 'terms' | 'suggestions' | 'drift';

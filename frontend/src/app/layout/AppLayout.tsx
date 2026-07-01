@@ -2,6 +2,8 @@ import { NavLink, Outlet, useMatch } from 'react-router-dom';
 import { useState, type ReactElement } from 'react';
 import { useAuth, useLogout } from '../../features/auth/hooks/useAuth';
 import { useProject } from '../../features/projects/hooks/useProjects';
+import { TerminologyDriftBadge } from '../../features/glossary/components/TerminologyDriftTable';
+import { useTerminologyDriftCount } from '../../features/glossary/hooks/useTerminologyDrift';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function Icon({ d, d2 }: { d: string; d2?: string }) {
@@ -102,6 +104,7 @@ function ProjectSubNav({
   collapsed: boolean;
 }) {
   const { data: project } = useProject(projectId);
+  const { data: driftCount = 0 } = useTerminologyDriftCount(projectId);
 
   return (
     <div className="mt-1">
@@ -158,7 +161,14 @@ function ProjectSubNav({
             }
           >
             {PROJECT_TAB_ICONS[tab.to]}
-            {!collapsed && tab.label}
+            {!collapsed && (
+              <>
+                {tab.label}
+                {tab.to === 'glossary' && (
+                  <TerminologyDriftBadge count={driftCount} />
+                )}
+              </>
+            )}
           </NavLink>
         ))}
       </div>

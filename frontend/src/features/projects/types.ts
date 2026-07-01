@@ -20,6 +20,7 @@ export type Project = {
   name: string;
   description: string | null;
   domainProfile: DomainProfile | null;
+  autoTerminologyScan?: boolean;
   status: string;
   createdAt: string;
   keysCount: number;
@@ -36,4 +37,5 @@ export type UpdateProjectInput = {
   name?: string;
   description?: string;
   domainProfile?: DomainProfile | null;
+  autoTerminologyScan?: boolean;
 };

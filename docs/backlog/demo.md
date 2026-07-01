@@ -18,7 +18,7 @@ AI видит что это объект (например филд) и пере
 ## 4. Consistency Check
 После перевода AI проверяет что одно и то же слово переведено одинаково по всем Fields (например "Submit" везде "Envoyer", а не "Soumettre" в одном месте).
 
-→ [P0-07](demo/P0-07-consistency-check.md) — EverRest: glossary + drift, not standalone AI
+→ [P0-07](demo/P0-07-consistency-check.md) — Wave 1 shipped (auto drift scan, grid hints); EverRest: glossary + drift, not standalone AI
 
 ## 5. Confluence Import (must have)
 → [P0-03](demo/P0-03-documentation-import) — shipped (file import + OAuth live sync)

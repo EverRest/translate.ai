@@ -4,6 +4,18 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Terminology drift detection (P2-05 MVP)
+
+- **Schema:** `terminology_drift_issues` (project, source term, target language, variants JSON, status); `Project.autoTerminologyScan` (default `true`)
+- **Queue:** `terminology.scan` — BullMQ worker runs `TerminologyDriftService` (exact source-text clustering, skips glossary-covered terms)
+- **API:** `POST /projects/:id/terminology/scan`; `GET .../terminology/issues`; `GET .../issues/count`; `GET .../key-hints`; `POST .../issues/:id/resolve` (upsert glossary + mark resolved)
+- **UI:** Glossary → **Terminology drift** tab; resolve flow; badge on Glossary nav when open issues exist
+
+### Added — Consistency check UX Wave 1 (P0-07)
+
+- **Event:** `TerminologyScanOnJobCompletedHandler` enqueues `terminology.scan` when `autoTerminologyScan` is enabled
+- **UI:** Settings → **Consistency** toggle; post-job info toast with issue count; translations grid warning icon linking to drift tab
+
 ### Added — Sport-domain AI context (P0-01)
 
 - **Schema:** optional `Project.domainProfile` JSON (`domain`, `event`, `tone`, `audience`, `notes`, `localeNotes`)
@@ -21,7 +33,9 @@ All notable changes to translate.ai documentation and project.
 
 ### Changed — backlog
 
-- **Backlog:** P0-01 sport-domain AI context shipped — removed from Wave 1 / active P0 table; moved to [shipped-baseline](./backlog/shipped-baseline.md) and [demo/README](./backlog/demo/README.md#already-shipped--covered-no-new-p0-work); Wave 1 is P0-07 only
+- **Backlog:** P2-05 terminology drift MVP shipped — moved to [shipped-baseline](./backlog/shipped-baseline.md); full P2-05 (scheduled scan, LLM synonyms) remains deferred in [P2-05](./backlog/P2-05-terminology-drift.md)
+- **Backlog:** P0-07 consistency check Wave 1 shipped — removed from active P0 table; Wave 2 (LLM reviewer) deferred in [P0-07](./backlog/demo/P0-07-consistency-check.md); **Wave 1 complete** (P0-01, P0-S02, P0-07)
+- **Backlog:** P0-01 sport-domain AI context shipped — removed from Wave 1 / active P0 table; moved to [shipped-baseline](./backlog/shipped-baseline.md) and [demo/README](./backlog/demo/README.md#already-shipped--covered-no-new-p0-work)
 - **Backlog:** P0-S02 placeholder count in job summary shipped — removed from Wave 1; moved to [shipped-baseline](./backlog/shipped-baseline.md) and [demo/README](./backlog/demo/README.md#already-shipped--covered-no-new-p0-work)
 - **Backlog:** P0-03 Confluence import (Phase 1 + Phase 2) removed from active FIFA/WIZ P0 table and Wave 2 — moved to [shipped-baseline](./backlog/shipped-baseline.md) and [demo/README](./backlog/demo/README.md#already-shipped--covered-no-new-p0-work)
 

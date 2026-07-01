@@ -44,7 +44,7 @@ Goal: cost control, brand consistency, observability, integrations.
 | [P2-02](./P2-02-cross-provider-cost-router.md) | Cross-provider cost/quality router | High |
 | [P2-03](./P2-03-analytics-v2.md) | Analytics v2 (cache, prompts, confidence) | Medium |
 | [P2-04](./P2-04-brand-voice.md) | Brand voice / tone per project | Medium |
-| [P2-05](./P2-05-terminology-drift.md) | Terminology drift detection | Medium |
+| [P2-05](./P2-05-terminology-drift.md) | Terminology drift detection | Medium — **MVP shipped** |
 | [P2-06](./P2-06-slack-teams-notifications.md) | Slack / Teams / Discord alerts | Low |
 | [P2-07](./P2-07-ai-pr-review.md) | Post-job PR review (links, code blocks) | Medium |
 

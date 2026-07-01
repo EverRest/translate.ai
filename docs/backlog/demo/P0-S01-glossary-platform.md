@@ -25,7 +25,7 @@ Terms like “Accreditation”, “Venue”, “Privilege”, “Registration Gr
 
 - [x] FIFA-specific preset pack ([P0-01](./P0-01-sport-domain-ai-context.md)) — `fifa_accreditation` (24 terms)
 - [ ] Tenant-level glossary shared across event projects
-- [ ] Auto-scan after translate job ([P0-07](./P0-07-consistency-check.md))
+- [x] Auto-scan after translate job ([P0-07](./P0-07-consistency-check.md) Wave 1)
 - [ ] Per-language glossary target terms
 - [ ] CSV glossary import
 
@@ -65,4 +65,4 @@ Client #4 consistency check is **partially addressed** via glossary + drift — 
 
 | Backlog claim | Issue |
 |---------------|-------|
-| Listed as “no new P0 work” | P0-01 FIFA preset + P0-07 auto-scan are **content/UX extensions** of this platform — still schedule them in Wave 1 |
+| Listed as “no new P0 work” | P0-01 FIFA preset + P0-07 auto-scan shipped in Wave 1 — remaining items are tenant-level shared glossary and CSV import |
