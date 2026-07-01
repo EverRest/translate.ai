@@ -31,7 +31,7 @@ Tune concurrency per environment.
 
 ### Confluence scheduled sync
 
-`ConfluenceSyncSchedulerService` (worker) runs every **5 minutes**:
+`ConfluenceSyncSchedulerService` (worker) polls for due configs on a fixed interval (default **5 minutes**, `CONFLUENCE_SYNC_SCHEDULER_TICK_MS`):
 
 1. Finds `ConfluenceSyncConfig` where `syncEnabled`, `syncIntervalMinutes` set, and `nextSyncAt <= now`
 2. Skips if a `confluence_live` import session is already `parsing` / `applying`

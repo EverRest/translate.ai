@@ -39,7 +39,7 @@ Per [P0-03b](./backlog/demo/P0-03b-confluence-hardening.md) and [ADR 0016](./adr
 
 - **OAuth:** Multi-site picker after callback; `connect/pending-sites`, `connect/complete`
 - **Sync config:** `labelFilter`, `parseRulesJson` column mapping, `syncEnabled` + `syncIntervalMinutes`
-- **Scheduler:** Worker polls due configs every 5 min → `integration.confluence.sync` (webhook substitute)
+- **Scheduler:** Worker polls due configs every 5 min (configurable via `CONFLUENCE_SYNC_SCHEDULER_TICK_MS`) → `integration.confluence.sync` (webhook substitute)
 - **BYO OAuth:** `TenantAtlassianOAuthApp`; `GET/PUT/DELETE /tenant/integrations/atlassian`; Settings UI (admin)
 - **Import:** Optional column mapping on file upload / paste; shared `ColumnMappingFields` component
 - **Tests:** `import-confluence-oauth.e2e-spec.ts` (mocked Atlassian); `wiz-fixtures.spec.ts` (skipped until client files)

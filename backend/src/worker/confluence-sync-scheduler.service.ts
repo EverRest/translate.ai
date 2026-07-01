@@ -4,11 +4,12 @@ import {
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ImportSessionStatus } from '@prisma/client';
 import { PrismaService } from '../shared/prisma/prisma.service';
 import { ConfluenceSyncTriggerService } from '../integration/application/confluence-sync-trigger.service';
 
-const TICK_MS = 5 * 60 * 1000;
+const DEFAULT_TICK_MS = 5 * 60 * 1000;
 
 @Injectable()
 export class ConfluenceSyncSchedulerService
@@ -17,16 +18,23 @@ export class ConfluenceSyncSchedulerService
   private readonly logger = new Logger(ConfluenceSyncSchedulerService.name);
   private timer: NodeJS.Timeout | null = null;
   private running = false;
+  private readonly tickMs: number;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly trigger: ConfluenceSyncTriggerService,
-  ) {}
+    config: ConfigService,
+  ) {
+    this.tickMs = config.get<number>(
+      'CONFLUENCE_SYNC_SCHEDULER_TICK_MS',
+      DEFAULT_TICK_MS,
+    );
+  }
 
   onModuleInit(): void {
     this.timer = setInterval(() => {
       void this.tick();
-    }, TICK_MS);
+    }, this.tickMs);
     void this.tick();
   }
 

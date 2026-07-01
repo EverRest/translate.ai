@@ -54,6 +54,10 @@ export const validationSchema = Joi.object({
   ATLASSIAN_REDIRECT_URI: Joi.string().uri().optional(),
   ATLASSIAN_SCOPES: Joi.string().optional(),
   CONFLUENCE_TOKEN_ENCRYPTION_KEY: Joi.string().optional(),
+  CONFLUENCE_SYNC_SCHEDULER_TICK_MS: Joi.number()
+    .integer()
+    .min(60_000)
+    .default(300_000),
   EXPORT_JOB_TTL_HOURS: Joi.number().integer().min(1).max(168).default(24),
   GLOSSARY_ANALYZE_MIN_TRANSLATIONS: Joi.number().integer().min(1).default(100),
   GLOSSARY_ANALYZE_MAX_SUGGESTIONS: Joi.number()
