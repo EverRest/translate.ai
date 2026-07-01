@@ -44,7 +44,6 @@ Goal: cost control, brand consistency, observability, integrations.
 | [P2-02](./P2-02-cross-provider-cost-router.md) | Cross-provider cost/quality router | High |
 | [P2-03](./P2-03-analytics-v2.md) | Analytics v2 (cache, prompts, confidence) | Medium |
 | [P2-04](./P2-04-brand-voice.md) | Brand voice / tone per project | Medium |
-| [P2-05](./P2-05-terminology-drift.md) | Terminology drift detection | Medium — **MVP shipped** |
 | [P2-06](./P2-06-slack-teams-notifications.md) | Slack / Teams / Discord alerts | Low |
 | [P2-07](./P2-07-ai-pr-review.md) | Post-job PR review (links, code blocks) | Medium |
 
@@ -68,6 +67,10 @@ Goal: hard-to-replace infrastructure — replay, duplicates, CI pipeline, market
 | [P3-10](./P3-10-shared-cache-premium.md) | Tenant-shared anonymous TM (premium) | Low |
 | [P3-11](./P3-11-ai-marketplace.md) | Plugin marketplace (validators, providers) | Low |
 | [P3-12](./P3-12-nested-translation.md) | Localization objects (nested forms/pages → flat keys) | High |
+
+---
+
+**Recently shipped (Phase 2):** [P2-05](./P2-05-terminology-drift.md) terminology drift MVP — see [shipped-baseline](./shipped-baseline.md). Full scope (scheduled scan, LLM synonyms) deferred in task file.
 
 ---
 

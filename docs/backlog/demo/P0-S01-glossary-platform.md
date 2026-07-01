@@ -17,7 +17,7 @@ Terms like “Accreditation”, “Venue”, “Privilege”, “Registration Gr
 | Upsert + bulk upsert | `GlossaryService.upsertTerm` |
 | Multi-glossary sets | ADR 0015, activate per project |
 | Presets | `ui_common_en`, `ui_common_en_ru`, `do_not_translate` |
-| Terminology drift scan | P2-05, `terminology.scan` queue, Drift UI |
+| Terminology drift scan | [P2-05](../P2-05-terminology-drift.md) MVP shipped — `terminology.scan` queue, Drift UI |
 | AI prompt injection | `buildTranslationPrompts` + glossary terms |
 | Semantic TM | [P1-01](../P1-01-semantic-translation-memory.md) — backlog enhancement |
 
@@ -49,7 +49,7 @@ Client #4 consistency check is **partially addressed** via glossary + drift — 
 ### Architecture
 
 - **Tenant-level shared glossary** (remaining item): extend `Glossary` with optional `tenantId` scope or “shared set” copy-on-activate to event projects — ADR before schema change.
-- Auto-scan after job: implement in P0-07 via event handler, not glossary module.
+- Auto-scan after job: shipped in P0-07 via `TerminologyScanOnJobCompletedHandler`, not glossary module.
 
 ### Technical
 
@@ -59,7 +59,7 @@ Client #4 consistency check is **partially addressed** via glossary + drift — 
 ### UI
 
 - Cross-project glossary: **Tenant Settings → Shared terminology** (future) — for MC26/WWC27 reuse.
-- Translations page: ensure drift badge visible without manual scan after P0-07 ships.
+- Translations page: drift badge visible without manual scan (P0-07 Wave 1 shipped).
 
 ### Disagreements
 

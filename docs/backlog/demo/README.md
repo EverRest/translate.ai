@@ -28,7 +28,7 @@ P0-02 Excel is the next **adoption** priority (Wave 1 complete: P0-01 sport cont
 1. **New bounded context `integration`** (or sub-module under `project`) — parsers for Excel + Confluence HTML share `ImportParser` interface; one ADR `0016-external-import.md` covers P0-02 + P0-03 (do not duplicate ADRs).
 2. **All file ingest/export via BullMQ** — never parse 800+ rows or call AI in HTTP handlers ([ADR 0002](../../../adr/0002-bullmq-queues.md)).
 3. **Reporting read model** — P0-06 heatmap + P0-09 debt share `project` query handlers or materialized view; avoid three separate SQL aggregations.
-4. **Post-job reactions** — P0-07 auto-scan should use `TranslationJobCompletedEvent` handler (same pattern as webhooks), not poll from frontend.
+4. **Post-job reactions** — shipped: P0-07 auto-scan via `TerminologyScanOnJobCompletedHandler` on `TranslationJobCompletedEvent` (same pattern as webhooks).
 5. **Status enum** — use existing `TranslationStatus.review`, not a new `needs_review` / `stale` enum unless product insists (see P0-04 review).
 
 Each task file below has per-feature **Agent review** (architecture · technical · UI).
@@ -65,12 +65,13 @@ Each file follows the standard backlog template: **Goal**, **Current state**, **
 ### Suggested implementation waves
 
 ```text
-Wave 1 (demo-ready, ≤2 weeks) — COMPLETE
-  P0-01 Sport-domain AI context
-  P0-S02 Placeholder summary in job status
-  P0-07 Auto-scan after translate job (event handler) + drift UX
+Wave 1 (demo-ready) — COMPLETE — see Already shipped section below
+  P0-01 Sport-domain AI context (shipped)
+  P0-S02 Placeholder summary in job status (shipped)
+  P0-07 Auto-scan after translate job + drift UX (shipped)
+  P0-03 Confluence import file + OAuth (shipped)
 
-Wave 2 (client onboarding, 2–4 weeks)
+Wave 2 (client onboarding, 2–4 weeks) — NEXT
   P0-02 Excel delta import (Wiz Classic preset)
   P0-04 Stale detection
   P0-06 Coverage heatmap

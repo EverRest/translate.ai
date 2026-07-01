@@ -18,10 +18,11 @@ Detect inconsistent translations for the same source term over time (e.g. Custom
 
 | Layer | Change |
 |-------|--------|
-| **Queue** | On-demand `terminology.scan` (BullMQ) |
+| **Schema** | `terminology_drift_issues` (Prisma) |
+| **Queue** | On-demand `terminology.scan` (BullMQ) — `worker/processors/terminology.processor.ts` |
 | **Service** | `TerminologyDriftService` — identical source text across keys, variant comparison per language |
-| **Schema** | `terminology_drift_issues` |
-| **Frontend** | Glossary → Terminology drift tab; resolve → glossary upsert; nav badge |
+| **API** | `terminology.controller.ts` — scan, list, count, key-hints, resolve |
+| **Frontend** | `TerminologyDriftTable.tsx`, `useTerminologyDrift.ts`; Glossary → Terminology drift tab; resolve → glossary upsert; nav badge |
 | **Tests** | `terminology-drift.utils.spec.ts`, handler specs |
 
 ## Deferred (full P2-05)

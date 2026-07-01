@@ -39,7 +39,7 @@ Consider sampling (10% of keys) instead of 100% for cost control.
 
 ## Agent review
 
-**Verdict:** Agree with EverRest — defer. Cost doubles minimum; terminology drift (P2-05) catches many consistency issues without back-translate.
+**Verdict:** Agree with EverRest — defer. Cost doubles minimum; terminology drift ([P2-05](../P2-05-terminology-drift.md) MVP shipped) catches many consistency issues without back-translate.
 
 ### Architecture
 

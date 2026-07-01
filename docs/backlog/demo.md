@@ -45,7 +45,7 @@ AI видит что это объект (например филд) и пере
 → [P0-08](demo/P0-08-translation-inheritance.md)
 
 ## 14. Glossary / Translation Memory (must have)
-→ [P0-S01](demo/P0-S01-glossary-platform.md) — shipped
+→ [P0-S01](demo/P0-S01-glossary-platform.md) — shipped (glossary CRUD, presets, drift MVP via [P2-05](P2-05-terminology-drift.md))
 
 ## 15–16, 19–22, 24–27, 29
 See [fifa-wiz/README.md](demo/README.md) deferred and shipped sections.

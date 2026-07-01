@@ -56,4 +56,4 @@ Useful for high-volume UI strings after FIFA glossary stabilizes terminology.
 
 | Backlog claim | Issue |
 |---------------|-------|
-| Auto-approve for simple UI strings | Only safe after P0-07 auto-scan + glossary preset applied — order dependency |
+| Auto-approve for simple UI strings | Only safe after P0-07 auto-scan (shipped) + glossary preset applied — order dependency |
