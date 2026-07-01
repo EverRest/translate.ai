@@ -1,14 +1,5 @@
+import { extractPlaceholders } from '../utils/placeholder.utils';
 import type { QaValidationResult } from './qa-validation.types';
-
-const DOUBLE_BRACE_PATTERN = /\{\{[^{}]+\}\}/g;
-const PERCENT_TOKEN_PATTERN = /%%[^%]+%%/g;
-
-function extractPlaceholders(text: string): string[] {
-  return [
-    ...(text.match(DOUBLE_BRACE_PATTERN) ?? []),
-    ...(text.match(PERCENT_TOKEN_PATTERN) ?? []),
-  ];
-}
 
 function countOccurrences(values: string[]): Map<string, number> {
   const counts = new Map<string, number>();

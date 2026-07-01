@@ -70,7 +70,6 @@ Each file follows the standard backlog template: **Goal**, **Current state**, **
 Wave 1 (demo-ready, ≤2 weeks)
   P0-01 Sport context (+ FIFA glossary preset)
   P0-07 Auto-scan after translate job (event handler)
-  P0-S02 Placeholder count in job summary (demo metric)
 
 Wave 2 (client onboarding, 2–4 weeks)
   P0-02 Excel delta import (Wiz Classic preset)
@@ -87,7 +86,7 @@ Wave 4 / conditional
   P0-11 New keys alert — only after Wiz confirms static bundle workflow
 ```
 
-> **Note:** Revised from original README per agent review — P0-03 Confluence import shipped; P0-11 demoted.
+> **Note:** Revised from original README per agent review — P0-03 Confluence import shipped; P0-S02 placeholder summary shipped; P0-11 demoted.
 
 ---
 
@@ -115,7 +114,7 @@ Postponed by product review or blocked on external architecture.
 |----------|---------|----------------|
 | #5 | Confluence import | [shipped-baseline](../shipped-baseline.md), [P0-03](./P0-03-documentation-import.md) — file import + OAuth live sync |
 | #14 | Glossary / TM | [shipped-baseline](../shipped-baseline.md), [P2-05](../P2-05-terminology-drift.md) drift, glossary sets + presets |
-| #11 | Placeholder protection | `PlaceholderValidator` — `{{…}}` and `%%…%%` ([ADR 0008](../../adr/0008-translation-qa-validators.md)) |
+| #11 | Placeholder protection | [shipped-baseline](../shipped-baseline.md), [P0-S02](./P0-S02-placeholder-protection.md) — validator + job summary metric |
 | #24 | Brand voice training | Glossary + [P2-04](../P2-04-brand-voice.md) brand voice per project |
 | #1 (partial) | Object structure | [P3-12](../P3-12-nested-translation.md) localization objects shipped; tone batching = P0-05 |
 

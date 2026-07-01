@@ -50,6 +50,10 @@ async function waitForJob(
     const job = response.body.data as {
       status: string;
       progress: { total: number; completed: number; failed: number };
+      placeholderSummary?: {
+        placeholdersTotal: number;
+        placeholdersPreserved: number;
+      };
       failedItems?: Array<{
         key: string;
         language: string;
@@ -301,5 +305,54 @@ describe('Translation flow (e2e)', () => {
 
     expect(qualitySummary.body.data.totalSamples).toBeGreaterThanOrEqual(2);
     expect(qualitySummary.body.data.verifiedSamples).toBeGreaterThanOrEqual(1);
+  });
+
+  it('reports placeholder summary on completed jobs', async () => {
+    const placeholderProjectResponse = await request(app.getHttpServer())
+      .post('/api/v1/projects')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: `Placeholder Flow ${Date.now()}` })
+      .expect(201);
+
+    const placeholderProjectId = placeholderProjectResponse.body.data
+      .id as string;
+
+    await request(app.getHttpServer())
+      .post(`/api/v1/projects/${placeholderProjectId}/keys`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        key: 'greeting.personal',
+        sourceText: 'Hello {{name}}',
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/api/v1/projects/${placeholderProjectId}/keys`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        key: 'pricing.amount',
+        sourceText: 'Price: %%amount%%',
+      })
+      .expect(201);
+
+    const jobResponse = await request(app.getHttpServer())
+      .post('/api/v1/jobs')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        projectId: placeholderProjectId,
+        languages: ['de', 'fr'],
+        keys: ['greeting.personal', 'pricing.amount'],
+      })
+      .expect(201);
+
+    const jobId = jobResponse.body.data.jobId as string;
+    const job = await waitForJob(app, token, jobId);
+
+    expect(job.progress.completed).toBe(4);
+    expect(job.progress.failed).toBe(0);
+    expect(job.placeholderSummary).toEqual({
+      placeholdersTotal: 2,
+      placeholdersPreserved: 2,
+    });
   });
 });

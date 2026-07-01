@@ -21,10 +21,16 @@ Delivers events to customer-configured HTTPS endpoints when domain events occur.
   "data": {
     "jobId": "uuid",
     "projectId": "uuid",
-    "status": "completed"
+    "status": "completed",
+    "placeholderSummary": {
+      "placeholdersTotal": 134,
+      "placeholdersPreserved": 134
+    }
   }
 }
 ```
+
+`placeholderSummary` (`placeholdersTotal`, `placeholdersPreserved`) is optional on `job.completed` and `job.failed` — omitted when no placeholders in job scope. Counts `{{…}}` and `%%…%%` tokens per unique key from source text.
 
 ## Delivery flow
 

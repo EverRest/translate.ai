@@ -4,8 +4,16 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Placeholder count in job summary (P0-S02)
+
+- **API:** `GET /jobs/:id` includes optional `placeholderSummary` (`placeholdersTotal`, `placeholdersPreserved`) — computed per unique key from source text, omitted when zero
+- **Webhooks:** `job.completed` and `job.failed` payloads include `placeholderSummary` when placeholders exist
+- **UI:** Green success banner on job detail when job completed with placeholder summary
+- **Utils:** Shared `placeholder.utils.ts` for `{{…}}` and `%%…%%` extraction (DRY with `PlaceholderValidator`)
+
 ### Changed — backlog
 
+- **Backlog:** P0-S02 placeholder count in job summary shipped — removed from Wave 1; moved to [shipped-baseline](./backlog/shipped-baseline.md) and [demo/README](./backlog/demo/README.md#already-shipped--covered-no-new-p0-work)
 - **Backlog:** P0-03 Confluence import (Phase 1 + Phase 2) removed from active FIFA/WIZ P0 table and Wave 2 — moved to [shipped-baseline](./backlog/shipped-baseline.md) and [demo/README](./backlog/demo/README.md#already-shipped--covered-no-new-p0-work)
 
 ### Added — Confluence file import (P0-03 Phase 1)
