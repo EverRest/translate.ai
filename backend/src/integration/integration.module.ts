@@ -10,6 +10,8 @@ import { ImportJobRunnerService } from './application/import-job-runner.service'
 import { ConfluenceFetchService } from './application/confluence-fetch.service';
 import { ConfluenceOAuthService } from './application/confluence-oauth.service';
 import { ConfluenceSyncJobRunnerService } from './application/confluence-sync-job-runner.service';
+import { ConfluenceSyncTriggerService } from './application/confluence-sync-trigger.service';
+import { TenantAtlassianOAuthService } from './application/tenant-atlassian-oauth.service';
 import {
   ApplyImportSessionHandler,
   CreateImportSessionHandler,
@@ -18,20 +20,29 @@ import {
   PreviewImportSessionHandler,
 } from './application/handlers/import.handlers';
 import {
+  CompleteConfluenceConnectHandler,
+  DeleteTenantAtlassianOAuthHandler,
   DisconnectConfluenceHandler,
   GetConfluenceConnectUrlHandler,
   GetConfluenceIntegrationHandler,
+  GetConfluencePendingSitesHandler,
+  GetTenantAtlassianOAuthHandler,
   ListConfluencePagesHandler,
   ListConfluenceSpacesHandler,
   TriggerConfluenceSyncHandler,
   UpdateConfluenceSyncConfigHandler,
+  UpsertTenantAtlassianOAuthHandler,
 } from './application/handlers/confluence.handlers';
+import { AtlassianOAuthCredentialsService } from './infrastructure/atlassian-oauth-credentials.service';
 import { ConfluenceApiClient } from './infrastructure/confluence-api.client';
 import { ConfluenceSyncQueueService } from './infrastructure/confluence-sync-queue.service';
 import { ImportQueueService } from './infrastructure/import-queue.service';
 import { ImportStorageService } from './infrastructure/import-storage.service';
 import { TokenEncryptionService } from './infrastructure/token-encryption.service';
-import { ConfluenceController } from './presentation/confluence.controller';
+import {
+  ConfluenceController,
+  TenantAtlassianOAuthController,
+} from './presentation/confluence.controller';
 import { ImportController } from './presentation/import.controller';
 
 @Module({
@@ -47,16 +58,23 @@ import { ImportController } from './presentation/import.controller';
       }),
     }),
   ],
-  controllers: [ImportController, ConfluenceController],
+  controllers: [
+    ImportController,
+    ConfluenceController,
+    TenantAtlassianOAuthController,
+  ],
   providers: [
     ImportStorageService,
     ImportQueueService,
     ConfluenceSyncQueueService,
     TokenEncryptionService,
+    AtlassianOAuthCredentialsService,
     ConfluenceApiClient,
     ConfluenceOAuthService,
     ConfluenceFetchService,
     ConfluenceSyncJobRunnerService,
+    ConfluenceSyncTriggerService,
+    TenantAtlassianOAuthService,
     ImportDiffService,
     ImportApplyService,
     ImportJobRunnerService,
@@ -66,17 +84,24 @@ import { ImportController } from './presentation/import.controller';
     ListImportSessionsHandler,
     PreviewImportSessionHandler,
     GetConfluenceConnectUrlHandler,
+    GetConfluencePendingSitesHandler,
+    CompleteConfluenceConnectHandler,
     GetConfluenceIntegrationHandler,
     UpdateConfluenceSyncConfigHandler,
     ListConfluenceSpacesHandler,
     ListConfluencePagesHandler,
     TriggerConfluenceSyncHandler,
     DisconnectConfluenceHandler,
+    GetTenantAtlassianOAuthHandler,
+    UpsertTenantAtlassianOAuthHandler,
+    DeleteTenantAtlassianOAuthHandler,
   ],
   exports: [
     ImportJobRunnerService,
     ImportStorageService,
     ConfluenceSyncJobRunnerService,
+    ConfluenceSyncTriggerService,
+    AtlassianOAuthCredentialsService,
   ],
 })
 export class IntegrationModule {}

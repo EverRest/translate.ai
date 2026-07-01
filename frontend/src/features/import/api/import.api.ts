@@ -17,9 +17,13 @@ function authHeaders(): HeadersInit {
 export async function uploadImportFile(
   projectId: string,
   file: File,
+  parseRulesJson?: string,
 ): Promise<CreateImportSessionResponse> {
   const formData = new FormData();
   formData.append('file', file);
+  if (parseRulesJson) {
+    formData.append('parseRulesJson', parseRulesJson);
+  }
 
   const response = await fetch(
     `${baseUrl}/projects/${projectId}/import/sessions`,
@@ -45,11 +49,15 @@ export async function uploadImportFile(
 export async function pasteImportHtml(
   projectId: string,
   html: string,
+  parseRules?: { columnMapping?: Record<string, string | undefined> },
 ): Promise<CreateImportSessionResponse> {
   const response = await apiPost<
     ApiSuccess<CreateImportSessionResponse>,
-    { html: string }
-  >(`/projects/${projectId}/import/sessions/paste`, { html });
+    {
+      html: string;
+      parseRules?: { columnMapping?: Record<string, string | undefined> };
+    }
+  >(`/projects/${projectId}/import/sessions/paste`, { html, parseRules });
   return response.data;
 }
 

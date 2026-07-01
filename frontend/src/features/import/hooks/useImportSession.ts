@@ -7,6 +7,7 @@ import {
   previewImportSession,
   uploadImportFile,
 } from '../api/import.api';
+import type { ParseRulesInput } from '../utils/column-mapping.utils';
 import {
   IMPORT_POLL_INTERVAL_MS,
   IMPORT_POLL_MAX_ATTEMPTS,
@@ -53,15 +54,27 @@ export function useCreateImportSession(projectId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: { file?: File; html?: string }) => {
+    mutationFn: async (input: {
+      file?: File;
+      html?: string;
+      parseRules?: ParseRulesInput;
+    }) => {
       if (!projectId) {
         throw new Error('Project is required');
       }
 
+      const parseRulesJson = input.parseRules
+        ? JSON.stringify(input.parseRules)
+        : undefined;
+
       let session =
         input.file !== undefined
-          ? await uploadImportFile(projectId, input.file)
-          : await pasteImportHtml(projectId, input.html ?? '');
+          ? await uploadImportFile(projectId, input.file, parseRulesJson)
+          : await pasteImportHtml(
+              projectId,
+              input.html ?? '',
+              input.parseRules,
+            );
 
       if (session.queued || session.status === 'parsing') {
         session = await waitForSessionStatus(projectId, session.id, [

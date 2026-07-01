@@ -24,7 +24,9 @@ Add an **`integration`** bounded context (symmetric to `export`):
 - **Queues** (ADR 0002): `integration.import.parse`, `integration.import.apply` — no parsing or bulk upsert in HTTP handlers for large files
 - **No AI during import** — import source of truth only; translation jobs run separately
 
-Phase 1 sources: Confluence HTML/CSV/ZIP export, paste HTML. **Phase 2 (shipped):** Atlassian OAuth 3LO, live page fetch via Confluence REST API, `integration.confluence.sync` queue, Settings → Integrations UI. Excel parser added under same module for P0-02.
+Phase 1 sources: Confluence HTML/CSV/ZIP export, paste HTML. **Phase 2 (shipped):** Atlassian OAuth 3LO, live page fetch via Confluence REST API, `integration.confluence.sync` queue, Settings → Integrations UI. **P0-03b (shipped):** multi-site OAuth picker, label filter, column mapping UI, scheduled polling sync (no Confluence webhooks on 3LO), tenant BYO OAuth app. Excel parser added under same module for P0-02.
+
+**Confluence change detection:** OAuth 3LO apps cannot register `page_updated` webhooks (Atlassian platform limit). Use **scheduled polling** via `syncEnabled` + worker scheduler; true webhooks deferred to Forge/Connect epic.
 
 ## Consequences
 

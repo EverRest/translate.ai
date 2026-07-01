@@ -1,40 +1,42 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   CommandHandler,
   ICommandHandler,
   QueryHandler,
   IQueryHandler,
 } from '@nestjs/cqrs';
-import { ImportSessionStatus } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { ProjectAccessService } from '../../../project/infrastructure/project-access.service';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { ConfluenceFetchService } from '../confluence-fetch.service';
 import { ConfluenceOAuthService } from '../confluence-oauth.service';
-import { ConfluenceSyncQueueService } from '../../infrastructure/confluence-sync-queue.service';
-import type { ParseRules } from '../../domain/import-document.types';
+import { ConfluenceSyncTriggerService } from '../confluence-sync-trigger.service';
+import { TenantAtlassianOAuthService } from '../tenant-atlassian-oauth.service';
 import {
+  CompleteConfluenceConnectCommand,
+  DeleteTenantAtlassianOAuthCommand,
   DisconnectConfluenceCommand,
   GetConfluenceConnectUrlQuery,
   GetConfluenceIntegrationQuery,
+  GetConfluencePendingSitesQuery,
+  GetTenantAtlassianOAuthQuery,
   ListConfluencePagesQuery,
   ListConfluenceSpacesQuery,
   TriggerConfluenceSyncCommand,
   UpdateConfluenceSyncConfigCommand,
+  UpsertTenantAtlassianOAuthCommand,
 } from '../confluence.commands';
 
-function withOAuthMeta(
+async function withOAuthMeta(
   oauth: ConfluenceOAuthService,
+  tenantId: string,
   data: Record<string, unknown>,
 ) {
-  const oauthAvailable = oauth.isOAuthConfigured();
+  const oauthAvailable = await oauth.isOAuthConfigured(tenantId);
   return {
     ...data,
     oauthAvailable,
-    setupHint: oauthAvailable ? null : oauth.getSetupHint(),
+    setupHint: oauthAvailable ? null : await oauth.getSetupHint(tenantId),
   };
 }
 
@@ -51,7 +53,12 @@ function toIntegrationDto(
   syncConfig: {
     pageIds: string[];
     spaceKey: string | null;
+    labelFilter: string | null;
+    parseRulesJson: unknown;
     autoApply: boolean;
+    syncEnabled: boolean;
+    syncIntervalMinutes: number | null;
+    nextSyncAt: Date | null;
     lastSyncedAt: Date | null;
     lastSyncStatus: string | null;
     lastSyncSummaryJson: unknown;
@@ -73,7 +80,12 @@ function toIntegrationDto(
       ? {
           pageIds: syncConfig.pageIds,
           spaceKey: syncConfig.spaceKey,
+          labelFilter: syncConfig.labelFilter,
+          parseRulesJson: syncConfig.parseRulesJson,
           autoApply: syncConfig.autoApply,
+          syncEnabled: syncConfig.syncEnabled,
+          syncIntervalMinutes: syncConfig.syncIntervalMinutes,
+          nextSyncAt: syncConfig.nextSyncAt,
           lastSyncedAt: syncConfig.lastSyncedAt,
           lastSyncStatus: syncConfig.lastSyncStatus,
           lastSyncSummary: syncConfig.lastSyncSummaryJson,
@@ -97,12 +109,45 @@ export class GetConfluenceConnectUrlHandler implements IQueryHandler<GetConfluen
       query.tenantId,
       query.projectId,
     );
-    const url = this.oauth.createAuthorizeUrl({
+    const url = await this.oauth.createAuthorizeUrl({
       tenantId: query.tenantId,
       projectId: query.projectId,
       userId: query.userId,
     });
     return { url };
+  }
+}
+
+@Injectable()
+@QueryHandler(GetConfluencePendingSitesQuery)
+export class GetConfluencePendingSitesHandler implements IQueryHandler<GetConfluencePendingSitesQuery> {
+  constructor(private readonly oauth: ConfluenceOAuthService) {}
+
+  execute(query: GetConfluencePendingSitesQuery) {
+    return Promise.resolve({
+      sites: this.oauth.getPendingSites(query.pendingToken),
+    });
+  }
+}
+
+@Injectable()
+@CommandHandler(CompleteConfluenceConnectCommand)
+export class CompleteConfluenceConnectHandler implements ICommandHandler<CompleteConfluenceConnectCommand> {
+  constructor(
+    private readonly projectAccess: ProjectAccessService,
+    private readonly oauth: ConfluenceOAuthService,
+  ) {}
+
+  async execute(command: CompleteConfluenceConnectCommand) {
+    await this.projectAccess.getProjectForTenant(
+      command.tenantId,
+      command.projectId,
+    );
+    const result = await this.oauth.completePendingConnection(
+      command.pendingToken,
+      command.cloudId,
+    );
+    return result;
   }
 }
 
@@ -127,11 +172,12 @@ export class GetConfluenceIntegrationHandler implements IQueryHandler<GetConflue
     });
 
     if (!connection) {
-      return withOAuthMeta(this.oauth, { connected: false });
+      return withOAuthMeta(this.oauth, query.tenantId, { connected: false });
     }
 
     return withOAuthMeta(
       this.oauth,
+      query.tenantId,
       toIntegrationDto(connection, connection.syncConfig),
     );
   }
@@ -160,6 +206,13 @@ export class UpdateConfluenceSyncConfigHandler implements ICommandHandler<Update
       );
     }
 
+    const nextSyncAt =
+      command.syncEnabled && command.syncIntervalMinutes
+        ? new Date(Date.now() + command.syncIntervalMinutes * 60_000)
+        : command.syncEnabled === false
+          ? null
+          : undefined;
+
     const syncConfig = await this.prisma.confluenceSyncConfig.upsert({
       where: { connectionId: connection.id },
       create: {
@@ -167,6 +220,13 @@ export class UpdateConfluenceSyncConfigHandler implements ICommandHandler<Update
         pageIds: command.pageIds,
         spaceKey: command.spaceKey,
         autoApply: command.autoApply ?? false,
+        labelFilter: command.labelFilter ?? null,
+        parseRulesJson: (command.parseRulesJson ?? undefined) as
+          | Prisma.InputJsonValue
+          | undefined,
+        syncEnabled: command.syncEnabled ?? false,
+        syncIntervalMinutes: command.syncIntervalMinutes ?? null,
+        nextSyncAt: nextSyncAt ?? null,
       },
       update: {
         pageIds: command.pageIds,
@@ -174,10 +234,31 @@ export class UpdateConfluenceSyncConfigHandler implements ICommandHandler<Update
         ...(command.autoApply !== undefined
           ? { autoApply: command.autoApply }
           : {}),
+        ...(command.labelFilter !== undefined
+          ? { labelFilter: command.labelFilter }
+          : {}),
+        ...(command.parseRulesJson !== undefined
+          ? {
+              parseRulesJson: command.parseRulesJson as Prisma.InputJsonValue,
+            }
+          : {}),
+        ...(command.syncEnabled !== undefined
+          ? { syncEnabled: command.syncEnabled }
+          : {}),
+        ...(command.syncIntervalMinutes !== undefined
+          ? { syncIntervalMinutes: command.syncIntervalMinutes }
+          : {}),
+        ...(nextSyncAt !== undefined ? { nextSyncAt } : {}),
       },
     });
 
-    return { pageIds: syncConfig.pageIds, autoApply: syncConfig.autoApply };
+    return {
+      pageIds: syncConfig.pageIds,
+      autoApply: syncConfig.autoApply,
+      labelFilter: syncConfig.labelFilter,
+      syncEnabled: syncConfig.syncEnabled,
+      syncIntervalMinutes: syncConfig.syncIntervalMinutes,
+    };
   }
 }
 
@@ -222,11 +303,18 @@ export class ListConfluencePagesHandler implements IQueryHandler<ListConfluenceP
     );
     const connection = await this.prisma.confluenceConnection.findUnique({
       where: { projectId: query.projectId },
+      include: { syncConfig: true },
     });
     if (!connection) {
       throw new NotFoundException('Confluence is not connected');
     }
-    const pages = await this.fetch.listPages(connection.id, query.spaceId);
+    const labelFilter =
+      query.labelFilter ?? connection.syncConfig?.labelFilter ?? undefined;
+    const pages = await this.fetch.listPages(
+      connection.id,
+      query.spaceId,
+      labelFilter ?? undefined,
+    );
     return { items: pages };
   }
 }
@@ -235,9 +323,8 @@ export class ListConfluencePagesHandler implements IQueryHandler<ListConfluenceP
 @CommandHandler(TriggerConfluenceSyncCommand)
 export class TriggerConfluenceSyncHandler implements ICommandHandler<TriggerConfluenceSyncCommand> {
   constructor(
-    private readonly prisma: PrismaService,
     private readonly projectAccess: ProjectAccessService,
-    private readonly syncQueue: ConfluenceSyncQueueService,
+    private readonly trigger: ConfluenceSyncTriggerService,
   ) {}
 
   async execute(command: TriggerConfluenceSyncCommand) {
@@ -245,55 +332,12 @@ export class TriggerConfluenceSyncHandler implements ICommandHandler<TriggerConf
       command.tenantId,
       command.projectId,
     );
-
-    const connection = await this.prisma.confluenceConnection.findUnique({
-      where: { projectId: command.projectId },
-      include: { syncConfig: true },
-    });
-    if (!connection?.syncConfig) {
-      throw new NotFoundException('Confluence is not connected');
-    }
-
-    const pageIds = connection.syncConfig.pageIds;
-    if (pageIds.length === 0) {
-      throw new BadRequestException(
-        'Select at least one Confluence page to sync',
-      );
-    }
-
-    const autoApply =
-      command.autoApply ?? connection.syncConfig.autoApply ?? false;
-
-    const session = await this.prisma.importSession.create({
-      data: {
-        tenantId: command.tenantId,
-        projectId: command.projectId,
-        userId: command.userId,
-        sourceType: 'confluence_live',
-        status: ImportSessionStatus.pending,
-        parseRulesJson: connection.syncConfig.parseRulesJson ?? undefined,
-        originalFilename: 'confluence-live-sync',
-      },
-    });
-
-    await this.syncQueue.enqueue({
-      tenantId: command.tenantId,
-      projectId: command.projectId,
-      sessionId: session.id,
-      connectionId: connection.id,
-      pageIds,
-      parseRules: (connection.syncConfig.parseRulesJson ?? undefined) as
-        | ParseRules
-        | undefined,
-      autoApply,
-      userId: command.userId,
-    });
-
-    return {
-      queued: true,
-      sessionId: session.id,
-      autoApply,
-    };
+    return this.trigger.triggerForProject(
+      command.tenantId,
+      command.projectId,
+      command.userId,
+      command.autoApply,
+    );
   }
 }
 
@@ -316,5 +360,35 @@ export class DisconnectConfluenceHandler implements ICommandHandler<DisconnectCo
     });
 
     return { disconnected: true };
+  }
+}
+
+@Injectable()
+@QueryHandler(GetTenantAtlassianOAuthQuery)
+export class GetTenantAtlassianOAuthHandler implements IQueryHandler<GetTenantAtlassianOAuthQuery> {
+  constructor(private readonly service: TenantAtlassianOAuthService) {}
+
+  execute(query: GetTenantAtlassianOAuthQuery) {
+    return this.service.get(query);
+  }
+}
+
+@Injectable()
+@CommandHandler(UpsertTenantAtlassianOAuthCommand)
+export class UpsertTenantAtlassianOAuthHandler implements ICommandHandler<UpsertTenantAtlassianOAuthCommand> {
+  constructor(private readonly service: TenantAtlassianOAuthService) {}
+
+  execute(command: UpsertTenantAtlassianOAuthCommand) {
+    return this.service.upsert(command);
+  }
+}
+
+@Injectable()
+@CommandHandler(DeleteTenantAtlassianOAuthCommand)
+export class DeleteTenantAtlassianOAuthHandler implements ICommandHandler<DeleteTenantAtlassianOAuthCommand> {
+  constructor(private readonly service: TenantAtlassianOAuthService) {}
+
+  execute(command: DeleteTenantAtlassianOAuthCommand) {
+    return this.service.delete(command);
   }
 }

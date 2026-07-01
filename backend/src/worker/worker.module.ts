@@ -30,6 +30,7 @@ import {
   ImportParseProcessor,
 } from './processors/import.processor';
 import { ConfluenceSyncProcessor } from './processors/confluence-sync.processor';
+import { ConfluenceSyncSchedulerService } from './confluence-sync-scheduler.service';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { ConfluenceSyncProcessor } from './processors/confluence-sync.processor'
     ImportParseProcessor,
     ImportApplyProcessor,
     ConfluenceSyncProcessor,
+    ConfluenceSyncSchedulerService,
   ],
 })
 export class WorkerModule {}

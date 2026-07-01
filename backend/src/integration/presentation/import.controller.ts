@@ -32,7 +32,19 @@ import {
   ListImportSessionsQuery,
   PreviewImportSessionQuery,
 } from '../application/import.commands';
-import { ApplyImportSessionDto, PasteImportDto } from './dto/import.dto';
+import type { ParseRules } from '../domain/import-document.types';
+import {
+  ApplyImportSessionDto,
+  CreateImportFileDto,
+  PasteImportDto,
+} from './dto/import.dto';
+
+function parseParseRulesJson(raw?: string): ParseRules | undefined {
+  if (!raw?.trim()) {
+    return undefined;
+  }
+  return JSON.parse(raw) as ParseRules;
+}
 
 @ApiTags('import')
 @ApiBearerAuth()
@@ -52,6 +64,7 @@ export class ImportController {
     @CurrentUser() user: AuthUser,
     @Param('projectId') projectId: string,
     @UploadedFile() file: { buffer: Buffer; originalname: string } | undefined,
+    @Body() body: CreateImportFileDto,
   ) {
     if (!file) {
       throw new BadRequestException('File is required');
@@ -63,6 +76,8 @@ export class ImportController {
         user.userId,
         file.buffer,
         file.originalname,
+        undefined,
+        parseParseRulesJson(body.parseRulesJson),
       ),
     );
     return successResponse(data);
@@ -84,6 +99,7 @@ export class ImportController {
         buffer,
         'paste.html',
         'paste_html',
+        dto.parseRules,
       ),
     );
     return successResponse(data);

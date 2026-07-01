@@ -158,7 +158,8 @@ model Tenant {
   qualityMetrics     TranslationQualityMetric[]
   exportJobs         ExportJob[]
   importSessions     ImportSession[]
-  confluenceConnections ConfluenceConnection[]
+  confluenceConnections     ConfluenceConnection[]
+  atlassianOAuthApp         TenantAtlassianOAuthApp?
 
   @@map("tenants")
 }
@@ -700,6 +701,21 @@ model ConfluenceConnection {
   @@map("confluence_connections")
 }
 
+model TenantAtlassianOAuthApp {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String   @unique @map("tenant_id") @db.Uuid
+  clientId        String   @map("client_id")
+  clientSecretEnc String   @map("client_secret_enc") @db.Text
+  redirectUri     String?  @map("redirect_uri")
+  scopes          String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("tenant_atlassian_oauth_apps")
+}
+
 model ConfluenceSyncConfig {
   id                  String    @id @default(uuid()) @db.Uuid
   connectionId        String    @unique @map("connection_id") @db.Uuid
@@ -708,6 +724,9 @@ model ConfluenceSyncConfig {
   labelFilter         String?   @map("label_filter")
   parseRulesJson      Json?     @map("parse_rules_json")
   autoApply           Boolean   @default(false) @map("auto_apply")
+  syncEnabled         Boolean   @default(false) @map("sync_enabled")
+  syncIntervalMinutes Int?      @map("sync_interval_minutes")
+  nextSyncAt          DateTime? @map("next_sync_at")
   lastSyncedAt        DateTime? @map("last_synced_at")
   lastSyncStatus      String?   @map("last_sync_status") @db.VarChar(20)
   lastSyncSummaryJson Json?     @map("last_sync_summary_json")

@@ -1,5 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import {
+  AtlassianOAuthCredentials,
+  AtlassianOAuthCredentialsService,
+} from './atlassian-oauth-credentials.service';
 
 export interface AtlassianAccessibleResource {
   id: string;
@@ -37,43 +40,57 @@ export interface ConfluenceTokenResponse {
 export class ConfluenceApiClient {
   private readonly logger = new Logger(ConfluenceApiClient.name);
 
-  constructor(private readonly config: ConfigService) {}
+  constructor(private readonly credentials: AtlassianOAuthCredentialsService) {}
 
-  getAuthorizeUrl(state: string): string {
-    const clientId = this.config.get<string>('ATLASSIAN_CLIENT_ID', '');
-    const redirectUri = this.redirectUri();
-    const scopes = this.scopes().join(' ');
-    const params = new URLSearchParams({
-      audience: 'api.atlassian.com',
-      client_id: clientId,
-      scope: scopes,
-      redirect_uri: redirectUri,
-      state,
-      response_type: 'code',
-      prompt: 'consent',
+  getAuthorizeUrl(state: string, tenantId?: string): Promise<string> {
+    return this.credentials.resolve(tenantId).then((creds) => {
+      if (!creds) {
+        throw new Error('Atlassian OAuth is not configured');
+      }
+      const params = new URLSearchParams({
+        audience: 'api.atlassian.com',
+        client_id: creds.clientId,
+        scope: creds.scopes.join(' '),
+        redirect_uri: creds.redirectUri,
+        state,
+        response_type: 'code',
+        prompt: 'consent',
+      });
+      return `https://auth.atlassian.com/authorize?${params.toString()}`;
     });
-    return `https://auth.atlassian.com/authorize?${params.toString()}`;
   }
 
-  async exchangeCode(code: string): Promise<ConfluenceTokenResponse> {
-    return this.postToken({
-      grant_type: 'authorization_code',
-      client_id: this.config.get<string>('ATLASSIAN_CLIENT_ID', ''),
-      client_secret: this.config.get<string>('ATLASSIAN_CLIENT_SECRET', ''),
-      code,
-      redirect_uri: this.redirectUri(),
-    });
+  async exchangeCode(
+    code: string,
+    tenantId?: string,
+  ): Promise<ConfluenceTokenResponse> {
+    const creds = await this.requireCredentials(tenantId);
+    return this.postToken(
+      {
+        grant_type: 'authorization_code',
+        client_id: creds.clientId,
+        client_secret: creds.clientSecret,
+        code,
+        redirect_uri: creds.redirectUri,
+      },
+      tenantId,
+    );
   }
 
   async refreshAccessToken(
     refreshToken: string,
+    tenantId?: string,
   ): Promise<ConfluenceTokenResponse> {
-    return this.postToken({
-      grant_type: 'refresh_token',
-      client_id: this.config.get<string>('ATLASSIAN_CLIENT_ID', ''),
-      client_secret: this.config.get<string>('ATLASSIAN_CLIENT_SECRET', ''),
-      refresh_token: refreshToken,
-    });
+    const creds = await this.requireCredentials(tenantId);
+    return this.postToken(
+      {
+        grant_type: 'refresh_token',
+        client_id: creds.clientId,
+        client_secret: creds.clientSecret,
+        refresh_token: refreshToken,
+      },
+      tenantId,
+    );
   }
 
   async getAccessibleResources(
@@ -118,6 +135,27 @@ export class ConfluenceApiClient {
     return data.results ?? [];
   }
 
+  async listPagesByLabel(
+    cloudId: string,
+    label: string,
+    accessToken: string,
+  ): Promise<ConfluencePageSummary[]> {
+    const cql = `label="${label.replace(/"/g, '\\"')}" and type=page`;
+    const data = await this.getJson<{
+      results: Array<{ content?: { id: string; title: string } }>;
+    }>(
+      cloudId,
+      `/wiki/rest/api/search?cql=${encodeURIComponent(cql)}&limit=100`,
+      accessToken,
+    );
+    return (data.results ?? [])
+      .map((row) => row.content)
+      .filter((content): content is { id: string; title: string } =>
+        Boolean(content?.id),
+      )
+      .map((content) => ({ id: content.id, title: content.title }));
+  }
+
   async getPageContent(
     cloudId: string,
     pageId: string,
@@ -141,7 +179,9 @@ export class ConfluenceApiClient {
 
   private async postToken(
     body: Record<string, string>,
+    tenantId?: string,
   ): Promise<ConfluenceTokenResponse> {
+    await this.requireCredentials(tenantId);
     const response = await fetch('https://auth.atlassian.com/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -187,19 +227,14 @@ export class ConfluenceApiClient {
     return (await response.json()) as T;
   }
 
-  private redirectUri(): string {
-    return this.config.get<string>(
-      'ATLASSIAN_REDIRECT_URI',
-      'http://localhost:3000/api/v1/integrations/confluence/oauth/callback',
-    );
-  }
-
-  private scopes(): string[] {
-    const raw = this.config.get<string>(
-      'ATLASSIAN_SCOPES',
-      'read:confluence-content.all read:confluence-space.summary offline_access',
-    );
-    return raw.split(/\s+/).filter(Boolean);
+  private async requireCredentials(
+    tenantId?: string,
+  ): Promise<AtlassianOAuthCredentials> {
+    const creds = await this.credentials.resolve(tenantId);
+    if (!creds) {
+      throw new Error('Atlassian OAuth is not configured');
+    }
+    return creds;
   }
 }
 

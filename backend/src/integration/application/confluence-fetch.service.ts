@@ -91,11 +91,30 @@ export class ConfluenceFetchService {
     return this.api.listSpaces(connection.cloudId, accessToken);
   }
 
-  async listPages(connectionId: string, spaceId: string) {
+  async listPages(connectionId: string, spaceId: string, labelFilter?: string) {
     const connection = await this.prisma.confluenceConnection.findUniqueOrThrow(
       { where: { id: connectionId } },
     );
     const accessToken = await this.oauth.getValidAccessToken(connectionId);
+
+    if (labelFilter?.trim()) {
+      const labeled = await this.api.listPagesByLabel(
+        connection.cloudId,
+        labelFilter.trim(),
+        accessToken,
+      );
+      if (!spaceId) {
+        return labeled;
+      }
+      const inSpace = await this.api.listPagesInSpace(
+        connection.cloudId,
+        spaceId,
+        accessToken,
+      );
+      const spacePageIds = new Set(inSpace.map((page) => page.id));
+      return labeled.filter((page) => spacePageIds.has(page.id));
+    }
+
     return this.api.listPagesInSpace(connection.cloudId, spaceId, accessToken);
   }
 }

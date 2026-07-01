@@ -33,6 +33,17 @@ Per [ADR 0016](./adr/0016-external-import.md):
 - **UX:** `oauthAvailable` + `setupHint` on integration status when `ATLASSIAN_CLIENT_*` env vars are unset — Connect/Sync disabled; admin setup steps shown; file import still available
 - **Tests:** `token-encryption`, `confluence-api.client`, `confluence-fetch` unit specs
 
+### Added — Confluence hardening (P0-03b)
+
+Per [P0-03b](./backlog/demo/P0-03b-confluence-hardening.md) and [ADR 0016](./adr/0016-external-import.md):
+
+- **OAuth:** Multi-site picker after callback; `connect/pending-sites`, `connect/complete`
+- **Sync config:** `labelFilter`, `parseRulesJson` column mapping, `syncEnabled` + `syncIntervalMinutes`
+- **Scheduler:** Worker polls due configs every 5 min → `integration.confluence.sync` (webhook substitute)
+- **BYO OAuth:** `TenantAtlassianOAuthApp`; `GET/PUT/DELETE /tenant/integrations/atlassian`; Settings UI (admin)
+- **Import:** Optional column mapping on file upload / paste; shared `ColumnMappingFields` component
+- **Tests:** `import-confluence-oauth.e2e-spec.ts` (mocked Atlassian); `wiz-fixtures.spec.ts` (skipped until client files)
+
 ### Added — Entities, collections, OpenAPI import
 
 Per [ADR 0017](./adr/0017-entity-collections.md):

@@ -1,8 +1,14 @@
 import { ConfigService } from '@nestjs/config';
+import { AtlassianOAuthCredentialsService } from './atlassian-oauth-credentials.service';
 import { ConfluenceApiClient } from './confluence-api.client';
 
 describe('ConfluenceApiClient', () => {
-  const client = new ConfluenceApiClient(
+  const credentials = new AtlassianOAuthCredentialsService(
+    {
+      tenantAtlassianOAuthApp: {
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
+    } as never,
     new ConfigService({
       ATLASSIAN_CLIENT_ID: 'test-client-id',
       ATLASSIAN_CLIENT_SECRET: 'secret',
@@ -10,10 +16,13 @@ describe('ConfluenceApiClient', () => {
         'http://localhost:3000/api/v1/integrations/confluence/oauth/callback',
       ATLASSIAN_SCOPES: 'read:confluence-content.all offline_access',
     }),
+    { decrypt: jest.fn(), encrypt: jest.fn() } as never,
   );
 
-  it('builds authorize URL with state and scopes', () => {
-    const url = new URL(client.getAuthorizeUrl('signed-state-token'));
+  const client = new ConfluenceApiClient(credentials);
+
+  it('builds authorize URL with state and scopes', async () => {
+    const url = new URL(await client.getAuthorizeUrl('signed-state-token'));
     expect(url.origin + url.pathname).toBe(
       'https://auth.atlassian.com/authorize',
     );

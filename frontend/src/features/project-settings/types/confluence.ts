@@ -4,6 +4,18 @@ export type ConfluenceOAuthSetupHint = {
   envVars: string[];
   redirectUri: string;
   docsUrl: string;
+  credentialSource?: 'tenant' | 'platform' | 'none';
+};
+
+export type ColumnMapping = {
+  scope?: string;
+  key?: string;
+  sourceText?: string;
+  hints?: string;
+};
+
+export type ParseRulesJson = {
+  columnMapping?: ColumnMapping;
 };
 
 export type ConfluenceIntegration = {
@@ -21,7 +33,12 @@ export type ConfluenceIntegration = {
   syncConfig?: {
     pageIds: string[];
     spaceKey: string | null;
+    labelFilter: string | null;
+    parseRulesJson: ParseRulesJson | null;
     autoApply: boolean;
+    syncEnabled: boolean;
+    syncIntervalMinutes: number | null;
+    nextSyncAt: string | null;
     lastSyncedAt: string | null;
     lastSyncStatus: string | null;
     lastSyncSummary: {
@@ -43,4 +60,10 @@ export type ConfluenceSpace = {
 export type ConfluencePage = {
   id: string;
   title: string;
+};
+
+export type ConfluencePendingSite = {
+  id: string;
+  name: string;
+  url: string;
 };

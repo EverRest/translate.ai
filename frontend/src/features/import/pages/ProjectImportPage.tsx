@@ -2,6 +2,11 @@ import { useCallback, useRef, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
 import { useToast } from '../../../shared/ui/use-toast';
 import type { Project } from '../../projects/types';
+import { ColumnMappingFields } from '../components/ColumnMappingFields';
+import {
+  toParseRulesInput,
+  type ColumnMapping,
+} from '../utils/column-mapping.utils';
 import {
   useApplyImportSession,
   useCreateImportSession,
@@ -26,6 +31,8 @@ export function ProjectImportPage() {
   const [pasteHtml, setPasteHtml] = useState('');
   const [actionFilter, setActionFilter] = useState<ImportItemAction | ''>('');
   const [page, setPage] = useState(1);
+  const [showColumnMapping, setShowColumnMapping] = useState(false);
+  const [columnMapping, setColumnMapping] = useState<ColumnMapping>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const createSession = useCreateImportSession(projectId);
@@ -40,7 +47,10 @@ export function ProjectImportPage() {
   const handleFile = useCallback(
     async (file: File) => {
       try {
-        const created = await createSession.mutateAsync({ file });
+        const created = await createSession.mutateAsync({
+          file,
+          parseRules: toParseRulesInput(columnMapping),
+        });
         setSession(created);
         setStep('preview');
         setPage(1);
@@ -49,7 +59,7 @@ export function ProjectImportPage() {
         toast.error(error instanceof Error ? error.message : 'Upload failed.');
       }
     },
-    [createSession, toast],
+    [createSession, toast, columnMapping],
   );
 
   const handlePaste = useCallback(async () => {
@@ -58,7 +68,10 @@ export function ProjectImportPage() {
       return;
     }
     try {
-      const created = await createSession.mutateAsync({ html: pasteHtml });
+      const created = await createSession.mutateAsync({
+        html: pasteHtml,
+        parseRules: toParseRulesInput(columnMapping),
+      });
       setSession(created);
       setStep('preview');
       setPage(1);
@@ -68,7 +81,7 @@ export function ProjectImportPage() {
         error instanceof Error ? error.message : 'Paste import failed.',
       );
     }
-  }, [createSession, pasteHtml, toast]);
+  }, [createSession, pasteHtml, toast, columnMapping]);
 
   const handleApply = async () => {
     if (!session) return;
@@ -137,6 +150,24 @@ export function ProjectImportPage() {
             >
               {createSession.isPending ? 'Parsing…' : 'Import pasted HTML'}
             </button>
+          </div>
+
+          <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-6 lg:col-span-2">
+            <button
+              type="button"
+              onClick={() => setShowColumnMapping((v) => !v)}
+              className="text-sm text-sky-400 hover:underline"
+            >
+              {showColumnMapping ? 'Hide' : 'Show'} column mapping (advanced)
+            </button>
+            {showColumnMapping && (
+              <div className="mt-4">
+                <ColumnMappingFields
+                  value={columnMapping}
+                  onChange={setColumnMapping}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}

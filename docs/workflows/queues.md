@@ -24,10 +24,21 @@ nestjs-api (producer)     nestjs-worker (consumer)
 | `integration.openapi.import` | API (large OpenAPI spec) | Worker | 3 |
 | `integration.import.parse` | API (import session upload) | Worker | 3 |
 | `integration.import.apply` | API (import apply) | Worker | 3 |
-| `integration.confluence.sync` | API (Confluence sync) | Worker | 3 |
+| `integration.confluence.sync` | API (Confluence sync) / scheduler | Worker | 3 |
 | `webhook.send` | event handlers | Worker | 10 |
 
 Tune concurrency per environment.
+
+### Confluence scheduled sync
+
+`ConfluenceSyncSchedulerService` (worker) runs every **5 minutes**:
+
+1. Finds `ConfluenceSyncConfig` where `syncEnabled`, `syncIntervalMinutes` set, and `nextSyncAt <= now`
+2. Skips if a `confluence_live` import session is already `parsing` / `applying`
+3. Enqueues `integration.confluence.sync` via `ConfluenceSyncTriggerService`
+4. Sets `nextSyncAt = now + syncIntervalMinutes`
+
+This replaces Confluence webhooks (not available for OAuth 3LO). See [ADR 0016](../adr/0016-external-import.md).
 
 ## Job payload conventions
 

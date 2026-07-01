@@ -83,6 +83,10 @@ export class ConfluenceSyncJobRunnerService {
         where: { id: sessionId },
       });
 
+      const config = await this.prisma.confluenceSyncConfig.findUnique({
+        where: { connectionId },
+      });
+
       await this.prisma.confluenceSyncConfig.update({
         where: { connectionId },
         data: {
@@ -91,6 +95,13 @@ export class ConfluenceSyncJobRunnerService {
           lastSyncSummaryJson: session.diffSummaryJson as Prisma.InputJsonValue,
           lastImportSessionId: sessionId,
           lastErrorMessage: null,
+          ...(config?.syncEnabled && config.syncIntervalMinutes
+            ? {
+                nextSyncAt: new Date(
+                  Date.now() + config.syncIntervalMinutes * 60_000,
+                ),
+              }
+            : {}),
         },
       });
     } catch (error) {
