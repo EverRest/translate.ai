@@ -23,5 +23,6 @@ Reference only — do **not** re-implement. Details live in `docs/domain/`, `doc
 | Confluence live sync (P0-03 Phase 2) | OAuth 3LO, `ConfluenceConnection`, `integration.confluence.sync` queue, Settings → Integrations; `oauthAvailable` UX when OAuth not configured |
 | Confluence hardening (P0-03b) | Site picker, label filter, column mapping, scheduled sync, tenant BYO OAuth, OAuth e2e mocks |
 | Placeholder protection + job summary (P0-S02) | `PlaceholderValidator` (ADR 0008); optional `placeholderSummary` on `GET /jobs/:id` and `job.completed` / `job.failed` webhooks |
+| Sport-domain AI context (P0-01) | `Project.domainProfile`; `GET /projects/:id/domain-presets`; `POST .../copy-settings`; domain block in `buildTranslationPrompts`; `fifa_accreditation` glossary preset; Settings → Domain context UI; post-create onboarding modal |
 
 When extending the platform, **build on these modules** — do not fork parallel implementations.

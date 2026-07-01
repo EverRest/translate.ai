@@ -1,8 +1,11 @@
+import { DomainProfile } from '../../../shared/domain/domain-profile.types';
+
 export class CreateProjectCommand {
   constructor(
     public readonly tenantId: string,
     public readonly name: string,
     public readonly description?: string,
+    public readonly domainProfile?: DomainProfile | null,
   ) {}
 }
 
@@ -12,6 +15,7 @@ export class UpdateProjectCommand {
     public readonly projectId: string,
     public readonly name?: string,
     public readonly description?: string,
+    public readonly domainProfile?: DomainProfile | null,
   ) {}
 }
 
@@ -19,6 +23,17 @@ export class ArchiveProjectCommand {
   constructor(
     public readonly tenantId: string,
     public readonly projectId: string,
+  ) {}
+}
+
+export type ProjectSettingsCopyInclude = 'domainProfile' | 'glossary';
+
+export class CopyProjectSettingsCommand {
+  constructor(
+    public readonly tenantId: string,
+    public readonly targetProjectId: string,
+    public readonly sourceProjectId: string,
+    public readonly include: ProjectSettingsCopyInclude[],
   ) {}
 }
 

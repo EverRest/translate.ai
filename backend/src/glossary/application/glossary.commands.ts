@@ -38,3 +38,26 @@ export class ListGlossaryTermsQuery {
     public readonly search?: string,
   ) {}
 }
+
+export class ListGlossaryPresetsQuery {
+  constructor(
+    public readonly tenantId: string,
+    public readonly projectId: string,
+  ) {}
+}
+
+export class ApplyGlossaryPresetCommand {
+  constructor(
+    public readonly tenantId: string,
+    public readonly projectId: string,
+    public readonly presetId: string,
+  ) {}
+}
+
+export class CopyGlossaryFromProjectCommand {
+  constructor(
+    public readonly tenantId: string,
+    public readonly sourceProjectId: string,
+    public readonly targetProjectId: string,
+  ) {}
+}

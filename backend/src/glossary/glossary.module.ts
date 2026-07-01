@@ -9,6 +9,11 @@ import {
   UpdateGlossaryTermHandler,
 } from './application/handlers/glossary.handlers';
 import {
+  ApplyGlossaryPresetHandler,
+  ListGlossaryPresetsHandler,
+} from './application/handlers/glossary-preset.handlers';
+import { CopyGlossaryFromProjectHandler } from './application/handlers/copy-glossary-from-project.handler';
+import {
   AnalyzeGlossaryHandler,
   ApproveGlossarySuggestionHandler,
   ListGlossarySuggestionsHandler,
@@ -17,12 +22,15 @@ import {
 import { GlossaryService } from './application/glossary.service';
 import { GlossaryQueueService } from './infrastructure/glossary-queue.service';
 import { GlossaryController } from './presentation/glossary.controller';
+import { GlossaryPresetsController } from './presentation/glossary-presets.controller';
 import { GlossarySuggestionsController } from './presentation/glossary-suggestions.controller';
 
 const commandHandlers = [
   CreateGlossaryTermHandler,
   UpdateGlossaryTermHandler,
   DeleteGlossaryTermHandler,
+  ApplyGlossaryPresetHandler,
+  CopyGlossaryFromProjectHandler,
   AnalyzeGlossaryHandler,
   ApproveGlossarySuggestionHandler,
   RejectGlossarySuggestionHandler,
@@ -30,12 +38,17 @@ const commandHandlers = [
 
 const queryHandlers = [
   ListGlossaryTermsHandler,
+  ListGlossaryPresetsHandler,
   ListGlossarySuggestionsHandler,
 ];
 
 @Module({
   imports: [CqrsModule, ProjectModule],
-  controllers: [GlossaryController, GlossarySuggestionsController],
+  controllers: [
+    GlossaryController,
+    GlossaryPresetsController,
+    GlossarySuggestionsController,
+  ],
   providers: [
     ...commandHandlers,
     ...queryHandlers,

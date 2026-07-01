@@ -45,3 +45,27 @@ export async function archiveProject(projectId: string) {
   );
   return response.data;
 }
+
+export type ProjectSettingsCopyInclude = 'domainProfile' | 'glossary';
+
+export type CopyProjectSettingsInput = {
+  sourceProjectId: string;
+  include: ProjectSettingsCopyInclude[];
+};
+
+export type CopyProjectSettingsResult = {
+  domainProfileCopied: boolean;
+  glossaryAdded: number;
+  glossarySkipped: number;
+};
+
+export async function copyProjectSettings(
+  targetProjectId: string,
+  input: CopyProjectSettingsInput,
+) {
+  const response = await apiPost<
+    ApiSuccess<CopyProjectSettingsResult>,
+    CopyProjectSettingsInput
+  >(`/projects/${targetProjectId}/copy-settings`, input);
+  return response.data;
+}

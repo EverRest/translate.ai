@@ -23,7 +23,7 @@ Terms like “Accreditation”, “Venue”, “Privilege”, “Registration Gr
 
 ## Remaining improvements (not blocking FIFA demo)
 
-- [ ] FIFA-specific preset pack ([P0-01](./P0-01-sport-domain-ai-context.md))
+- [x] FIFA-specific preset pack ([P0-01](./P0-01-sport-domain-ai-context.md)) — `fifa_accreditation` (24 terms)
 - [ ] Tenant-level glossary shared across event projects
 - [ ] Auto-scan after translate job ([P0-07](./P0-07-consistency-check.md))
 - [ ] Per-language glossary target terms

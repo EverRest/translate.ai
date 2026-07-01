@@ -9,6 +9,7 @@ import type {
 import { DataGrid } from '../../../shared/ui/DataGrid';
 import { Tooltip } from '../../../shared/ui/Tooltip';
 import { ProjectFormModal } from '../components/ProjectFormModal';
+import { ProjectOnboardingModal } from '../components/ProjectOnboardingModal';
 import {
   useArchiveProject,
   useCreateProject,
@@ -33,10 +34,21 @@ export function ProjectsPage() {
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [onboardingProject, setOnboardingProject] = useState<Project | null>(
+    null,
+  );
   const gridRef = useRef<GridRef | null>(null);
 
   const archiveRef = useRef(archive);
   archiveRef.current = archive;
+
+  const finishOnboarding = useCallback(() => {
+    const projectId = onboardingProject?.id;
+    setOnboardingProject(null);
+    if (projectId) {
+      navigate(`/projects/${projectId}`);
+    }
+  }, [navigate, onboardingProject?.id]);
 
   // Lock column widths on first mount so columns never flex-grow
   useEffect(() => {
@@ -248,7 +260,12 @@ export function ProjectsPage() {
         error={create.error instanceof Error ? create.error.message : undefined}
         onClose={() => setCreateOpen(false)}
         onSubmit={(values) => {
-          create.mutate(values, { onSuccess: () => setCreateOpen(false) });
+          create.mutate(values, {
+            onSuccess: (project) => {
+              setCreateOpen(false);
+              setOnboardingProject(project);
+            },
+          });
         }}
       />
 
@@ -267,6 +284,14 @@ export function ProjectsPage() {
           );
         }}
       />
+
+      {onboardingProject && (
+        <ProjectOnboardingModal
+          open
+          project={onboardingProject}
+          onDone={finishOnboarding}
+        />
+      )}
     </section>
   );
 }

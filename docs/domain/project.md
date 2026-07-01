@@ -10,6 +10,7 @@ Manages customer projects and integration settings.
 | tenant_id | FK → Tenant (required on all queries) |
 | name | Project name |
 | description | Optional |
+| domain_profile | Optional JSON — sport/event domain context for AI prompts (see [translation.md](./translation.md#domain-profile)) |
 | status | active, archived |
 | created_at | Timestamp |
 
@@ -77,6 +78,7 @@ Project
 - Project belongs to exactly one tenant.
 - Deleting a project is soft-delete (archive) unless explicitly purged.
 - API keys and webhooks are never shared across projects.
+- After create, the UI offers optional onboarding: FIFA domain preset (+ glossary), copy `domainProfile` from another tenant project, or skip.
 
 ## Related
 

@@ -7,7 +7,7 @@ import {
   listProjects,
   updateProject,
 } from '../api/projects.api';
-import type { CreateProjectInput, UpdateProjectInput } from '../types';
+import type { CreateProjectInput, Project, UpdateProjectInput } from '../types';
 
 export function useProjectsList(page = 1, limit = 20) {
   return useQuery({
@@ -26,14 +26,13 @@ export function useProject(projectId: string | undefined) {
 
 export function useCreateProject() {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: (input: CreateProjectInput) => createProject(input),
-    onSuccess: (project) => {
+    onSuccess: (project: Project) => {
       void queryClient.invalidateQueries({ queryKey: ['projects'] });
       void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-      navigate(`/projects/${project.id}`);
+      void queryClient.setQueryData(['project', project.id], project);
     },
   });
 }

@@ -186,12 +186,13 @@ model User {
 }
 
 model Project {
-  id          String        @id @default(uuid()) @db.Uuid
-  tenantId    String        @map("tenant_id") @db.Uuid
-  name        String
-  description String?
-  status      ProjectStatus @default(active)
-  createdAt   DateTime      @default(now()) @map("created_at")
+  id            String        @id @default(uuid()) @db.Uuid
+  tenantId      String        @map("tenant_id") @db.Uuid
+  name          String
+  description   String?
+  domainProfile Json?         @map("domain_profile")
+  status        ProjectStatus @default(active)
+  createdAt     DateTime      @default(now()) @map("created_at")
 
   tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   apiKeys          ApiKey[]

@@ -88,7 +88,9 @@ export class TranslationJobRunnerService {
       include: {
         translationKey: {
           include: {
-            project: { select: { name: true, description: true } },
+            project: {
+              select: { name: true, description: true, domainProfile: true },
+            },
           },
         },
         job: true,
