@@ -4,6 +4,15 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Context-aware object translation (P0-05 MVP)
+
+- **Schema:** `TranslationJob.mode` (`object_batch`), `metadata`; `TranslationJobItem.batchGroupId`
+- **API:** `POST .../objects/translate-batch` — `{ objectIds[], languages[] }`; single-object translate uses same batch pipeline
+- **Worker:** field-node batching via extended `translation.process`; one AI call per field group (label + placeholder + error); QA validators per output string
+- **Job status:** optional `objectProgress: { objectsDone, objectsTotal }` on `GET /jobs/:id`
+- **UI:** Entities list multi-select + **Translate selected (N fields)**; job detail **Field X of Y** progress
+- **Tests:** `group-field-batches.utils.spec.ts`, `object-batch-prompt.builder.spec.ts`, `object-batch-progress.utils.spec.ts`, `object-batch-translation.e2e-spec.ts`
+
 ### Added — Translation coverage heatmap (P0-06 MVP)
 
 - **API:** `GET .../reports/coverage-matrix` — scope × language matrix with RAG (`green` / `yellow` / `red`), `byLanguage` summary, `worstCells`
@@ -40,7 +49,8 @@ Per [ADR 0016](./adr/0016-external-import.md):
 
 ### Changed — backlog
 
-- **P0-06 Translation coverage heatmap** shipped (MVP); active spec → `P0-06-translation-coverage-heatmap-shipped.md`; Wave 3 focus **P0-05**, **P0-09**
+- **P0-05 Context-aware object translation** shipped (MVP); active spec → `P0-05-context-aware-object-translation-shipped.md`; Wave 3 focus **P0-09**
+- **P0-06 Translation coverage heatmap** shipped (MVP); active spec → `P0-06-translation-coverage-heatmap-shipped.md`
 - **P0-04 Stale translation detection** shipped (MVP); active specs renamed to `*-shipped.md`; see [shipped-baseline](./backlog/shipped-baseline.md) and [demo shipped tasks](./backlog/demo/README.md#shipped-tasks-reference)
 - **Demo backlog** — shipped shipped demo tasks kept as reference under `docs/backlog/demo/P0-*-shipped.md` (not deleted); code pointers in [shipped-baseline](./backlog/shipped-baseline.md)
 - **P0-02 Excel round-trip** removed from active P0 table; added to [shipped-baseline](./backlog/shipped-baseline.md) and demo “Already shipped” (#10, #17)

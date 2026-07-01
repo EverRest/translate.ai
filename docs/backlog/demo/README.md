@@ -12,14 +12,14 @@ Cross-cutting review against [AGENTS.md](../../../AGENTS.md), existing modules, 
 
 ### Agree with overall ordering
 
-Wave 1 complete (P0-01 sport context, P0-S02 placeholder summary, P0-07 consistency UX; P0-03 Confluence import shipped). **P0-02 Excel round-trip shipped (MVP).** **P0-04 stale detection shipped (MVP).** **P0-06 coverage heatmap shipped (MVP).** Wave 3 adoption focus: P0-05 object translation, P0-09 debt dashboard. EverRest’s deferrals (runtime API, multi-model, standalone consistency AI) match platform reality.
+Wave 1 complete (P0-01 sport context, P0-S02 placeholder summary, P0-07 consistency UX; P0-03 Confluence import shipped). **P0-02 Excel round-trip shipped (MVP).** **P0-04 stale detection shipped (MVP).** **P0-06 coverage heatmap shipped (MVP).** **P0-05 object-batch translation shipped (MVP).** Wave 3 adoption focus: **P0-09** debt dashboard. EverRest’s deferrals (runtime API, multi-model, standalone consistency AI) match platform reality.
 
 ### Suggested wave changes (disagree partially with README waves)
 
 | Current wave | Issue | Suggested change |
 |--------------|-------|------------------|
 | Wave 1: P0-02 Excel | Excel round-trip is **Medium–High** if byte-identical output is required; parsing must run on **backend + queue**, not browser only | **Shipped (MVP)** — Classic import preset, delta fill, compose download; see [shipped-baseline](../shipped-baseline.md) (P0-02) |
-| Wave 3: P0-05 objects | Client #1 is “must have” but **P3-12 already covers 60% of demo** (tree + translate all) | Demo can show objects in Wave 2; full object-batch AI (single prompt per field) stays Wave 3 |
+| Wave 3: P0-05 objects | Client #1 is “must have” but **P3-12 already covers 60% of demo** (tree + translate all) | **Shipped (MVP)** — field-node JSON batch, multi-select translate, object progress; see [shipped-baseline](../shipped-baseline.md) (P0-05) |
 | Wave 3: P0-10 extension | Marked same wave as debt dashboard but difficulty **High** and needs client DOM cooperation | POC only after P0-03 key naming is stable; consider **export preview page** as interim demo (no extension) |
 | P0-11 in P0 list | EverRest: conditional on static bundle model | **Demote to P1** until Client confirms import path; do not build snapshots in parallel with P0-02/03 |
 
@@ -54,7 +54,6 @@ Each file follows the standard backlog template: **Goal**, **Current state**, **
 
 | ID | Feature | Importance | Difficulty | Client # | EverRest note |
 |----|---------|------------|------------|----------|---------------|
-| [P0-05](./P0-05-context-aware-object-translation.md) | Context-aware object translation | Critical | Medium | #1 | Must have; builds on P3-12 |
 | [P0-08](./P0-08-translation-inheritance.md) | Translation inheritance between events | High | Medium–High | #13 | Reuse MC26 → WWC27 |
 | [P0-09](./P0-09-translation-debt-dashboard.md) | Translation debt dashboard | Medium | Medium | #28 | Good for demo |
 | [P0-10](./P0-10-live-browser-injection.md) | Live browser injection (extension) | High | High | #29 | Killer demo feature |
@@ -73,16 +72,15 @@ Wave 2 (client onboarding) — COMPLETE
  P0-06 Coverage heatmap (shipped)
 
 Wave 3 (differentiation, 4–8 weeks) — NEXT
- P0-05 Object-batch translation + progress by object
- P0-08 Event inheritance
  P0-09 Debt dashboard
+ P0-08 Event inheritance
  P0-10 Browser extension POC (or interim preview page)
 
 Wave 4 / conditional
  P0-11 New keys alert — only after Client confirms static bundle workflow
 ```
 
-> **Note:** Revised from original README per agent review — Wave 1 complete (P0-01, P0-S02, P0-07, P0-03); P0-02 Excel shipped (MVP); P0-04 stale detection shipped (MVP); P0-06 coverage heatmap shipped (MVP); P0-11 demoted.
+> **Note:** Revised from original README per agent review — Wave 1 complete (P0-01, P0-S02, P0-07, P0-03); P0-02 Excel shipped (MVP); P0-04 stale detection shipped (MVP); P0-06 coverage heatmap shipped (MVP); P0-05 object-batch translation shipped (MVP); P0-11 demoted.
 
 ---
 
@@ -118,6 +116,7 @@ See [shipped-baseline.md](../shipped-baseline.md) for code pointers. Full specs 
 | [P0-03b](./P0-03b-confluence-hardening-shipped.md) | Confluence hardening (site picker, scheduled sync, BYO OAuth) | #5 |
 | [P0-04](./P0-04-stale-translation-detection-shipped.md) | Stale translation detection | #12 |
 | [P0-06](./P0-06-translation-coverage-heatmap-shipped.md) | Translation coverage heatmap | #6 |
+| [P0-05](./P0-05-context-aware-object-translation-shipped.md) | Context-aware object translation | #1 |
 | [P0-07](./P0-07-consistency-check-shipped.md) | Consistency check Wave 1 (auto drift scan) | #4 |
 | [P0-S01](./P0-S01-glossary-platform-shipped.md) | Glossary / TM platform | #14 |
 | [P0-S02](./P0-S02-placeholder-protection-shipped.md) | Placeholder protection + job summary | #11 |
@@ -128,6 +127,7 @@ See [shipped-baseline.md](../shipped-baseline.md) for code pointers. Full specs 
 |----------|---------|-------|
 | #4 | Consistency check (post-translate) | [P0-07](./P0-07-consistency-check-shipped.md) Wave 1 — auto drift scan, grid hints, settings toggle; Wave 2 LLM reviewer deferred |
 | #10, #17 | Excel round-trip + delta import | [P0-02](./P0-02-excel-delta-import-shipped.md) — Classic import preset, empty-cell fill, same-layout download |
+| #1 | Context-aware object translation | [P0-05-shipped](./P0-05-context-aware-object-translation-shipped.md) — field-node batch AI, multi-select translate, Field X/Y progress |
 | #6 | Translation coverage heatmap | [P0-06](./P0-06-translation-coverage-heatmap-shipped.md) — scope × language RAG matrix, Analytics tab, Launch readiness |
 | #12 | Stale translation detection | [P0-04](./P0-04-stale-translation-detection-shipped.md) — snapshot staleness, grid/overview UX, `onlyStale` jobs |
 | #5 | Confluence import | [P0-03](./P0-03-documentation-import-shipped.md) + [P0-03b](./P0-03b-confluence-hardening-shipped.md) |
@@ -135,7 +135,7 @@ See [shipped-baseline.md](../shipped-baseline.md) for code pointers. Full specs 
 | #14 | Glossary / TM | [P0-S01](./P0-S01-glossary-platform-shipped.md) + [P2-05](../P2-05-terminology-drift.md) drift MVP |
 | #11 | Placeholder protection | [P0-S02](./P0-S02-placeholder-protection-shipped.md) |
 | #24 | Brand voice training | Glossary + [P2-04](../P2-04-brand-voice.md) brand voice per project |
-| #1 (partial) | Object structure | [P3-12](../P3-12-nested-translation.md) localization objects shipped; tone batching = [P0-05](./P0-05-context-aware-object-translation.md) |
+| #1 (partial) | Object structure + batch tone | [P3-12](../P3-12-nested-translation.md) objects + [P0-05-shipped](./P0-05-context-aware-object-translation-shipped.md) field-batch AI |
 
 ---
 
@@ -143,7 +143,7 @@ See [shipped-baseline.md](../shipped-baseline.md) for code pointers. Full specs 
 
 | client | Existing backlog |
 |----------|------------------|
-| P0-05 Context-aware objects | Extends [P3-12](../P3-12-nested-translation.md) |
+| P0-05 Context-aware objects (shipped) | Extends [P3-12](../P3-12-nested-translation.md) — see [P0-05-shipped](./P0-05-context-aware-object-translation-shipped.md) |
 | P0-07 Consistency (Wave 1 shipped) | [P0-07-shipped](./P0-07-consistency-check-shipped.md), [P2-05](../P2-05-terminology-drift.md) + glossary |
 | P0-01 Sport context (shipped) | [P0-01-shipped](./P0-01-sport-domain-ai-context-shipped.md), [P2-04](../P2-04-brand-voice.md) tone versioning later |
 | P0-D06 CI/CD | [P3-07](../P3-07-localization-pipeline-as-code.md) |

@@ -56,4 +56,4 @@ Overlap with [P3-06](../P3-06-screenshot-regression.md) and [P0-D04](./P0-D04-ch
 
 | Backlog claim | Issue |
 |---------------|-------|
-| Difficulty High | **High** for translate-time vision + storage + GDPR; keep deferred until P0-05 object UX stable |
+| Difficulty High | **High** for translate-time vision + storage + GDPR; keep deferred until object-batch UX stable ([P0-05-shipped](./P0-05-context-aware-object-translation-shipped.md)) |

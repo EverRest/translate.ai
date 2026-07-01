@@ -30,5 +30,6 @@ Reference only — do **not** re-implement. Details live in `docs/domain/`, `doc
 | Excel round-trip + delta import (P0-02 MVP) | `excel.parser.ts`, Classic import preset, Excel Import tab | [P0-02-shipped](demo/P0-02-excel-delta-import-shipped.md) |
 | Stale translation detection (P0-04 MVP) | `sourceTextSnapshot`, stale API, `onlyStale` jobs, grid UX | [P0-04-shipped](demo/P0-04-stale-translation-detection-shipped.md) |
 | Translation coverage heatmap (P0-06 MVP) | `CoverageMatrixService`, reports API, Analytics heatmap, Launch readiness | [P0-06-shipped](demo/P0-06-translation-coverage-heatmap-shipped.md) |
+| Context-aware object translation (P0-05 MVP) | `object_batch` jobs, field-node AI batching, object progress UX | [P0-05-shipped](demo/P0-05-context-aware-object-translation-shipped.md) |
 
 When extending the platform, **build on these modules** — do not fork parallel implementations.

@@ -10,11 +10,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
 import { LocalizationNodeType, LocalizationTemplateType } from '@prisma/client';
 import { ProjectAccessService } from '../../../project/infrastructure/project-access.service';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
-import { CreateTranslationJobCommand } from '../../../translation/application/job.commands';
+import { ObjectBatchTranslationService } from '../services/object-batch-translation.service';
 import {
   CreateLocalizationNodeCommand,
   CreateLocalizationObjectCommand,
@@ -27,6 +26,7 @@ import {
   ListLocalizationObjectsQuery,
   MaterializeLocalizationObjectCommand,
   TranslateLocalizationObjectCommand,
+  TranslateObjectsBatchCommand,
   UpdateLocalizationNodeCommand,
   UpdateLocalizationObjectCommand,
 } from '../localization-object.commands';
@@ -399,10 +399,8 @@ export class MaterializeLocalizationObjectHandler implements ICommandHandler<Mat
 @CommandHandler(TranslateLocalizationObjectCommand)
 export class TranslateLocalizationObjectHandler implements ICommandHandler<TranslateLocalizationObjectCommand> {
   constructor(
-    private readonly prisma: PrismaService,
     private readonly projectAccess: ProjectAccessService,
-    private readonly commandBus: CommandBus,
-    private readonly materialize: MaterializeObjectService,
+    private readonly objectBatch: ObjectBatchTranslationService,
   ) {}
 
   async execute(command: TranslateLocalizationObjectCommand) {
@@ -410,30 +408,37 @@ export class TranslateLocalizationObjectHandler implements ICommandHandler<Trans
       command.tenantId,
       command.projectId,
     );
-    await ensureObject(this.prisma, command.projectId, command.objectId);
 
-    await this.materialize.materialize(command.projectId, command.objectId);
+    return this.objectBatch.createBatchJob(
+      command.tenantId,
+      command.projectId,
+      [command.objectId],
+      command.languages,
+      command.createdById,
+    );
+  }
+}
 
-    const keys = await this.prisma.translationKey.findMany({
-      where: { localizationObjectId: command.objectId },
-      select: { key: true },
-    });
+@Injectable()
+@CommandHandler(TranslateObjectsBatchCommand)
+export class TranslateObjectsBatchHandler implements ICommandHandler<TranslateObjectsBatchCommand> {
+  constructor(
+    private readonly projectAccess: ProjectAccessService,
+    private readonly objectBatch: ObjectBatchTranslationService,
+  ) {}
 
-    if (keys.length === 0) {
-      throw new BadRequestException('No translatable leaves in this object');
-    }
+  async execute(command: TranslateObjectsBatchCommand) {
+    await this.projectAccess.getProjectForTenant(
+      command.tenantId,
+      command.projectId,
+    );
 
-    return this.commandBus.execute(
-      new CreateTranslationJobCommand(
-        command.tenantId,
-        command.projectId,
-        command.languages,
-        keys.map((row) => row.key),
-        undefined,
-        undefined,
-        undefined,
-        command.createdById,
-      ),
+    return this.objectBatch.createBatchJob(
+      command.tenantId,
+      command.projectId,
+      command.objectIds,
+      command.languages,
+      command.createdById,
     );
   }
 }

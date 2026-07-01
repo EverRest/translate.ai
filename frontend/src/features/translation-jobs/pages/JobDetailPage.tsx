@@ -28,14 +28,21 @@ export function JobDetailPage() {
   }
 
   const progressPercent =
-    job.progress.total > 0
-      ? Math.round((job.progress.completed / job.progress.total) * 100)
-      : 0;
+    job.objectProgress && job.objectProgress.objectsTotal > 0
+      ? Math.round(
+          (job.objectProgress.objectsDone / job.objectProgress.objectsTotal) *
+            100,
+        )
+      : job.progress.total > 0
+        ? Math.round((job.progress.completed / job.progress.total) * 100)
+        : 0;
 
   const pendingCount = Math.max(
     0,
     job.progress.total - job.progress.completed - job.progress.failed,
   );
+
+  const isObjectBatchJob = job.mode === 'object_batch' && job.objectProgress;
 
   const canRetry =
     job.status === 'failed' ||
@@ -74,12 +81,31 @@ export function JobDetailPage() {
             <div className="flex justify-between text-sm text-slate-400">
               <span>{progressPercent}% complete</span>
               <span>
-                {job.progress.completed}/{job.progress.total} items
+                {isObjectBatchJob
+                  ? `Field ${job.objectProgress!.objectsDone} of ${job.objectProgress!.objectsTotal}`
+                  : `${job.progress.completed}/${job.progress.total} items`}
               </span>
             </div>
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-              <span>{job.progress.completed} completed</span>
-              {pendingCount > 0 && <span>{pendingCount} pending</span>}
+              {isObjectBatchJob ? (
+                <>
+                  <span>{job.objectProgress!.objectsDone} fields done</span>
+                  {job.objectProgress!.objectsTotal -
+                    job.objectProgress!.objectsDone >
+                    0 && (
+                    <span>
+                      {job.objectProgress!.objectsTotal -
+                        job.objectProgress!.objectsDone}{' '}
+                      remaining
+                    </span>
+                  )}
+                </>
+              ) : (
+                <>
+                  <span>{job.progress.completed} completed</span>
+                  {pendingCount > 0 && <span>{pendingCount} pending</span>}
+                </>
+              )}
               {job.progress.failed > 0 && (
                 <span className="text-red-400">
                   {job.progress.failed} failed

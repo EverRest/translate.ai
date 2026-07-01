@@ -1,10 +1,11 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { JobItemStatus } from '@prisma/client';
+import { JobItemStatus, TranslationJobMode } from '@prisma/client';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { GetJobStatusQuery, ListTranslationJobsQuery } from '../job.commands';
 import { buildJobFailureSummary } from '../utils/job-failure-summary';
 import { buildJobPlaceholderSummary } from '../utils/job-placeholder-summary';
+import { computeObjectBatchProgress } from '../utils/object-batch-progress.utils';
 
 @Injectable()
 @QueryHandler(ListTranslationJobsQuery)
@@ -68,7 +69,13 @@ export class GetJobStatusHandler implements IQueryHandler<GetJobStatusQuery> {
       include: {
         items: {
           include: {
-            translationKey: { select: { key: true, sourceText: true } },
+            translationKey: {
+              select: {
+                key: true,
+                sourceText: true,
+                localizationObjectId: true,
+              },
+            },
           },
         },
         project: { select: { id: true } },
@@ -108,12 +115,27 @@ export class GetJobStatusHandler implements IQueryHandler<GetJobStatusQuery> {
       })),
     );
 
+    const objectIds =
+      job.mode === TranslationJobMode.object_batch &&
+      job.metadata &&
+      typeof job.metadata === 'object' &&
+      Array.isArray((job.metadata as { objectIds?: unknown }).objectIds)
+        ? ((job.metadata as { objectIds: string[] }).objectIds ?? [])
+        : [];
+
+    const objectProgress =
+      objectIds.length > 0
+        ? computeObjectBatchProgress(objectIds, job.items)
+        : undefined;
+
     return {
       id: job.id,
       projectId: job.projectId,
       status: job.status,
       provider: job.provider,
+      mode: job.mode,
       progress: { total, completed, failed },
+      ...(objectProgress ? { objectProgress } : {}),
       failures,
       failedItems: failedItemDetails,
       ...(placeholderSummary ? { placeholderSummary } : {}),

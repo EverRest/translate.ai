@@ -91,6 +91,16 @@ export class TranslateLocalizationObjectCommand {
   ) {}
 }
 
+export class TranslateObjectsBatchCommand {
+  constructor(
+    public readonly tenantId: string,
+    public readonly projectId: string,
+    public readonly objectIds: string[],
+    public readonly languages: string[],
+    public readonly createdById?: string,
+  ) {}
+}
+
 export class GenerateLocalizationObjectStructureCommand {
   constructor(
     public readonly tenantId: string,
