@@ -13,7 +13,7 @@ AI видит что это объект (например филд) и пере
 
 Выбрал 50 Fields, нажал Translate All → AI идёт по каждому объекту сохраняя структуру. Прогресс-бар по объектам, не по ключам.
 
-→ [P0-05](demo/P0-05-context-aware-object-translation.md) (partial: P3-12 shipped)
+→ [P0-05-shipped](demo/P0-05-context-aware-object-translation-shipped.md) — field-node batch AI, multi-select translate, Field X/Y progress
 
 ## 4. Consistency Check
 После перевода AI проверяет что одно и то же слово переведено одинаково по всем Fields (например "Submit" везде "Envoyer", а не "Soumettre" в одном месте).
