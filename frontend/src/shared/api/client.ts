@@ -70,6 +70,21 @@ export async function apiPatch<T, B = unknown>(
   return parseResponse<T>(response);
 }
 
+export async function apiPut<T, B = unknown>(
+  path: string,
+  body: B,
+): Promise<T> {
+  const response = await fetch(`${baseUrl}${path}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders(),
+    },
+    body: JSON.stringify(body),
+  });
+  return parseResponse<T>(response);
+}
+
 export async function apiDelete<T>(path: string): Promise<T> {
   const response = await fetch(`${baseUrl}${path}`, {
     method: 'DELETE',

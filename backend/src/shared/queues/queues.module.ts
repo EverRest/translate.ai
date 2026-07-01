@@ -16,6 +16,7 @@ import { QUEUES } from '../constants/queues';
       { name: QUEUES.INTEGRATION_OPENAPI_IMPORT },
       { name: QUEUES.INTEGRATION_IMPORT_PARSE },
       { name: QUEUES.INTEGRATION_IMPORT_APPLY },
+      { name: QUEUES.INTEGRATION_CONFLUENCE_SYNC },
       { name: QUEUES.WEBHOOK_SEND },
     ),
   ],

@@ -24,6 +24,7 @@ nestjs-api (producer)     nestjs-worker (consumer)
 | `integration.openapi.import` | API (large OpenAPI spec) | Worker | 3 |
 | `integration.import.parse` | API (import session upload) | Worker | 3 |
 | `integration.import.apply` | API (import apply) | Worker | 3 |
+| `integration.confluence.sync` | API (Confluence sync) | Worker | 3 |
 | `webhook.send` | event handlers | Worker | 10 |
 
 Tune concurrency per environment.

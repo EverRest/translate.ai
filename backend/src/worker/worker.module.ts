@@ -29,6 +29,7 @@ import {
   ImportApplyProcessor,
   ImportParseProcessor,
 } from './processors/import.processor';
+import { ConfluenceSyncProcessor } from './processors/confluence-sync.processor';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import {
     OpenApiImportProcessor,
     ImportParseProcessor,
     ImportApplyProcessor,
+    ConfluenceSyncProcessor,
   ],
 })
 export class WorkerModule {}

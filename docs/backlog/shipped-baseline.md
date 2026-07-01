@@ -20,5 +20,6 @@ Reference only — do **not** re-implement. Details live in `docs/domain/`, `doc
 | Export API (sync) | `export` module — json/yaml/csv/android-xml/ios-strings/po |
 | Export UI + async queue | `ExportJob`, `translation.export` worker, project Export tab |
 | Confluence file import (P0-03 Phase 1) | ADR 0016, `integration` module, `ImportSession`, Confluence HTML/CSV/ZIP parsers, project Import tab |
+| Confluence live sync (P0-03 Phase 2) | OAuth 3LO, `ConfluenceConnection`, `integration.confluence.sync` queue, Settings → Integrations; `oauthAvailable` UX when OAuth not configured |
 
 When extending the platform, **build on these modules** — do not fork parallel implementations.

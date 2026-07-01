@@ -515,6 +515,44 @@ Session status and diff summary.
 
 **Dashboard:** Project → **Import** tab — upload or paste → preview → apply.
 
+#### Confluence live sync (Phase 2)
+
+Requires `ATLASSIAN_CLIENT_ID`, `ATLASSIAN_CLIENT_SECRET`, `ATLASSIAN_REDIRECT_URI` on the API. When credentials are not set, `GET .../integrations/confluence` returns `oauthAvailable: false` and `setupHint` (no secrets).
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/projects/{projectId}/integrations/confluence` | Connection + sync config status; `oauthAvailable`, `setupHint` when OAuth not configured |
+| GET | `/api/v1/projects/{projectId}/integrations/confluence/connect` | OAuth authorize URL |
+| GET | `/api/v1/integrations/confluence/oauth/callback` | Public OAuth redirect (no auth) |
+| PUT | `/api/v1/projects/{projectId}/integrations/confluence/config` | `{ pageIds, spaceKey?, autoApply? }` |
+| GET | `/api/v1/projects/{projectId}/integrations/confluence/spaces` | List spaces |
+| GET | `/api/v1/projects/{projectId}/integrations/confluence/spaces/{spaceId}/pages` | List pages |
+| POST | `/api/v1/projects/{projectId}/integrations/confluence/sync` | `{ autoApply? }` → enqueues `integration.confluence.sync` |
+| DELETE | `/api/v1/projects/{projectId}/integrations/confluence` | Disconnect |
+
+**Dashboard:** Project → **Settings → Integrations** — connect Confluence, select pages, sync now. If OAuth is not configured on the server, Connect/Sync are disabled and admin setup instructions are shown; file import via **Import** tab remains available.
+
+**GET integration response (excerpt):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "connected": false,
+    "oauthAvailable": false,
+    "setupHint": {
+      "steps": ["..."],
+      "scopes": ["read:confluence-content.all", "read:confluence-space.summary", "offline_access"],
+      "envVars": ["ATLASSIAN_CLIENT_ID", "ATLASSIAN_CLIENT_SECRET", "ATLASSIAN_REDIRECT_URI", "ATLASSIAN_SCOPES", "CONFLUENCE_TOKEN_ENCRYPTION_KEY"],
+      "redirectUri": "http://localhost:3000/api/v1/integrations/confluence/oauth/callback",
+      "docsUrl": "https://developer.atlassian.com/cloud/confluence/oauth-2-3lo-apps/"
+    }
+  }
+}
+```
+
+When `oauthAvailable` is `true`, `setupHint` is `null`.
+
 ---
 
 **Query (GET sync only):**

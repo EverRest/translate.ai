@@ -56,7 +56,8 @@ export type ImportSourceType =
   | 'confluence_html'
   | 'confluence_csv'
   | 'confluence_zip'
-  | 'paste_html';
+  | 'paste_html'
+  | 'confluence_live';
 
 export interface ColumnMapping {
   scope?: string;

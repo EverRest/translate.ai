@@ -16,7 +16,18 @@ Per [ADR 0016](./adr/0016-external-import.md):
 - **UI:** Hints column on Translations grid (parsed from key context)
 - **Tests:** unit parsers + `import-confluence.e2e-spec.ts` (850-key demo fixture, &lt;30s)
 
-Phase 2 (Atlassian OAuth live sync) remains backlog.
+### Added — Confluence live sync (P0-03 Phase 2)
+
+Per [ADR 0016](./adr/0016-external-import.md):
+
+- **Schema:** `ConfluenceConnection`, `ConfluenceSyncConfig` — encrypted OAuth tokens per project
+- **OAuth:** Atlassian 3LO connect/callback; token refresh; `TokenEncryptionService`
+- **API client:** Confluence REST v2 (spaces, pages, page body); 429 retry
+- **Queue:** `integration.confluence.sync` — fetch → parse → diff → optional auto-apply
+- **API:** `/projects/:id/integrations/confluence/*` — connect, config, spaces/pages, sync, disconnect
+- **UI:** Project **Settings → Integrations** — Confluence connect, page picker, sync now, last sync stats
+- **UX:** `oauthAvailable` + `setupHint` on integration status when `ATLASSIAN_CLIENT_*` env vars are unset — Connect/Sync disabled; admin setup steps shown; file import still available
+- **Tests:** `token-encryption`, `confluence-api.client`, `confluence-fetch` unit specs
 
 ### Added — Entities, collections, OpenAPI import
 

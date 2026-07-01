@@ -1,6 +1,6 @@
   # P0-03 — Confluence import
 
-**Phase:** FIFA/WIZ P0 · **Importance:** Critical · **Difficulty:** Medium–High · **Status:** Partial (Phase 1 shipped)
+**Phase:** FIFA/WIZ P0 · **Importance:** Critical · **Difficulty:** Medium–High · **Status:** Shipped (Phase 1 + Phase 2 OAuth)
 
 **Client idea:** #5 · **EverRest:** “Killer feature”
 
@@ -21,10 +21,13 @@ Wiz developers store translation keys on Confluence pages (BMA/PMA/SEQ). transla
 - Scope and hints stored in `TranslationKey.context`; hints column on Translations grid
 - E2e: fixture CSV/HTML + 850-key perf demo (&lt;30s, no AI)
 
-**Phase 2 (backlog):**
+**Phase 2 (shipped):**
 
-- No Atlassian OAuth connector or live page sync
-- No `confluence_connections` / webhook sync
+- Atlassian OAuth 3LO connect per project (`ConfluenceConnection`)
+- Live page fetch + parse via `integration.confluence.sync` queue
+- Settings → Integrations → Confluence: connect, pick pages, sync now
+- Optional auto-apply or preview via Import session
+- When OAuth env vars are missing: UI shows `setupHint` (Atlassian app steps, scopes, env vars, docs link); Connect/Sync disabled; **Import** tab file upload still works
 
 ## Proposed fit
 
@@ -54,7 +57,7 @@ Hints containing "%%…%% must be kept" → flag key context for QA
 ## Acceptance criteria
 
 - [x] **Phase 1:** Upload Confluence HTML export → keys + source text imported with scope preserved
-- [ ] **Phase 2:** OAuth connect; sync specified pages; idempotent upsert
+- [x] **Phase 2:** OAuth connect; sync specified pages; idempotent upsert
 - [x] Demo script: ≥800 keys from sample export in <30s (no AI)
 - [x] Hints column stored and visible in key detail / translation grid
 - [x] ADR: `0016-external-import.md`
