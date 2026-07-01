@@ -1,7 +1,25 @@
+export type DomainProfile = {
+  domain?: string;
+  event?: string;
+  tone?: string;
+  audience?: string;
+  notes?: string;
+  localeNotes?: Record<string, string>;
+};
+
+export type DomainPreset = {
+  id: string;
+  name: string;
+  description: string;
+  profile: DomainProfile;
+  glossaryPresetId: string | null;
+};
+
 export type Project = {
   id: string;
   name: string;
   description: string | null;
+  domainProfile: DomainProfile | null;
   status: string;
   createdAt: string;
   keysCount: number;
@@ -11,9 +29,11 @@ export type Project = {
 export type CreateProjectInput = {
   name: string;
   description?: string;
+  domainProfile?: DomainProfile;
 };
 
 export type UpdateProjectInput = {
   name?: string;
   description?: string;
+  domainProfile?: DomainProfile | null;
 };

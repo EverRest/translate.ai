@@ -6,6 +6,7 @@ import {
   GetProjectHandler,
   ListProjectsHandler,
 } from './application/handlers/project-query.handlers';
+import { ListDomainPresetsHandler } from './application/handlers/domain-presets.handler';
 import {
   ListApiKeysHandler,
   ListProjectLanguagesHandler,
@@ -21,6 +22,7 @@ import {
   UpdateWebhookHandler,
 } from './application/handlers/project-resource.handlers';
 import { UpdateProjectHandler } from './application/handlers/update-project.handler';
+import { CopyProjectSettingsHandler } from './application/handlers/copy-project-settings.handler';
 import { ProjectAccessService } from './infrastructure/project-access.service';
 import { ProjectResourcesController } from './presentation/project-resources.controller';
 import { ProjectsController } from './presentation/projects.controller';
@@ -29,6 +31,7 @@ const commandHandlers = [
   CreateProjectHandler,
   UpdateProjectHandler,
   ArchiveProjectHandler,
+  CopyProjectSettingsHandler,
   CreateApiKeyHandler,
   RevokeApiKeyHandler,
   AddProjectLanguageHandler,
@@ -44,6 +47,7 @@ const queryHandlers = [
   ListApiKeysHandler,
   ListProjectLanguagesHandler,
   ListWebhooksHandler,
+  ListDomainPresetsHandler,
 ];
 
 @Module({

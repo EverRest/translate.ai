@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- **Sport-domain AI context (P0-01)** — `Project.domainProfile` JSON; `GET /projects/:id/domain-presets`; `PATCH` accepts `domainProfile`; `POST /projects/:id/copy-settings` (domain profile + glossary from another project); FIFA glossary preset list/apply; domain block in translation prompts; Settings → Domain context UI with prompt preview; post-create onboarding modal (FIFA preset, copy from project, or skip)
 - **Placeholder count in job summary (P0-S02)** — `GET /jobs/:id` includes optional `placeholderSummary` (`placeholdersTotal`, `placeholdersPreserved`); omitted when zero; `job.completed` / `job.failed` webhooks include it when placeholders exist; job detail UI banner
 - **Confluence file import (P0-03 Phase 1)** — upload HTML/CSV/ZIP Confluence export or paste HTML; preview diff; apply keys with scope and hints in context; async parse/apply via BullMQ (ADR 0016)
 - **Confluence live sync (P0-03 Phase 2)** — Atlassian OAuth 3LO connect per project; Settings → Integrations page picker + sync now; `integration.confluence.sync` queue; `oauthAvailable` + `setupHint` when OAuth env vars unset (file import still works)

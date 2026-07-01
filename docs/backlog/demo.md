@@ -30,7 +30,7 @@ AI видит что это объект (например филд) и пере
 → [P0-11](demo/P0-11-new-keys-alert.md) — conditional
 
 ## 9. Sport-Domain AI Context (must have)
-→ [P0-01](demo/P0-01-sport-domain-ai-context.md) — EverRest: easy win
+→ [P0-01](demo/P0-01-sport-domain-ai-context.md) — shipped (`domainProfile`, presets API, copy-settings, FIFA glossary, Domain context UI, post-create onboarding)
 
 ## 10. Excel Round-Trip Compatibility (must have)
 → [P0-02](demo/P0-02-excel-delta-import.md)

@@ -3,6 +3,7 @@ import {
   TranslateOptions,
 } from '../../../ai-provider/domain/ai-provider.interface';
 import { inferContentTypeFromContext } from '../../../ai-provider/application/content-classifier.utils';
+import { parseDomainProfile } from '../../../shared/domain/domain-profile.utils';
 
 export const VALID_CONTENT_TYPES: ContentType[] = [
   'ui',
@@ -49,6 +50,7 @@ type TranslationKeyContext = {
 type ProjectContext = {
   name: string;
   description?: string | null;
+  domainProfile?: unknown;
 };
 
 export function buildTranslateOptionsFromKey(
@@ -56,11 +58,13 @@ export function buildTranslateOptionsFromKey(
   project: ProjectContext,
   extras?: Partial<TranslateOptions>,
 ): TranslateOptions {
+  const domainProfile = parseDomainProfile(project.domainProfile);
   return {
     context: key.context ?? undefined,
     keyDescription: key.description ?? undefined,
     projectName: project.name,
     projectDescription: project.description ?? undefined,
+    domainProfile: domainProfile,
     contentType: resolveContentType(
       key.contentType,
       key.context,

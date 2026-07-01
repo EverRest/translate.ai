@@ -231,6 +231,24 @@ export function ProjectOverviewTab() {
 
   return (
     <div className="flex flex-col gap-5 pb-6">
+      {!project.domainProfile && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-800/50 bg-amber-950/30 px-4 py-3 shrink-0">
+          <p className="text-sm text-amber-200/90">
+            Add domain context for better translations — sport, event, tone, and
+            locale notes for AI prompts.
+          </p>
+          <button
+            type="button"
+            onClick={() =>
+              navigate(`/projects/${projectId}/settings?tab=domain`)
+            }
+            className="shrink-0 rounded-lg border border-amber-700/60 px-3 py-1.5 text-xs font-medium text-amber-200 hover:bg-amber-900/40"
+          >
+            Set up domain context
+          </button>
+        </div>
+      )}
+
       {/* ── Hero card ─────────────────────────────────────────────────────── */}
       <div className="rounded-xl border border-slate-800 bg-slate-900/60 px-5 py-4 shrink-0">
         <div className="flex items-start gap-4">

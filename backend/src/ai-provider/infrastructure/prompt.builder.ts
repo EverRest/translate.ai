@@ -8,6 +8,7 @@ import {
   isCyrillicTargetLang,
 } from '../../shared/utils/language-script.utils';
 import { formatReferenceTranslationsPrompt } from '../../shared/utils/reference-translation-prompt.utils';
+import { formatDomainProfilePrompt } from '../../shared/domain/domain-profile.utils';
 
 export interface ProviderUsageMetrics {
   model: string;
@@ -111,6 +112,10 @@ export function buildTranslationPrompts(
     CONTENT_TYPE_HINTS[options.contentType]
       ? `\n${CONTENT_TYPE_HINTS[options.contentType]}`
       : '';
+  const domainHint = formatDomainProfilePrompt(
+    options?.domainProfile,
+    targetLang,
+  );
   const glossaryHint = options?.glossary
     ? formatGlossaryPrompt(options.glossary)
     : '';
@@ -120,7 +125,7 @@ export function buildTranslationPrompts(
 
   const systemPrompt = `You are a professional translator. Translate from ${sourceLang} to ${targetLang}.
 Preserve formatting, template placeholders (e.g. {{...}}, %%...%%), and HTML tags exactly as-is — do not translate or alter them.
-Return only the translated text without explanations or surrounding quotation marks.${toneHint}${contentHint}${contentTypeGuidance}${glossaryHint}${scriptHint}`;
+Return only the translated text without explanations or surrounding quotation marks.${toneHint}${contentHint}${contentTypeGuidance}${domainHint}${glossaryHint}${scriptHint}`;
 
   const userPrompt = buildUserPromptParts(text, options);
 

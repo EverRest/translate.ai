@@ -72,6 +72,23 @@ Separate aggregate for cost optimization.
 
 **Rule:** Always check memory before AI call. Store result after successful AI translation.
 
+## Domain profile
+
+Projects may set an optional `domainProfile` (JSON on `Project`) to steer AI tone and terminology for an entire project — e.g. FIFA accreditation forms.
+
+| Field | Purpose |
+|-------|---------|
+| `domain` | Broad domain (`sports`, …) |
+| `event` | Event name (`FIFA World Cup 2026`) |
+| `tone` | Formality / voice hint (`formal`, …) |
+| `audience` | Who reads the copy (`accreditation`, `venue operations`, …) |
+| `notes` | Free-text additional context |
+| `localeNotes` | Per target-language paragraph keyed by ISO code (`fr`, `es`, …) |
+
+**Pipeline:** `translation.process` loads `project.domainProfile` via `buildTranslateOptionsFromKey` → `TranslateOptions.domainProfile` → `buildTranslationPrompts` adds a **Domain context** block in the **system prompt** (before glossary rules). The matching `localeNotes[targetLang]` entry is included for each job item's target language.
+
+Seed presets: `GET /projects/:id/domain-presets` (`fifa_accreditation`, `fifa_venue_ops`). FIFA glossary terms: `POST .../glossary/presets/apply` with `fifa_accreditation`.
+
 ## Output validation
 
 After AI translation and sanitization, `TranslationOutputValidator` runs heuristic checks then a QA chain (ADR 0008):

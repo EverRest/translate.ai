@@ -72,6 +72,38 @@ describe('prompt.builder', () => {
       expect(systemPrompt).toContain('Translate "Cart" as "Warenkorb"');
     });
 
+    it('includes domain context before glossary rules in system prompt', () => {
+      const { systemPrompt } = buildTranslationPrompts(
+        'Accreditation',
+        'en',
+        'fr',
+        {
+          domainProfile: {
+            domain: 'sports',
+            event: 'FIFA World Cup 2026',
+            tone: 'formal',
+            audience: 'accreditation',
+            localeNotes: { fr: 'Use official FIFA French terminology' },
+          },
+          glossary: [{ sourceTerm: 'FIFA', doNotTranslate: true }],
+        },
+      );
+
+      const domainIndex = systemPrompt.indexOf('Domain context:');
+      const glossaryIndex = systemPrompt.indexOf('Glossary rules:');
+      expect(domainIndex).toBeGreaterThan(-1);
+      expect(glossaryIndex).toBeGreaterThan(domainIndex);
+      expect(systemPrompt).toContain('Target-language guidance (fr)');
+      expect(systemPrompt).toContain('Keep "FIFA" unchanged');
+    });
+
+    it('omits domain block when profile is empty', () => {
+      const { systemPrompt } = buildTranslationPrompts('Hello', 'en', 'de', {
+        domainProfile: null,
+      });
+      expect(systemPrompt).not.toContain('Domain context:');
+    });
+
     it('includes quote instruction in system prompt', () => {
       const { systemPrompt } = buildTranslationPrompts('Hello', 'en', 'de');
       expect(systemPrompt).toContain(

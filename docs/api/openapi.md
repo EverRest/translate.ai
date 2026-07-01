@@ -183,11 +183,115 @@ List projects for current tenant.
 
 #### GET `/api/v1/projects/{projectId}`
 
+Returns project metadata including optional `domainProfile` (same shape as PATCH).
+
 #### PATCH `/api/v1/projects/{projectId}`
+
+**Request (optional fields):**
+
+```json
+{
+  "name": "FIFA Accred",
+  "description": "Accreditation strings",
+  "domainProfile": {
+    "domain": "sports",
+    "event": "FIFA World Cup 2026",
+    "tone": "formal",
+    "audience": "accreditation",
+    "notes": "Official FIFA copy",
+    "localeNotes": {
+      "fr": "Use official FIFA French terminology",
+      "es": "Use official FIFA Spanish terminology"
+    }
+  }
+}
+```
+
+Pass `"domainProfile": null` to clear.
+
+#### POST `/api/v1/projects/{projectId}/copy-settings`
+
+Copy domain profile and/or glossary from another project in the same tenant.
+
+**Request:**
+
+```json
+{
+  "sourceProjectId": "uuid",
+  "include": ["domainProfile", "glossary"]
+}
+```
+
+- `domainProfile` — replaces target `domainProfile` when the source has one (no-op otherwise)
+- `glossary` — upserts all source glossary terms into the target; skips duplicates by `sourceTerm` (case-insensitive)
+
+**Response `200`:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "domainProfileCopied": true,
+    "glossaryAdded": 18,
+    "glossarySkipped": 6
+  }
+}
+```
+
+#### GET `/api/v1/projects/{projectId}/domain-presets`
+
+Returns seed domain context presets (`fifa_accreditation`, `fifa_venue_ops`) with optional `glossaryPresetId` link.
+
+**Response `200`:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "id": "fifa_accreditation",
+        "name": "FIFA Accreditation",
+        "description": "Formal accreditation forms and badges for FIFA World Cup — official sports terminology, especially for FR/ES.",
+        "glossaryPresetId": "fifa_accreditation",
+        "profile": {
+          "domain": "sports",
+          "event": "FIFA World Cup 2026",
+          "tone": "formal",
+          "audience": "accreditation",
+          "notes": "Official FIFA accreditation copy. Use established FIFA terminology; preserve brand names and competition titles.",
+          "localeNotes": {
+            "fr": "Use official FIFA French terminology (e.g. Accréditation, Stade, Privilège). Avoid informal or generic sports wording.",
+            "es": "Use official FIFA Spanish terminology (e.g. Acreditación, Estadio, Privilegio). Prefer formal register used in FIFA publications."
+          }
+        }
+      }
+    ]
+  }
+}
+```
 
 #### DELETE `/api/v1/projects/{projectId}`
 
 Archive project (soft delete).
+
+---
+
+### Glossary presets
+
+#### GET `/api/v1/projects/{projectId}/glossary/presets`
+
+List built-in glossary presets (e.g. `fifa_accreditation`).
+
+#### POST `/api/v1/projects/{projectId}/glossary/presets/apply`
+
+**Request:**
+
+```json
+{ "presetId": "fifa_accreditation" }
+```
+
+Adds preset terms to the project glossary (skips duplicates). Response: `{ presetId, added, skipped }`.
 
 ---
 

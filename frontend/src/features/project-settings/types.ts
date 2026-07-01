@@ -26,6 +26,7 @@ export type WebhookCreated = Webhook & {
 };
 
 export type SettingsTab =
+  | 'domain'
   | 'languages'
   | 'api-keys'
   | 'webhooks'

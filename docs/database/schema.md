@@ -52,6 +52,7 @@ Export (metadata)
 | tenant_id | UUID FK | INDEX |
 | name | VARCHAR | |
 | description | TEXT | nullable |
+| domain_profile | JSONB | nullable — AI domain context (see domain/translation.md) |
 | status | ENUM | active, archived |
 | created_at | TIMESTAMP | |
 
