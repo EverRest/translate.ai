@@ -15,6 +15,7 @@ import {
   GetJobStatusHandler,
   ListTranslationJobsHandler,
 } from './application/handlers/translation-job-query.handlers';
+import { GetCoverageMatrixHandler } from './application/handlers/coverage-matrix.handlers';
 import {
   GetStaleTranslationKeyHintsHandler,
   GetStaleTranslationSummaryHandler,
@@ -31,6 +32,7 @@ import {
   LookupTranslationsHandler,
 } from './application/handlers/translation-query.handlers';
 import { RecordTranslationQualityHandler } from './application/handlers/record-translation-quality.handler';
+import { CoverageMatrixService } from './application/services/coverage-matrix.service';
 import { JobCompletionService } from './application/services/job-completion.service';
 import { StaleTranslationService } from './application/services/stale-translation.service';
 import { TranslationSseService } from './application/services/translation-sse.service';
@@ -40,6 +42,7 @@ import { TranslationOutputValidator } from './application/services/translation-o
 import { TranslationMemoryService } from './application/services/translation-memory.service';
 import { TranslationQueueService } from './infrastructure/translation-queue.service';
 import { JobsController } from './presentation/jobs.controller';
+import { ReportsController } from './presentation/reports.controller';
 import { TranslationKeysController } from './presentation/translation-keys.controller';
 import { TranslationsController } from './presentation/translations.controller';
 
@@ -62,6 +65,7 @@ const queryHandlers = [
   LookupTranslationsHandler,
   GetStaleTranslationSummaryHandler,
   GetStaleTranslationKeyHintsHandler,
+  GetCoverageMatrixHandler,
 ];
 
 const services = [
@@ -73,6 +77,7 @@ const services = [
   TranslationOutputValidator,
   TranslationSseService,
   StaleTranslationService,
+  CoverageMatrixService,
 ];
 
 @Module({
@@ -95,6 +100,7 @@ const services = [
     JobsController,
     TranslationKeysController,
     TranslationsController,
+    ReportsController,
   ],
   providers: [...commandHandlers, ...queryHandlers, ...services],
   exports: [
@@ -102,6 +108,7 @@ const services = [
     TranslationQueueService,
     TranslationMemoryService,
     StaleTranslationService,
+    CoverageMatrixService,
   ],
 })
 export class TranslationModule {}

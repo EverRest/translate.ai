@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 export type TranslationKeyListFilter = {
   localizationObjectId?: string;
   keyPrefix?: string;
+  scope?: string;
 };
 
 export function buildTranslationKeyListFilter(
@@ -17,6 +18,14 @@ export function buildTranslationKeyListFilter(
       : {}),
     ...(filter?.keyPrefix
       ? { key: { startsWith: filter.keyPrefix, mode: 'insensitive' } }
+      : {}),
+    ...(filter?.scope
+      ? {
+          context: {
+            contains: `scope: ${filter.scope}`,
+            mode: 'insensitive' as const,
+          },
+        }
       : {}),
     ...(search
       ? {

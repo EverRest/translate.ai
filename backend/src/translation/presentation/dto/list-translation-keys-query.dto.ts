@@ -28,6 +28,14 @@ export class ListTranslationKeysQueryDto {
   keyPrefix?: string;
 
   @ApiPropertyOptional({
+    example: 'BMA/Login',
+    description: 'Filter keys whose context scope matches (from import)',
+  })
+  @IsOptional()
+  @IsString()
+  scope?: string;
+
+  @ApiPropertyOptional({
     example: 'true',
     description:
       'When `true` or `1`, return only keys with at least one stale translation',

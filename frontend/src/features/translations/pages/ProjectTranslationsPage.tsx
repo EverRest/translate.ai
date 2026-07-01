@@ -434,6 +434,8 @@ export function ProjectTranslationsPage() {
     useObjectFilterFromUrl();
   const [searchParams, setSearchParams] = useSearchParams();
   const staleFilter = searchParams.get('stale') === '1';
+  const scopeFilter = searchParams.get('scope') ?? '';
+  const highlightLang = searchParams.get('lang')?.toLowerCase() ?? '';
   const refetchTranslations = useRefetchTranslations(projectId ?? '');
   const refetchKeys = useRefetchTranslationKeys(projectId ?? '');
 
@@ -459,14 +461,15 @@ export function ProjectTranslationsPage() {
 
   useEffect(() => {
     gridRef.current?.refetch();
-  }, [localizationObjectId, staleFilter]);
+  }, [localizationObjectId, staleFilter, scopeFilter]);
 
   const keyFilter = useMemo(
     () => ({
       ...(localizationObjectId ? { localizationObjectId } : {}),
       ...(staleFilter ? { staleOnly: true } : {}),
+      ...(scopeFilter ? { scope: scopeFilter } : {}),
     }),
-    [localizationObjectId, staleFilter],
+    [localizationObjectId, staleFilter, scopeFilter],
   );
 
   // ── Live translations (SSE) ───────────────────────────────────────────────
@@ -883,7 +886,17 @@ export function ProjectTranslationsPage() {
       },
       ...languages.map((lang) => ({
         key: `lang_${lang.code}`,
-        header: lang.code.toUpperCase(),
+        header: (
+          <span
+            className={
+              highlightLang === lang.code.toLowerCase()
+                ? 'text-sky-300'
+                : undefined
+            }
+          >
+            {lang.code.toUpperCase()}
+          </span>
+        ),
         width: 192,
         sortable: true,
         sortValue: (row: KeyRow) =>
@@ -944,6 +957,7 @@ export function ProjectTranslationsPage() {
     driftKeySet,
     staleKeyIdSet,
     projectId,
+    highlightLang,
   ]);
 
   // ── fetchFn ───────────────────────────────────────────────────────────────
@@ -1214,6 +1228,21 @@ export function ProjectTranslationsPage() {
         {staleFilter ? 'Stale only ✓' : 'Stale'}
         {staleKeyIds.length > 0 ? ` (${staleKeyIds.length})` : ''}
       </button>
+      {scopeFilter && (
+        <button
+          type="button"
+          onClick={() => {
+            const next = new URLSearchParams(searchParams);
+            next.delete('scope');
+            next.delete('lang');
+            setSearchParams(next);
+          }}
+          className="rounded-lg border border-sky-700/60 bg-sky-950/30 px-3 py-1.5 text-sm text-sky-200"
+        >
+          Scope: {scopeFilter}
+          {highlightLang ? ` · ${highlightLang.toUpperCase()}` : ''} ×
+        </button>
+      )}
     </>
   );
 

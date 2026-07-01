@@ -4,6 +4,14 @@ All notable changes to translate.ai documentation and project.
 
 ## [Unreleased]
 
+### Added — Translation coverage heatmap (P0-06 MVP)
+
+- **API:** `GET .../reports/coverage-matrix` — scope × language matrix with RAG (`green` / `yellow` / `red`), `byLanguage` summary, `worstCells`
+- **Query:** `GetCoverageMatrixQuery` + `CoverageMatrixService`; scope from key `context` (`scope: …` via import)
+- **Keys list:** `scope` query filter on `GET .../keys`
+- **UI:** Analytics **Coverage heatmap** sub-tab; CSV export; project overview **Launch readiness** card (worst 3 cells); heatmap cell → translations grid `?scope=&lang=`
+- **Tests:** `coverage-matrix.utils.spec.ts`, `coverage-matrix.service.spec.ts`, `coverage-matrix.e2e-spec.ts`
+
 ### Added — Stale translation detection (P0-04 MVP)
 
 - **Schema:** `Translation.sourceTextSnapshot` + backfill migration
@@ -32,7 +40,8 @@ Per [ADR 0016](./adr/0016-external-import.md):
 
 ### Changed — backlog
 
-- **P0-04 Stale translation detection** shipped (MVP); active specs renamed to `*-shipped.md`; see [shipped-baseline](./backlog/shipped-baseline.md) and [demo shipped tasks](./backlog/demo/README.md#shipped-tasks-reference); Wave 2 now **P0-06** only
+- **P0-06 Translation coverage heatmap** shipped (MVP); active spec → `P0-06-translation-coverage-heatmap-shipped.md`; Wave 3 focus **P0-05**, **P0-09**
+- **P0-04 Stale translation detection** shipped (MVP); active specs renamed to `*-shipped.md`; see [shipped-baseline](./backlog/shipped-baseline.md) and [demo shipped tasks](./backlog/demo/README.md#shipped-tasks-reference)
 - **Demo backlog** — shipped shipped demo tasks kept as reference under `docs/backlog/demo/P0-*-shipped.md` (not deleted); code pointers in [shipped-baseline](./backlog/shipped-baseline.md)
 - **P0-02 Excel round-trip** removed from active P0 table; added to [shipped-baseline](./backlog/shipped-baseline.md) and demo “Already shipped” (#10, #17)
 - Prior backlog cleanup: P0-01, P0-S02, P0-07, P0-03 removed from active work; **Wave 1 complete**

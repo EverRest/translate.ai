@@ -40,5 +40,6 @@ export class ListTranslationKeysQuery {
     public readonly localizationObjectId?: string,
     public readonly keyPrefix?: string,
     public readonly staleOnly?: boolean,
+    public readonly scope?: string,
   ) {}
 }
