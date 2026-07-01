@@ -49,7 +49,8 @@ Per [ADR 0016](./adr/0016-external-import.md):
 
 ### Changed — backlog
 
-- **P0-06 Translation coverage heatmap** shipped (MVP); active spec → `P0-06-translation-coverage-heatmap-shipped.md`; Wave 3 focus **P0-05**, **P0-09**
+- **P0-05 Context-aware object translation** shipped (MVP); active spec → `P0-05-context-aware-object-translation-shipped.md`; Wave 3 focus **P0-09**
+- **P0-06 Translation coverage heatmap** shipped (MVP); active spec → `P0-06-translation-coverage-heatmap-shipped.md`
 - **P0-04 Stale translation detection** shipped (MVP); active specs renamed to `*-shipped.md`; see [shipped-baseline](./backlog/shipped-baseline.md) and [demo shipped tasks](./backlog/demo/README.md#shipped-tasks-reference)
 - **Demo backlog** — shipped shipped demo tasks kept as reference under `docs/backlog/demo/P0-*-shipped.md` (not deleted); code pointers in [shipped-baseline](./backlog/shipped-baseline.md)
 - **P0-02 Excel round-trip** removed from active P0 table; added to [shipped-baseline](./backlog/shipped-baseline.md) and demo “Already shipped” (#10, #17)

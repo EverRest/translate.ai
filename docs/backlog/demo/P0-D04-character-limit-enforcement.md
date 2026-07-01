@@ -23,7 +23,7 @@ AI respects max character count per UI element (e.g. German button label must fi
 
 ## Dependencies
 
-- [P0-05](./P0-05-context-aware-object-translation.md) for field-level limits
+- [P0-05-shipped](./P0-05-context-aware-object-translation-shipped.md) for field-level limits
 - Optional: [P0-D03](./P0-D03-visual-context-screenshot.md) for inferred limits
 
 ## Acceptance criteria
